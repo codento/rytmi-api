@@ -12,14 +12,23 @@
     "debug": "nodemon -w api -w db -w services --inspect --exec \"babel-node api --presets es2015,es2017\"",
     "build": "docker-compose build",
     "test": "jest",
-    "coverage": "node_modules/.bin/istanbul cover node_modules/mocha/bin/_mocha -- --compilers js:babel-core/register --colors --reporter dot test/*.js",
-    "testwatch": "mocha --no-exit --watch --reporter min test/02-test-users.js",
+    "testwatch": "jest --watch",
     "create-html-doc": "node node_modules/spectacle-docs/bin/spectacle.js -t doc/ doc/openapi-spec.json",
     "containers": "docker-compose up -d && echo Rytmi API is now up & running.",
     "stop": "docker-compose down"
   },
   "jest": {
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "collectCoverage": true,
+    "coverageReporters": ["json", "html", "text-summary"],
+    "collectCoverageFrom": [
+      "**/*.js",
+      "!**/node_modules/**",
+      "!**/test/**",
+      "!**/coverage/**",
+      "!**/db/migrations/**",
+      "!**/db/seeders/**"
+    ]
   },
   "author": "Antti Myyrä",
   "license": "MIT",

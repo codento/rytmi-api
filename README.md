@@ -1,5 +1,7 @@
 # Rytmi API for Codento Management System
 
+![Build Status](https://travis-ci.com/codento/rytmi-api.svg?token=RKckhBMLtobAyw7zRwWJ&branch=master)
+
 ## Background
 
 ## Installation
