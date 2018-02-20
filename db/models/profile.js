@@ -8,12 +8,31 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false
     },
-    birthday: DataTypes.DATE,
+    birthday: {
+      type: DataTypes.DATE,
+      validate: {
+        isBefore: {
+          args: new Date(),
+          msg: 'Birthday must be in the past'
+        }
+      }
+    },
     email: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
+      validate: {
+        isEmail: true
+      }
     },
-    phone: DataTypes.STRING,
+    phone: {
+      type: DataTypes.STRING,
+      validate: {
+        is: {
+          args: /^\+?[0-9 ]+$/i,
+          msg: 'Phone number must contain only numbers spaces or a plus sign'
+        }
+      }
+    },
     title: DataTypes.STRING,
     description: DataTypes.TEXT,
     links: DataTypes.JSON,
