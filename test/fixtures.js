@@ -25,7 +25,7 @@ const db = {
   user1Profile: {
     lastName: 'Man',
     firstName: 'Bat',
-    birthday: new Date().toISOString(),
+    birthday: new Date('1970-01-01').toISOString(),
     email: 'batman@example.com',
     phone: '+358 40 41561',
     title: 'Hero',
@@ -37,7 +37,7 @@ const db = {
   user2Profile: {
     lastName: 'Man',
     firstName: 'Robin',
-    birthday: new Date().toISOString(),
+    birthday: new Date('1970-01-01').toISOString(),
     email: 'robin@example.com',
     phone: '09 4561 4561',
     title: 'Sidekick',
@@ -49,7 +49,7 @@ const db = {
   user3Profile: {
     lastName: 'Freeze',
     firstName: 'Mr',
-    birthday: new Date().toISOString(),
+    birthday: new Date('1970-01-01').toISOString(),
     email: 'mrfreeze@example.com',
     phone: '09 4616 1651 156',
     title: 'Bad guy',
