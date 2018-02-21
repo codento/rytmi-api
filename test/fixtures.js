@@ -59,25 +59,16 @@ const db = {
     active: false
   },
   skill1: {
-    id: 1,
     name: 'COBOL',
-    description: 'blah blah',
-    createdAt: new Date(),
-    updatedAt: new Date()
+    description: 'blah blah'
   },
   skill2: {
-    id: 2,
     name: 'PL/SQL',
-    description: 'blah blah',
-    createdAt: new Date(),
-    updatedAt: new Date()
+    description: 'blah blah'
   },
   skill3: {
-    id: 3,
     name: 'VB.Net',
-    description: 'blah blah',
-    createdAt: new Date(),
-    updatedAt: new Date()
+    description: 'blah blah'
   },
   user1ProfileSkill1: {
     skillId: 1,
@@ -104,7 +95,11 @@ const db = {
 
 async function init (done) {
   await runMigrations(requireModules('../db/migrations'))
-  await sequelize.queryInterface.bulkInsert('Skills', [db.skill1, db.skill2, db.skill3])
+  await Promise.all([
+    insertSkill(db.skill1),
+    insertSkill(db.skill2),
+    insertSkill(db.skill3)
+  ])
   await Promise.all([
     insertUser(db.user1, db.user1Profile, [db.user1ProfileSkill1, db.user1ProfileSkill2]),
     insertUser(db.user2, db.user2Profile, [db.user2ProfileSkill]),
@@ -129,6 +124,12 @@ function runMigrations (modules) {
       return migration.up(sequelize.queryInterface, sequelize.Sequelize)
     })
   }, Promise.resolve())
+}
+
+function insertSkill (skill) {
+  return models.Skill.build(skill).save().then(savedSkill => {
+    skill.id = savedSkill.id
+  })
 }
 
 function insertUser (user, profile, profileSkills) {

@@ -1,35 +1,18 @@
+import CrudService from '../crud'
 import models from '../../db/models'
 
-module.exports = {
-  getActive: () => {
+export default class ProfileService extends CrudService {
+  constructor () {
+    super(models.Profile)
+  }
+
+  getActive () {
     return models.Profile
       .findAll({where: {active: true}})
-  },
+  }
 
-  getAll: () => {
-    return models.Profile
-      .findAll()
-  },
-
-  get: (id) => {
-    return models.Profile
-      .findById(id)
-  },
-
-  create: (attrs) => {
-    delete attrs.id
-    return models.Profile
-      .build(attrs)
-      .save()
-  },
-
-  update: (id, attrs) => {
-    attrs.id = parseInt(id)
+  update (id, attrs) {
     delete attrs.userId
-    return models.Profile
-      .findById(id)
-      .then(profile => {
-        return profile.update(attrs)
-      })
+    return super.update(id, attrs)
   }
 }

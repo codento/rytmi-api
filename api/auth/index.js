@@ -5,7 +5,6 @@ const router = Router()
 
 export default () => {
   router.post('/', (req, res) => {
-    console.log('Starting login:')
     let idToken = req.body.id_token
     if (idToken === 'undefined') {
       res.status(500).json('Missing client id')

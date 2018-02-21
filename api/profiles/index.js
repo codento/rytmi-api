@@ -1,13 +1,11 @@
 import { Router } from 'express'
-import profileService from '../../services/profiles'
-import profileSkillService from '../../services/profileSkills'
+import ProfileService from '../../services/profiles'
 import utils from '../utils'
 import skills from './skills'
 
+const profileService = new ProfileService()
 const router = Router()
-
 router.param('id', utils.findObjectOr404('profile', profileService))
-
 
 export default () => {
   router.get('/', (req, res) => {

@@ -1,40 +1,31 @@
+import CrudService from '../crud'
 import models from '../../db/models'
 
-module.exports = {
-  getAll: () => {
-    return models.ProfileSkill
-      .findAll()
-  },
+export default class ProfileSkillService extends CrudService {
+  constructor () {
+    super(models.ProfileSkill)
+  }
 
-  getByProfileId: (profileId) => {
+  getByProfileId (profileId) {
     return models.ProfileSkill
       .findAll({where: {profileId: profileId}})
-  },
+  }
 
-  getByIds: (profileId, profileSkillId) => {
+  getByIds (profileId, profileSkillId) {
     return models.ProfileSkill
       .findOne({where: {
         id: profileSkillId,
         profileId: profileId
-        }
-      })
-  },
+      }})
+  }
 
-  get: (id) => {
-    return models.ProfileSkill
-      .findById(id)
-  },
-
-  create: (profileId, attrs) => {
-    delete attrs.id
+  create (profileId, attrs) {
     attrs.profileId = parseInt(profileId)
-    return models.ProfileSkill
-      .build(attrs)
-      .save()
-  },
+    return super.create(attrs)
+  }
 
-  update: (profileId, profileSkillId, attrs) => {
-    attrs.id = parseInt(profileId)
+  update (profileId, profileSkillId, attrs) {
+    attrs.id = parseInt(profileSkillId)
     attrs.profileId = parseInt(profileId)
     return models.ProfileSkill
       .findOne({where: {
@@ -45,9 +36,9 @@ module.exports = {
         return profileSkill
           .update(attrs)
       })
-  },
+  }
 
-  delete: (profileId, profileSkillId) => {
+  delete (profileId, profileSkillId) {
     return models.ProfileSkill
       .findOne({where: {
         id: profileSkillId,

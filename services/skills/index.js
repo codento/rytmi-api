@@ -1,13 +1,8 @@
+import CrudService from '../crud'
 import models from '../../db/models'
 
-module.exports = {
-  getAll: () => {
-    return models.Skill
-      .findAll()
-  },
-
-  get: (id) => {
-    return models.Skill
-      .findById(id)
+export default class SkillService extends CrudService {
+  constructor () {
+    super(models.Skill)
   }
 }

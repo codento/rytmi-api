@@ -1,7 +1,8 @@
 import { Router } from 'express'
-import profileSkillService from '../../services/profileSkills'
+import ProfileSkillService from '../../services/profileSkills'
 import utils from '../utils'
 
+const profileSkillService = new ProfileSkillService()
 const router = Router()
 router.param('id', utils.findObjectOr404('profileSkill', profileSkillService))
 

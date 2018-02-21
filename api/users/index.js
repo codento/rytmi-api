@@ -1,7 +1,8 @@
+import UserService from '../../services/users'
 import { Router } from 'express'
-import userService from '../../services/users'
 import utils from '../utils'
 
+const userService = new UserService()
 const router = Router()
 router.param('id', utils.findObjectOr404('user', userService))
 
