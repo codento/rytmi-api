@@ -1,46 +1,31 @@
 import SkillService from '../../services/skills'
 import { Router } from 'express'
-import utils from '../utils'
+import {findObjectOr404, wrapAsync} from '../utils'
 
 const skillService = new SkillService()
 const router = Router()
-router.param('id', utils.findObjectOr404('skill', skillService))
+router.param('id', findObjectOr404('skill', skillService))
 
 export default () => {
-  router.get('/', (req, res) => {
-    skillService.getAll()
-      .then(skills => {
-        res.json(skills)
-      })
-      .catch(err => {
-        res.status(500).json(err)
-      })
-  })
+  router.get('/', wrapAsync(async (req, res) => {
+    const skills = await skillService.getAll()
+    res.json(skills)
+  }))
 
-  router.get('/:id', (req, res) => {
+  router.get('/:id', wrapAsync(async (req, res) => {
     const skill = req.skill
     res.status(200).json(skill)
-  })
+  }))
 
-  router.post('/', (req, res) => {
-    skillService.create(req.body)
-      .then(skill => {
-        res.status(201).json(skill)
-      })
-      .catch(err => {
-        res.status(500).json(err)
-      })
-  })
+  router.post('/', wrapAsync(async (req, res) => {
+    const skill = await skillService.create(req.body)
+    res.status(201).json(skill)
+  }))
 
-  router.put('/:id', (req, res) => {
-    skillService.update(req.params.id, req.body)
-      .then(skill => {
-        res.json(skill)
-      })
-      .catch(err => {
-        res.status(500).json(err)
-      })
-  })
+  router.put('/:id', wrapAsync(async (req, res) => {
+    const skill = await skillService.update(req.params.id, req.body)
+    res.json(skill)
+  }))
 
   return router
 }
