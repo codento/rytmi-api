@@ -24,6 +24,7 @@
     "coverageReporters": ["lcov", "json", "html", "text-summary"],
     "collectCoverageFrom": [
       "**/*.js",
+      "!.eslintrc.js",
       "!**/node_modules/**",
       "!**/test/**",
       "!**/coverage/**",
