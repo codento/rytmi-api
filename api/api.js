@@ -28,7 +28,7 @@ function validateErrorHandler (err, req, res, next) {
   if (err instanceof ValidationError) {
     let arr = err.errors.map((error) => error.message)
 
-    res.status(400).json(utils.errorTemplate(400, arr))
+    res.status(400).json(utils.errorTemplate(400, 'Validation error', arr))
   } else {
     next(err)
   }
