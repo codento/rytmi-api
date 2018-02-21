@@ -17,25 +17,15 @@ export default () => {
     res.status(200).json(skill)
   }))
 
-  router.post('/', (req, res) => {
-    skillService.create(req.body)
-      .then(skill => {
-        res.status(201).json(skill)
-      })
-      .catch(err => {
-        res.status(500).json(err)
-      })
-  })
+  router.post('/', wrapAsync(async (req, res) => {
+    const skill = await skillService.create(req.body)
+    res.status(201).json(skill)
+  }))
 
-  router.put('/:id', (req, res) => {
-    skillService.update(req.params.id, req.body)
-      .then(skill => {
-        res.json(skill)
-      })
-      .catch(err => {
-        res.status(500).json(err)
-      })
-  })
+  router.put('/:id', wrapAsync(async (req, res) => {
+    const skill = await skillService.update(req.params.id, req.body)
+    res.json(skill)
+  }))
 
   return router
 }
