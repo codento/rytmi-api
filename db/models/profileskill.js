@@ -1,5 +1,15 @@
 module.exports = (sequelize, DataTypes) => {
   let ProfileSkill = sequelize.define('ProfileSkill', {
+    profileId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      unique: 'uniqueIndex'
+    },
+    skillId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      unique: 'uniqueIndex'
+    },
     knows: {
       type: DataTypes.INTEGER,
       allowNull: false,
