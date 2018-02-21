@@ -1,57 +1,38 @@
 import { Router } from 'express'
 import ProfileService from '../../services/profiles'
-import utils from '../utils'
+import {findObjectOr404, wrapAsync} from '../utils'
 import skills from './skills'
 
 const profileService = new ProfileService()
 const router = Router()
-router.param('id', utils.findObjectOr404('profile', profileService))
+
+router.param('id', findObjectOr404('profile', profileService))
 
 export default () => {
-  router.get('/', (req, res) => {
-    profileService.getActive()
-      .then(profiles => {
-        res.json(profiles)
-      })
-      .catch(err => {
-        res.status(500).json(err)
-      })
-  })
+  router.get('/', wrapAsync(async (req, res) => {
+    const profiles = await profileService.getActive()
+    res.json(profiles)
+  }))
 
-  router.post('/', (req, res) => {
-    profileService.create(req.body)
-      .then(profile => {
-        res.status(201).json(profile)
-      })
-      .catch(err => {
-        res.status(500).json(err)
-      })
-  })
+  router.post('/', wrapAsync(async (req, res) => {
+    const profile = await profileService.create(req.body)
+    res.status(201).json(profile)
+  }))
 
-  router.get('/all', (req, res) => {
-    profileService.getAll()
-      .then(profiles => {
-        res.json(profiles)
-      })
-      .catch(err => {
-        res.status(500).json(err)
-      })
-  })
+  router.get('/all', wrapAsync(async (req, res) => {
+    const profiles = await profileService.getAll()
+    res.json(profiles)
+  }))
 
-  router.get('/:id', (req, res) => {
+  router.get('/:id', wrapAsync(async (req, res) => {
     const profile = req.profile
     res.json(profile)
-  })
+  }))
 
-  router.put('/:id', (req, res) => {
-    profileService.update(req.params.id, req.body)
-      .then(profile => {
-        res.json(profile)
-      })
-      .catch(err => {
-        res.status(500).json(err)
-      })
-  })
+  router.put('/:id', wrapAsync(async (req, res) => {
+    const profile = await profileService.update(req.params.id, req.body)
+    res.json(profile)
+  }))
 
   router.use('/:id/skills', skills())
 

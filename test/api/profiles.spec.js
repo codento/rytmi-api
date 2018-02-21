@@ -216,3 +216,16 @@ describe('Creating, updating and deleting profileSkills', () => {
     // expect(fetched.body).toBeNull()
   })
 })
+
+describe('Testing data validation', () => {
+  it('should return 400 with invalid data', async () => {
+    const profile = {
+      lastName: 'LastName'
+    }
+
+    const created = await request
+      .post('/api/profiles/')
+      .send(profile)
+    expect(created.status).toBe(400)
+  })
+})

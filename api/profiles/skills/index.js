@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import ProfileSkillService from '../../../services/profileSkills'
-import utils from '../../utils'
+import {errorTemplate, wrapAsync} from '../../utils'
 
 const profileSkillService = new ProfileSkillService()
 const router = Router()
@@ -12,7 +12,7 @@ router.param('profileSkillId', (req, res, next, value) => {
         req.profileSkill = profileSkill
         next()
       } else {
-        res.status(404).json(utils.errorTemplate(404, 'profileSkill not found'))
+        res.status(404).json(errorTemplate(404, 'profileSkill not found'))
       }
     })
     .catch(err => {
@@ -21,54 +21,34 @@ router.param('profileSkillId', (req, res, next, value) => {
 })
 
 export default () => {
-  router.get('/', (req, res) => {
+  router.get('/', wrapAsync(async (req, res) => {
     const profile = req.profile
-    profileSkillService.getByProfileId(profile.id)
-      .then(profileSkills => {
-        res.json(profileSkills)
-      })
-      .catch(err => {
-        res.status(500).json(err)
-      })
-  })
+    const profileSkills = await profileSkillService.getByProfileId(profile.id)
+    res.json(profileSkills)
+  }))
 
-  router.post('/', (req, res) => {
+  router.post('/', wrapAsync(async (req, res) => {
     const profile = req.profile
-    profileSkillService.create(profile.id, req.body)
-      .then(profileSkill => {
-        res.status(201).json(profileSkill)
-      })
-      .catch(err => {
-        res.status(500).json(err)
-      })
-  })
+    const profileSkill = await profileSkillService.create(profile.id, req.body)
+    res.status(201).json(profileSkill)
+  }))
 
-  router.get('/:profileSkillId', (req, res) => {
+  router.get('/:profileSkillId', wrapAsync(async (req, res) => {
     const profileSkill = req.profileSkill
     res.json(profileSkill)
-  })
+  }))
 
-  router.put('/:profileSkillId', (req, res) => {
+  router.put('/:profileSkillId', wrapAsync(async (req, res) => {
     const profile = req.profile
-    profileSkillService.update(profile.id, req.params.profileSkillId, req.body)
-      .then(profileSkill => {
-        res.json(profileSkill)
-      })
-      .catch(err => {
-        res.status(500).json(err)
-      })
-  })
+    const profileSkill = await profileSkillService.update(profile.id, req.params.profileSkillId, req.body)
+    res.json(profileSkill)
+  }))
 
-  router.delete('/:profileSkillId', (req, res) => {
+  router.delete('/:profileSkillId', wrapAsync(async (req, res) => {
     const profile = req.profile
-    profileSkillService.delete(profile.id, req.params.profileSkillId)
-      .then(profileSkill => {
-        res.status(204).json(profileSkill)
-      })
-      .catch(err => {
-        res.status(500).json(err)
-      })
-  })
+    const profileSkill = await profileSkillService.delete(profile.id, req.params.profileSkillId)
+    res.status(204).json(profileSkill)
+  }))
 
   return router
 }

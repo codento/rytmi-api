@@ -32,7 +32,6 @@ describe('Fetching Users', () => {
       .set('Accept', 'application/json')
       .expect(404)
   })
-
 })
 
 describe('Creating and updating users', () => {

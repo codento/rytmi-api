@@ -2,12 +2,13 @@ import { version } from '../package.json'
 import { Router } from 'express'
 import winston from 'winston'
 import bodyParser from 'body-parser'
-
+import { ValidationError } from 'sequelize'
 import users from './users'
 import profiles from './profiles'
 import skills from './skills'
 import profileSkills from './profileSkills'
 import auth from './auth'
+import utils from './utils'
 
 require('dotenv').config()
 
@@ -23,6 +24,25 @@ const logger = new (winston.Logger)({
   ]
 })
 
+function validateErrorHandler (err, req, res, next) {
+  if (err instanceof ValidationError) {
+    let arr = err.errors.map((error) => error.message)
+
+    res.status(400).json(utils.errorTemplate(400, arr))
+  } else {
+    next(err)
+  }
+}
+
+function errorHandler (err, req, res, next) {
+  if (res.headersSent) {
+    return next(err)
+  }
+  res
+    .status(500)
+    .json(utils.errorTemplate(500, err))
+}
+
 export default () => {
   let api = Router()
   api.use(bodyParser.json())
@@ -36,5 +56,9 @@ export default () => {
   api.use('/skills', skills())
   api.use('/profileskills', profileSkills())
   api.use('/auth', auth())
+
+  api.use(validateErrorHandler)
+  api.use(errorHandler)
+
   return api
 }

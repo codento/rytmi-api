@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       validate: {
         isBefore: {
-          args: new Date(),
+          args: new Date().toISOString(),
           msg: 'Birthday must be in the past'
         }
       }
