@@ -26,9 +26,9 @@ const logger = new (winston.Logger)({
 
 function validateErrorHandler (err, req, res, next) {
   if (err instanceof ValidationError) {
-    let arr = err.errors.map((error) => error.message)
+    let messages = err.errors.map((error) => error.message)
 
-    res.status(400).json(utils.errorTemplate(400, 'Validation error', arr))
+    res.status(400).json(utils.errorTemplate(400, 'Validation error', messages))
   } else {
     next(err)
   }

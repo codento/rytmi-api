@@ -178,6 +178,25 @@ describe('Creating, updating and deleting profileSkills', () => {
     expect(fetched.body).toMatchObject(created.body)
   })
 
+  it('should ignore profileId in body', async () => {
+    const profileSkill = {
+      skillId: 3,
+      profileId: db.user2Profile.id,
+      knows: 0,
+      wantsTo: 5,
+      visibleInCV: true,
+      description: 'blah'
+    }
+
+    const created = await request
+      .post('/api/profiles/' + db.user1Profile.id + '/skills/')
+      .send(profileSkill)
+      .expect(201)
+
+    profileSkill.profileId = db.user1Profile.id
+    expect(created.body).toMatchObject(profileSkill)
+  })
+
   it('should update profileSkill and return the updated profileSkill', async () => {
     const profileSkill = {
       skillId: 3,
@@ -227,5 +246,34 @@ describe('Testing data validation', () => {
       .post('/api/profiles/')
       .send(profile)
     expect(created.status).toBe(400)
+  })
+
+  it('should include mandatory fields in profile validation errors', async () => {
+    const validationErrors = [
+      'Profile.lastName cannot be null',
+      'Profile.firstName cannot be null',
+      'Profile.email cannot be null',
+      'Profile.active cannot be null'
+    ]
+
+    const created = await request
+      .post('/api/profiles/')
+      .send({})
+    expect(created.status).toBe(400)
+    expect(created.body.error.details).toMatchObject(validationErrors)
+  })
+
+  it('should include mandatory fields in profileskill validation errors', async () => {
+    const validationErrors = [
+      'ProfileSkill.knows cannot be null',
+      'ProfileSkill.wantsTo cannot be null',
+      'ProfileSkill.visibleInCV cannot be null'
+    ]
+
+    const created = await request
+      .post('/api/profiles/' + db.user1Profile.id + '/skills')
+      .send({})
+      .expect(400)
+    expect(created.body.error.details).toMatchObject(validationErrors)
   })
 })

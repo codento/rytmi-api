@@ -43,7 +43,7 @@ describe('Creating and updating skills', () => {
     expect(fetched.body).toMatchObject(created.body)
   })
 
-  it('should update profile and return the updated profile', async () => {
+  it('should update skill and return the updated skill', async () => {
     const skill = {
       name: 'Updated name for skill 1',
       description: 'Updated description for skill 1'
@@ -95,5 +95,30 @@ describe('Creating and updating skills', () => {
       .expect('Content-Type', /json/)
       .expect(200)
     expect(fetchedAgain.body.id).not.toBe(skill.id)
+  })
+})
+
+describe('Testing data validation', () => {
+  it('should return 400 with invalid data', async () => {
+    const skill = {
+      description: 'desc'
+    }
+
+    const created = await request
+      .post('/api/skills/')
+      .send(skill)
+    expect(created.status).toBe(400)
+  })
+
+  it('should include mandatory fields in validation errors', async () => {
+    const validationErrors = [
+      'Skill.name cannot be null'
+    ]
+
+    const created = await request
+      .post('/api/skills/')
+      .send({})
+    expect(created.status).toBe(400)
+    expect(created.body.error.details).toMatchObject(validationErrors)
   })
 })
