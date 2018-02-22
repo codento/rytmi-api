@@ -113,4 +113,26 @@ describe('Creating and updating users', () => {
       .put('/api/users/1000')
       .expect(404)
   })
+
+  it('should not allow two users with the same username', async () => {
+    const user = {
+      'username': 'Test.User',
+      'password': 'fadsf',
+      'active': true,
+      'admin': false
+    }
+
+    const validationErrors = ['username must be unique']
+
+    await request
+      .post('/api/users')
+      .send(user)
+      .expect(201)
+
+    const failed = await request
+      .post('/api/users')
+      .send(user)
+      .expect(400)
+    expect(failed.body.error.details).toEqual(validationErrors)
+  })
 })

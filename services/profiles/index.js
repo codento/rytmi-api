@@ -15,4 +15,8 @@ export default class ProfileService extends CrudService {
     delete attrs.userId
     return super.update(id, attrs)
   }
+
+  delete () {
+    throw new Error('Not implemented')
+  }
 }

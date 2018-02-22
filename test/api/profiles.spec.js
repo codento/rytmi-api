@@ -116,6 +116,29 @@ describe('Creating and updating profiles', () => {
       .expect(200)
     expect(fetchedAgain.body.id).not.toBe(profile.id)
   })
+
+  it('should not allow two users with the same email', async () => {
+    const profile = {
+      userId: db.user3.id,
+      lastName: 'Freeze',
+      firstName: 'Mr',
+      email: 'mrfreeze@example.com',
+      active: false
+    }
+
+    const validationErrors = ['email must be unique']
+
+    await request
+      .post('/api/profiles')
+      .send(profile)
+      .expect(201)
+
+    const failed = await request
+      .post('/api/profiles')
+      .send(profile)
+      .expect(400)
+    expect(failed.body.error.details).toEqual(validationErrors)
+  })
 })
 
 describe('Fetching profileSkills', () => {
@@ -234,6 +257,30 @@ describe('Creating, updating and deleting profileSkills', () => {
     // TODO: decide what 404 body should contain
     // expect(fetched.body).toBeNull()
   })
+
+  it('should not allow multiple profileskills with the same profile/skill-combination', async () => {
+    const profileSkill = {
+      skillId: 3,
+      profileId: db.user1Profile.id,
+      knows: 3,
+      wantsTo: 3,
+      visibleInCV: true
+    }
+
+    // TODO: does not tell that the *combination* of these should be unique
+    const validationErrors = ['profileId must be unique', 'skillId must be unique']
+
+    await request
+      .post('/api/profiles/' + db.user1Profile.id + '/skills/')
+      .send(profileSkill)
+      .expect(201)
+
+    const failed = await request
+      .post('/api/profiles/' + db.user1Profile.id + '/skills/')
+      .send(profileSkill)
+      .expect(400)
+    expect(failed.body.error.details).toMatchObject(validationErrors)
+  })
 })
 
 describe('Testing data validation', () => {
@@ -265,6 +312,7 @@ describe('Testing data validation', () => {
 
   it('should include mandatory fields in profileskill validation errors', async () => {
     const validationErrors = [
+      'ProfileSkill.skillId cannot be null',
       'ProfileSkill.knows cannot be null',
       'ProfileSkill.wantsTo cannot be null',
       'ProfileSkill.visibleInCV cannot be null'

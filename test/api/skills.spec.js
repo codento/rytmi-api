@@ -96,6 +96,26 @@ describe('Creating and updating skills', () => {
       .expect(200)
     expect(fetchedAgain.body.id).not.toBe(skill.id)
   })
+
+  it('should not allow two skills with the same name', async () => {
+    const skill = {
+      name: 'Oracle Forms',
+      description: 'blah blah'
+    }
+
+    const validationErrors = ['name must be unique']
+
+    await request
+      .post('/api/skills')
+      .send(skill)
+      .expect(201)
+
+    const failed = await request
+      .post('/api/skills')
+      .send(skill)
+      .expect(400)
+    expect(failed.body.error.details).toEqual(validationErrors)
+  })
 })
 
 describe('Testing data validation', () => {
