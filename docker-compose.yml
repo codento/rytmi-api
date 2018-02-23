@@ -2,6 +2,8 @@ version: '2'
 services:
   api:
     build: .
+    args:
+      - NODE_ENV=development
     command: /bin/sh -c "npm run migrate && npm run start"
     volumes:
       - .:/usr/app/
