@@ -21,7 +21,12 @@
   "jest": {
     "testEnvironment": "node",
     "collectCoverage": true,
-    "coverageReporters": ["lcov", "json", "html", "text-summary"],
+    "coverageReporters": [
+      "lcov",
+      "json",
+      "html",
+      "text-summary"
+    ],
     "collectCoverageFrom": [
       "**/*.js",
       "!.eslintrc.js",
@@ -40,6 +45,7 @@
     "cors": "^2.8.4",
     "dotenv": "^4.0.0",
     "express": "^4.16.2",
+    "express-winston": "^2.5.0",
     "google-auth-library": "^1.2.1",
     "jsonwebtoken": "^8.1.1",
     "pg": "^7.4.1",
