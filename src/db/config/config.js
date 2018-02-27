@@ -1,5 +1,3 @@
-import logger from '../../api/logging'
-
 require('dotenv').config()
 
 module.exports = {
@@ -9,8 +7,7 @@ module.exports = {
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     dialect: 'postgres',
-    operatorsAliases: false,
-    logging: logger.debug
+    operatorsAliases: false
   },
   test: {
     dialect: 'sqlite',

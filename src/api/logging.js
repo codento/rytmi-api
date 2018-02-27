@@ -13,13 +13,14 @@ const tsFormat = () => (new Date()).toLocaleTimeString()
 
 const logger = new (winston.Logger)({
   level: env === 'production' ? 'info' : 'debug',
-  silent: env === 'test',
   transports: [
     new (winston.transports.Console)({
+      silent: env === 'test',
       colorize: true,
       timestamp: tsFormat
     }),
     new (winston.transports.File)({
+      silent: env === 'test',
       filename: `${logDir}/log.log`,
       timestamp: tsFormat,
       maxsize: 100 * 1024,

@@ -1,5 +1,5 @@
 import fixtures from '../fixtures'
-const app = require('../../api/app')
+const app = require('../../src/api/app')
 const request = require('supertest')(app)
 const db = fixtures.db
 

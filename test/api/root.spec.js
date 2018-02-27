@@ -1,5 +1,5 @@
 
-const app = require('../../api/app')
+const app = require('../../src/api/app')
 const request = require('supertest')(app)
 
 describe('Test the root api path', () => {
