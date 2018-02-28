@@ -11,7 +11,7 @@
     "start": "nodemon -w src --exec \"babel-node src/api --presets es2015,es2017\"",
     "debug": "nodemon -w src --inspect --exec \"babel-node src/api --presets es2015,es2017\"",
     "build": "babel src -d dist --presets es2015,es2017",
-    "serve": "node dist/api",
+    "serve": "sequelize db:migrate && node dist/api",
     "docker-build": "docker-compose build",
     "test": "jest",
     "testwatch": "jest --watch",
