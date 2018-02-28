@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import models from '../db/models'
+import models from '../src/db/models'
 
 const sequelize = models.sequelize
 const db = {
@@ -94,7 +94,7 @@ const db = {
 }
 
 async function init (done) {
-  await runMigrations(requireModules('../db/migrations'))
+  await runMigrations(requireModules('../src/db/migrations'))
   await Promise.all([
     insertSkill(db.skill1),
     insertSkill(db.skill2),

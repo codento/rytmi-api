@@ -38,6 +38,9 @@ jspm_packages
 # coverage folder
 coverage
 
+# transpiled files
+dist
+
 # swap files
 *.swp
 
