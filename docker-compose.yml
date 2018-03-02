@@ -23,8 +23,17 @@ services:
     volumes:
       - ./init_db.sh:/docker-entrypoint-initdb.d/init_db.sh
     ports:
+<<<<<<< HEAD
       - "5432:5432"
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
+=======
+      - 5432:5432
+    environment:
+      POSTGRES_USER: rytmi
+      POSTGRES_PASSWORD: rytmi
+      POSTGRES_DB: rytmi
+      
+>>>>>>> changed test to use pg
