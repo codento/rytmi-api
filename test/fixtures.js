@@ -1,5 +1,3 @@
-import fs from 'fs'
-import path from 'path'
 import models from '../src/db/models'
 
 const sequelize = models.sequelize
@@ -94,7 +92,6 @@ const db = {
 }
 
 async function init (done) {
-  await runMigrations(requireModules('../src/db/migrations'))
   await Promise.all([
     insertSkill(db.skill1),
     insertSkill(db.skill2),
@@ -109,21 +106,6 @@ async function init (done) {
     })
   ])
   done()
-}
-
-function requireModules (relativePath) {
-  let fullPath = path.join(__dirname, relativePath)
-  return fs.readdirSync(fullPath)
-    .filter(file => (file.indexOf('.') !== 0) && (file.slice(-3) === '.js'))
-    .map(file => require(path.join(fullPath, file)))
-}
-
-function runMigrations (modules) {
-  return modules.reduce((chain, migration) => {
-    return chain.then(() => {
-      return migration.up(sequelize.queryInterface, sequelize.Sequelize)
-    })
-  }, Promise.resolve())
 }
 
 function insertSkill (skill) {

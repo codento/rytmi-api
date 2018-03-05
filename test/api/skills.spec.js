@@ -3,9 +3,11 @@ const app = require('../../src/api/app')
 const request = require('supertest')(app)
 const db = fixtures.db
 
+/*
 beforeEach(done => fixtures.init(done))
 afterEach(done => fixtures.drop(done))
 afterAll(done => fixtures.close(done))
+*/
 
 describe('Test skills', () => {
   test('It should response 200 the GET method', () => {

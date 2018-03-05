@@ -3,11 +3,11 @@ const app = require('../../src/api/app')
 const request = require('supertest')(app)
 const db = fixtures.db
 const byId = (a, b) => a.id - b.id
-
+/*
 beforeEach(done => fixtures.init(done))
 afterEach(done => fixtures.drop(done))
 afterAll(done => fixtures.close(done))
-
+*/
 describe('Fetching profiles', () => {
   it('should return active profiles', async () => {
     const active = await request
