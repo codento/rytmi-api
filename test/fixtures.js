@@ -97,7 +97,7 @@ async function init () {
     insertSkill(db.skill2),
     insertSkill(db.skill3)
   ])
-  await Promise.all([
+  return Promise.all([
     insertUser(db.user1, db.user1Profile, [db.user1ProfileSkill1, db.user1ProfileSkill2]),
     insertUser(db.user2, db.user2Profile, [db.user2ProfileSkill]),
     models.User.build(db.user3).save().then(savedUser => {
@@ -105,7 +105,6 @@ async function init () {
       db.user3Profile.userId = savedUser.id
     })
   ])
-  return Promise().resolve()
 }
 
 function insertSkill (skill) {
@@ -137,7 +136,7 @@ function insertProfile (profile, profileSkills) {
 
 export default {
   db: db,
-  init: (done) => init(done),
+  init: init,
   drop: (done) => sequelize.queryInterface.dropAllTables().then(() => done()),
   close: (done) => sequelize.close().then(() => done())
 }
