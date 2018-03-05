@@ -1,12 +1,13 @@
 require('babel-register')
 require('babel-polyfill')
-const {sequelize} = require('../src/db/models')
+const { sequelize } = require('../src/db/models')
 const fixtures = require('./fixtures')
+const { runMigrations, requireModules } = require('./utils')
 
 module.exports = function () {
-  console.log(fixtures)
-  return Promise.all([
-    sequelize.sync({force: true}),
-    fixtures.init()
-  ])
+  // return sequelize.sync({force: true})
+  return runMigrations(requireModules('../src/db/migrations'))
+    .then(() => {
+      fixtures.init()
+    })
 }

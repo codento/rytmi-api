@@ -134,7 +134,7 @@ function insertProfile (profile, profileSkills) {
   })
 }
 
-export default {
+module.exports = {
   db: db,
   init: init,
   drop: (done) => sequelize.queryInterface.dropAllTables().then(() => done()),
