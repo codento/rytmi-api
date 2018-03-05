@@ -1,4 +1,9 @@
-import models from '../src/db/models'
-const sequelize = models.sequelize
+require('babel-polyfill')
+const { sequelize } = require('../src/db/models')
 
-module.export = sequelize.queryInterface.dropAllTables()
+module.exports = async function () {
+  return Promise.all([
+    sequelize.queryInterface.dropAllTables(),
+    sequelize.close()
+  ])
+}

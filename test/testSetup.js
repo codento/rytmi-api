@@ -1,4 +1,10 @@
-import models from '../src/db/models'
-const sequelize = models.sequelize
+require('babel-polyfill')
+const {sequelize} = require('../src/db/models')
+const { init } = require('./fixtures')
 
-module.export = sequelize.sync({force: true})
+module.exports = async function () {
+  return Promise.all([
+    sequelize.sync({force: true}),
+    init()
+  ])
+}

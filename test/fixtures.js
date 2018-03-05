@@ -91,7 +91,7 @@ const db = {
   }
 }
 
-async function init (done) {
+async function init () {
   await Promise.all([
     insertSkill(db.skill1),
     insertSkill(db.skill2),
@@ -105,7 +105,7 @@ async function init (done) {
       db.user3Profile.userId = savedUser.id
     })
   ])
-  done()
+  return Promise().resolve()
 }
 
 function insertSkill (skill) {
