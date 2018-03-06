@@ -24,3 +24,13 @@ export function truncate () {
     `TRUNCATE ${tableNames.map(name => `"${name}"`).join(', ')} CASCADE;`
   )
 }
+
+export function generatePost (request, endpoint) {
+  return function (attrs) {
+    return request
+      .post(endpoint)
+      .send(attrs)
+      .expect(201)
+      .then(response => response.body)
+  }
+}

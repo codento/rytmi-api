@@ -1,23 +1,33 @@
-import fixtures from '../fixtures'
-const app = require('../../src/api/app')
-const request = require('supertest')(app)
-const db = fixtures.db
+import { generatePost } from '../utils'
+import app from '../../src/api/app'
+import supertest from 'supertest'
 
-/*
-beforeEach(done => fixtures.init(done))
-afterEach(done => fixtures.drop(done))
-afterAll(done => fixtures.close(done))
-*/
+const request = supertest(app)
+const endpoint = '/api/skills/'
+const createSkill = generatePost(request, endpoint)
+const db = {}
+
+beforeAll(async done => {
+  db.skill1 = await createSkill({
+    name: 'COBOL',
+    description: 'blah blah'
+  })
+  db.skill2 = await createSkill({
+    name: 'PL/SQL',
+    description: 'blah blah'
+  })
+  done()
+})
 
 describe('Test skills', () => {
   test('It should response 200 the GET method', () => {
     return request
-      .get('/api/skills')
+      .get(endpoint)
       .expect(200)
   })
   test('respond with json', () => {
     return request
-      .get('/api/skills')
+      .get(endpoint)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
@@ -32,13 +42,13 @@ describe('Creating and updating skills', () => {
     }
 
     const created = await request
-      .post('/api/skills')
+      .post(endpoint)
       .send(skill)
       .expect(201)
     expect(created.body).toMatchObject(skill)
 
     const fetched = await request
-      .get('/api/skills/' + created.body.id)
+      .get(endpoint + created.body.id)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
@@ -52,13 +62,13 @@ describe('Creating and updating skills', () => {
     }
 
     const updated = await request
-      .put('/api/skills/' + db.skill1.id)
+      .put(endpoint + db.skill1.id)
       .send(skill)
       .expect(200)
     expect(updated.body).toMatchObject(skill)
 
     const fetched = await request
-      .get('/api/skills/' + db.skill1.id)
+      .get(endpoint + db.skill1.id)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
@@ -73,26 +83,26 @@ describe('Creating and updating skills', () => {
     }
 
     const created = await request
-      .post('/api/skills')
+      .post(endpoint)
       .send(skill)
       .expect(201)
     expect(created.body.id).not.toBe(skill.id)
 
     const fetched = await request
-      .get('/api/skills/' + created.body.id)
+      .get(endpoint + created.body.id)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
     expect(fetched.body.id).not.toBe(skill.id)
 
     const updated = await request
-      .put('/api/skills/' + created.body.id)
+      .put(endpoint + created.body.id)
       .send(skill)
       .expect(200)
     expect(updated.body.id).not.toBe(skill.id)
 
     const fetchedAgain = await request
-      .get('/api/skills/' + created.body.id)
+      .get(endpoint + created.body.id)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
@@ -108,12 +118,12 @@ describe('Creating and updating skills', () => {
     const validationErrors = ['name must be unique']
 
     await request
-      .post('/api/skills')
+      .post(endpoint)
       .send(skill)
       .expect(201)
 
     const failed = await request
-      .post('/api/skills')
+      .post(endpoint)
       .send(skill)
       .expect(400)
     expect(failed.body.error.details).toEqual(validationErrors)
@@ -127,7 +137,7 @@ describe('Testing data validation', () => {
     }
 
     const created = await request
-      .post('/api/skills/')
+      .post(endpoint)
       .send(skill)
     expect(created.status).toBe(400)
   })
@@ -138,7 +148,7 @@ describe('Testing data validation', () => {
     ]
 
     const created = await request
-      .post('/api/skills/')
+      .post(endpoint)
       .send({})
     expect(created.status).toBe(400)
     expect(created.body.error.details).toMatchObject(validationErrors)
