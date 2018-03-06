@@ -77,7 +77,6 @@
     "rosie": "^1.6.0",
     "sequelize-cli": "^3.2.0",
     "spectacle-docs": "^0.9.13",
-    "sqlite3": "^3.1.13",
     "superagent": "^3.8.2",
     "supertest": "^3.0.0"
   }
