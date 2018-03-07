@@ -21,7 +21,7 @@ npm install
 Use the Postgres Docker image:
 
 ```
-docker run -d --name rytmi-dev-db -p 5432:5432 -e POSTGRES_DB=rytmi -e POSTGRES_PASSWORD=rytmi -e POSTGRES_USER=rytmi postgres:10.1
+docker-compose up -d postgres
 ```
 
 ### Setting environment variables
