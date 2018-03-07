@@ -2,6 +2,9 @@ language: node_js
 node_js:
   - '9'
 before_script:
+  - psql -c "CREATE DATABASE rytmi_test;" -U postgres
+  - psql -c "CREATE USER rytmi WITH PASSWORD 'rytmi';" -U postgres
+  - cp $TRAVIS_BUILD_DIR/.env-travis $TRAVIS_BUILD_DIR/.env
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
