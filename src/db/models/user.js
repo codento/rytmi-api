@@ -1,11 +1,14 @@
 module.exports = (sequelize, DataTypes) => {
   let User = sequelize.define('User', {
-    username: {
+    googleId: {
       type: DataTypes.STRING,
-      allowNull: false,
-      unique: true
+      allowNull: false
     },
-    password: {
+    firstName: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    lastName: {
       type: DataTypes.STRING,
       allowNull: false
     },
@@ -17,6 +20,14 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       allowNull: false
     }
+  },
+  {
+    indexes: [
+      {
+        unique: true,
+        fields: ['googleId']
+      }
+    ]
   })
 
   User.associate = (models) => {

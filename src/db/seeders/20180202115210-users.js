@@ -4,12 +4,13 @@ const faker = require('faker')
 faker.seed(1337)
 
 factory.define('user')
-  .attr('username', () => { return faker.internet.userName() })
-  .attr('admin', () => { return faker.random.boolean() })
-  .attr('active', () => { return faker.random.boolean() })
-  .attr('password', () => { return faker.internet.password(24) })
+  .attr('googleId', () => { return faker.random.number({min: 1000000000, max: 9999999999}) })
+  .attr('firstName', () => { return faker.name.firstName() })
+  .attr('lastName', () => { return faker.name.lastName() })
   .attr('createdAt', () => new Date())
   .attr('updatedAt', () => new Date())
+  .attr('active', () => { return faker.random.boolean() })
+  .attr('admin', () => { return faker.random.boolean() })
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
