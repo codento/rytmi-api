@@ -3,8 +3,10 @@ module.exports = {
     return Promise.all([
       queryInterface.removeColumn('Users', 'username'),
       queryInterface.removeColumn('Users', 'password'),
-      queryInterface.addColumn('Users', 'googleId', {type: Sequelize.STRING, allowNull: false}),
-      queryInterface.addIndex('Users', {unique: true, fields: ['googleId']}),
+      queryInterface.addColumn('Users', 'googleId', {type: Sequelize.STRING, allowNull: false})
+        .then(() => {
+          queryInterface.addIndex('Users', {unique: true, fields: ['googleId']})
+        }),
       queryInterface.addColumn('Users', 'firstName', Sequelize.STRING),
       queryInterface.addColumn('Users', 'lastName', Sequelize.STRING)
     ])
