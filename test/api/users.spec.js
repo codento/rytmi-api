@@ -1,26 +1,47 @@
-import fixtures from '../fixtures'
-const app = require('../../src/api/app')
-const request = require('supertest')(app)
-const db = fixtures.db
-const byId = (a, b) => a.id - b.id
+import { generatePost } from '../utils'
+import app from '../../src/api/app'
+import supertest from 'supertest'
 
-beforeEach(done => fixtures.init(done))
-afterEach(done => fixtures.drop(done))
-afterAll(done => fixtures.close(done))
+const request = supertest(app)
+const endpoint = '/api/users/'
+const createUser = generatePost(request, endpoint)
+const db = {}
+
+beforeAll(async done => {
+  db.user1 = await createUser({
+    username: 'tupu',
+    password: 'trustNo1',
+    active: true,
+    admin: true
+  })
+  db.user2 = await createUser({
+    username: 'hupu',
+    password: 'trustNo1',
+    active: false,
+    admin: false
+  })
+  db.user3 = await createUser({
+    username: 'lupu',
+    password: 'trustNo1',
+    active: false,
+    admin: false
+  })
+  done()
+})
 
 describe('Fetching Users', () => {
   it('should return all users', async () => {
     const all = await request
-      .get('/api/users')
+      .get(endpoint)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-    expect(all.body.sort(byId))
-      .toMatchObject([db.user1, db.user2, db.user3].sort(byId))
+    expect(all.body).toEqual(
+      expect.arrayContaining([db.user1, db.user2, db.user3]))
   })
 
   it('should return user by id', async () => {
-    const fetched = await request.get('/api/users/' + db.user1.id)
+    const fetched = await request.get(endpoint + db.user1.id)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
@@ -37,19 +58,19 @@ describe('Fetching Users', () => {
 describe('Creating and updating users', () => {
   it('should persist and return new user', async () => {
     const user = {
-      'username': 'Test.User',
+      'username': 'newuser',
       'password': 'fadsf',
       'active': true,
       'admin': false
     }
 
     const saved = await request
-      .post('/api/users')
+      .post(endpoint)
       .send(user)
       .expect(201)
     expect(saved.body).toMatchObject(user)
 
-    const fetched = await request.get('/api/users/' + saved.body.id)
+    const fetched = await request.get(endpoint + saved.body.id)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
@@ -57,15 +78,15 @@ describe('Creating and updating users', () => {
   })
 
   it('should update user and return the updated user', async () => {
-    const current = await request.get('/api/users/' + db.user1.id)
+    const current = await request.get(endpoint + db.user1.id)
     const user = {
-      'username': 'Test.User',
-      'password': 'fadsf',
+      'username': 'tupu',
+      'password': 'updated',
       'active': true,
       'admin': false
     }
     const new_ = await request
-      .put('/api/users/' + db.user1.id)
+      .put(endpoint + db.user1.id)
       .send(user)
       .expect(200)
     expect(new_.body).toMatchObject(user)
@@ -75,33 +96,33 @@ describe('Creating and updating users', () => {
   it('should ignore passed id attribute', async () => {
     const user = {
       id: 999999999,
-      'username': 'Test.User',
+      'username': 'ignoremyid',
       'password': 'fadsf',
       'active': true,
       'admin': false
     }
 
     const created = await request
-      .post('/api/users')
+      .post(endpoint)
       .send(user)
       .expect(201)
     expect(created.body.id).not.toBe(user.id)
 
     const fetched = await request
-      .get('/api/users/' + created.body.id)
+      .get(endpoint + created.body.id)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
     expect(fetched.body.id).not.toBe(user.id)
 
     const updated = await request
-      .put('/api/users/' + created.body.id)
+      .put(endpoint + created.body.id)
       .send(user)
       .expect(200)
     expect(updated.body.id).not.toBe(user.id)
 
     const fetchedAgain = await request
-      .get('/api/users/' + created.body.id)
+      .get(endpoint + created.body.id)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
@@ -116,21 +137,18 @@ describe('Creating and updating users', () => {
 
   it('should not allow two users with the same username', async () => {
     const user = {
-      'username': 'Test.User',
-      'password': 'fadsf',
+      'username': 'mustbeunique',
+      'password': 'adfasd',
       'active': true,
       'admin': false
     }
 
     const validationErrors = ['username must be unique']
 
-    await request
-      .post('/api/users')
-      .send(user)
-      .expect(201)
+    await createUser(user)
 
     const failed = await request
-      .post('/api/users')
+      .post(endpoint)
       .send(user)
       .expect(400)
     expect(failed.body.error.details).toEqual(validationErrors)

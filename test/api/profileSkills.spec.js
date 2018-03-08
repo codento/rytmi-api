@@ -1,31 +1,99 @@
-import fixtures from '../fixtures'
-const app = require('../../src/api/app')
-const request = require('supertest')(app)
-const db = fixtures.db
-const byId = (a, b) => a.id - b.id
+import { generatePost } from '../utils'
+import app from '../../src/api/app'
+import supertest from 'supertest'
 
-beforeEach(done => fixtures.init(done))
-afterEach(done => fixtures.drop(done))
-afterAll(done => fixtures.close(done))
+const request = supertest(app)
+const profileSkillEndpoint = '/api/profileSkills/'
+const profileEndpoint = '/api/profiles/'
+const skillEndpointFor =
+  profile => profileEndpoint + profile.id + '/skills/'
+const createProfile = generatePost(request, profileEndpoint)
+const createSkill = generatePost(request, '/api/skills/')
+const createUser = generatePost(request, '/api/users/')
+const createProfileSkill =
+  (profile, attrs) => generatePost(request, skillEndpointFor(profile))(attrs)
+const db = {}
+
+beforeAll(async done => {
+  db.skill1 = await createSkill({
+    name: 'ArnoldC',
+    description: 'blah blah'
+  })
+  db.skill2 = await createSkill({
+    name: 'Brainfuck',
+    description: 'blah blah'
+  })
+  db.user1 = await createUser({
+    username: 'asdf',
+    password: 'trustNo1',
+    active: true,
+    admin: true
+  })
+  db.user2 = await createUser({
+    username: 'fdsa',
+    password: 'trustNo1',
+    active: false,
+    admin: false
+  })
+  db.user1Profile = await createProfile({
+    userId: db.user1.id,
+    lastName: 'Asdf',
+    firstName: 'Mr',
+    email: 'asdf@example.com',
+    active: true
+  })
+  db.user2Profile = await createProfile({
+    userId: db.user2.id,
+    lastName: 'Man',
+    firstName: 'Fdsa',
+    email: 'fdsa@example.com',
+    active: false
+  })
+  db.user1ProfileSkill1 = await createProfileSkill(db.user1Profile, {
+    profileId: db.user1Profile.id,
+    skillId: db.skill1.id,
+    knows: 5,
+    wantsTo: 1,
+    visibleInCV: true,
+    description: 'blah'
+  })
+  db.user1ProfileSkill2 = await createProfileSkill(db.user1Profile, {
+    profileId: db.user1Profile.id,
+    skillId: db.skill2.id,
+    knows: 3,
+    wantsTo: 0,
+    visibleInCV: true,
+    description: 'blah'
+  })
+  db.user2ProfileSkill = await createProfileSkill(db.user2Profile, {
+    profileId: db.user2Profile.id,
+    skillId: db.skill1.id,
+    knows: 0,
+    wantsTo: 5,
+    visibleInCV: true,
+    description: 'blah'
+  })
+  done()
+})
 
 describe('Fetching profileSkills', () => {
   it('should return all profileSkills', async () => {
     const all = await request
-      .get('/api/profileSkills')
+      .get(profileSkillEndpoint)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-    expect(all.body.sort(byId))
-      .toMatchObject([
+    expect(all.body).toEqual(
+      expect.arrayContaining([
         db.user1ProfileSkill1,
         db.user1ProfileSkill2,
         db.user2ProfileSkill
-      ].sort(byId))
+      ]))
   })
 
   it('should return profileSkill by id', async () => {
     const profileSkill = await request
-      .get('/api/profileSkills/' + db.user1ProfileSkill1.id)
+      .get(profileSkillEndpoint + db.user1ProfileSkill1.id)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)

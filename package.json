@@ -13,8 +13,8 @@
     "build": "babel src -d dist --presets es2015,es2017",
     "serve": "sequelize db:migrate && node dist/api",
     "docker-build": "docker-compose build",
-    "test": "jest",
-    "testwatch": "jest --watch",
+    "test": "jest --forceExit",
+    "testwatch": "jest --watch --forceExit",
     "create-html-doc": "node node_modules/spectacle-docs/bin/spectacle.js -t doc/ doc/openapi-spec.json",
     "containers": "docker-compose up -d && echo Rytmi API is now up and running.",
     "stop": "docker-compose down",
@@ -23,6 +23,8 @@
   "jest": {
     "testEnvironment": "node",
     "collectCoverage": true,
+    "globalSetup": "./test/testSetup.js",
+    "globalTeardown": "./test/testTeardown.js",
     "coverageReporters": [
       "lcov",
       "json",
@@ -58,6 +60,7 @@
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-eslint": "^8.2.1",
+    "babel-jest": "^22.4.1",
     "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.6.1",
     "babel-preset-es2015": "^6.24.1",
@@ -74,7 +77,6 @@
     "rosie": "^1.6.0",
     "sequelize-cli": "^3.2.0",
     "spectacle-docs": "^0.9.13",
-    "sqlite3": "^3.1.13",
     "superagent": "^3.8.2",
     "supertest": "^3.0.0"
   }
