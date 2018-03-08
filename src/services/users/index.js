@@ -8,7 +8,7 @@ export default class UserService extends CrudService {
 
   getByGoogleId (googleId) {
     return models.User
-      .findAll({where: {googleId: googleId}})
+      .findOne({where: {googleId: googleId}})
   }
 
   delete () {

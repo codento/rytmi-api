@@ -11,6 +11,11 @@ export default class ProfileService extends CrudService {
       .findAll({where: {active: true}})
   }
 
+  getByUserId (userId) {
+    return models.Profile
+      .findOne({where: {userId: userId}})
+  }
+
   update (id, attrs) {
     delete attrs.userId
     return super.update(id, attrs)
