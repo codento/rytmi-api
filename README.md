@@ -8,6 +8,16 @@
 
 ## Usage
 
+### Endpoints
+
+| Endpoint | Method | Description |
+| -------- | ------ | ----------- |
+| `/api/profiles` | GET | Returns a list of profiles.
+| `/api/skills` | GET | Returns a list of skills.
+| `/api/profileskills` | GET | Returns a list of profileskills.
+| `/api/users` | GET | Returns a list of users.
+| `/api/users` | POST | Creates a new user. Requires credentials `username`, `password`, `active` and `admin`. On success 201.
+
 ## Development
 
 Install dependencies:
