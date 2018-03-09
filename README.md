@@ -16,18 +16,22 @@
 | `/api/skills` | GET | Returns a list of skills.
 | `/api/profileskills` | GET | Returns a list of profileskills.
 | `/api/users` | GET | Returns a list of users.
+||
 | `/api/profiles/:id` | GET | Returns a single profile by `id`.
 | `/api/skills/:id` | GET | Returns a single skill by `id`.
 | `/api/profileskills/:id` | GET | Returns a single profileskill by `id`.
 | `/api/users/:id` | GET | Returns a single user by `id`.
+||
 | `/api/profiles` | POST | Creates a new profile. Requires credentials `firstName`, `lastName`, `birthday`, `phone`, `title`, `description`, `links`, `photoPath`, `active` and `email`.
 | `/api/skills` | POST | Creates a new skill. Requires credentials `name`, `description`.
 | `/api/profileskills` | POST | Creates a new link between user and skill. Requires credentials `profileId`, `skillId`, `knows`, `visibleInCV`, `description` and `wantsTo`.
 | `/api/users` | POST | Creates a new user. Requires credentials `username`, `password`, `active` and `admin`.
+||
 | `/api/profiles/:id` | PUT | Replaces a profile by `id` with new info. Accepts credentials `firstName`, `lastName`, `birthday`, `phone`, `title`, `description`, `links`, `photoPath`, `active` and `email`.
 | `/api/skills/:id` | PUT | Replaces a skill by `id` with new info. Accepts credentials `name`, `description`.
 | `/api/profileskills/:id` | PUT | Replaces a profileskill by `id` with new info. Accepts credentials `profileId`, `skillId`, `knows`, `visibleInCV`, `description` and `wantsTo`.
 | `/api/users/:id` | PUT | Replaces a user by `id` with new info. Accepts credentials `username`, `password`, `active` and `admin`.
+||
 
 ## Development
 
