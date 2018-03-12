@@ -6,6 +6,11 @@ export default class UserService extends CrudService {
     super(models.User)
   }
 
+  getByGoogleId (googleId) {
+    return models.User
+      .findOne({where: {googleId: googleId}})
+  }
+
   delete () {
     throw new Error('Not implemented')
   }

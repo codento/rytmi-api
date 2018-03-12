@@ -26,7 +26,8 @@ docker-compose up -d postgres
 
 ### Setting environment variables
 
-Create a `.env` file in the project root directory. Example using the aforementioned dev database:
+Copy the `.env.template` file in the project root directory and rename it to `.env`. Fill it with meaningful values.  
+Example using the aforementioned dev database:
 
 ```
 DB_HOST=localhost
@@ -34,7 +35,10 @@ DB_USER=rytmi
 DB_PASSWORD=rytmi
 DB_NAME=rytmi
 
-NODE_ENV=development
+GOOGLE_CLIENT_ID=123456-abcdef.apps.googleusercontent.com
+
+JWT_SECRET=qwerty123456
+JWT_VALID_TIME=3600 # 1h
 
 PORT=8081
 ```

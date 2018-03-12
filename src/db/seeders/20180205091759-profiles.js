@@ -5,12 +5,12 @@ faker.seed(1337)
 
 factory.define('profile')
   .attr('userId')
-  .attr('lastName', () => { return faker.name.lastName() })
-  .attr('firstName', () => { return faker.name.firstName() })
+  .attr('firstName')
+  .attr('lastName')
   .attr('email', () => { return faker.internet.email() })
   .attr('phone', () => { return faker.phone.phoneNumber() })
   .attr('birthday', () => { return faker.date.past(20, '1997-12-31') })
-  .attr('title', () => { return faker.name.findName() })
+  .attr('title', () => { return faker.name.jobTitle() })
   .attr('description', () => { return faker.lorem.paragraphs() })
   .attr('links')
   .attr('photoPath', () => { return faker.internet.avatar() })
@@ -33,6 +33,8 @@ module.exports = {
           }
           let profile = factory.build('profile', {
             userId: user.id,
+            firstName: user.firstName,
+            lastName: user.lastName,
             links: JSON.stringify(links)
           })
           profiles.push(profile)

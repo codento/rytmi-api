@@ -9,20 +9,23 @@ const db = {}
 
 beforeAll(async done => {
   db.user1 = await createUser({
-    username: 'tupu',
-    password: 'trustNo1',
+    googleId: '123456',
+    firstName: 'tupu',
+    lastName: 'ankka',
     active: true,
     admin: true
   })
   db.user2 = await createUser({
-    username: 'hupu',
-    password: 'trustNo1',
+    googleId: '234567',
+    firstName: 'hupu',
+    lastName: 'ankka',
     active: false,
     admin: false
   })
   db.user3 = await createUser({
-    username: 'lupu',
-    password: 'trustNo1',
+    googleId: '345678',
+    firstName: 'lupu',
+    lastName: 'ankka',
     active: false,
     admin: false
   })
@@ -58,8 +61,9 @@ describe('Fetching Users', () => {
 describe('Creating and updating users', () => {
   it('should persist and return new user', async () => {
     const user = {
-      'username': 'newuser',
-      'password': 'fadsf',
+      'googleId': "456789",
+      'firstName': 'new',
+      'lastName': 'user',
       'active': true,
       'admin': false
     }
@@ -80,8 +84,9 @@ describe('Creating and updating users', () => {
   it('should update user and return the updated user', async () => {
     const current = await request.get(endpoint + db.user1.id)
     const user = {
-      'username': 'tupu',
-      'password': 'updated',
+      'googleId': '123456',
+      'firstName': 'Dewey',
+      'lastName': 'updated',
       'active': true,
       'admin': false
     }
@@ -96,8 +101,9 @@ describe('Creating and updating users', () => {
   it('should ignore passed id attribute', async () => {
     const user = {
       id: 999999999,
-      'username': 'ignoremyid',
-      'password': 'fadsf',
+      'googleId': '45616234456',
+      'firstName': 'ignoremyid',
+      'lastName': 'fadsf',
       'active': true,
       'admin': false
     }
@@ -137,13 +143,14 @@ describe('Creating and updating users', () => {
 
   it('should not allow two users with the same username', async () => {
     const user = {
-      'username': 'mustbeunique',
-      'password': 'adfasd',
+      'googleId': 'mustbeunique',
+      'firstName': 'MrUnique',
+      'lastName': 'adfasd',
       'active': true,
       'admin': false
     }
 
-    const validationErrors = ['username must be unique']
+    const validationErrors = ['googleId must be unique']
 
     await createUser(user)
 

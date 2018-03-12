@@ -23,21 +23,23 @@ beforeAll(async done => {
     description: 'blah blah'
   })
   db.user1 = await createUser({
-    username: 'batman',
-    password: 'trustNo1',
+    googleId: '489324891358',
+    firstName: 'tupu',
+    lastName: 'ankka',
     active: true,
     admin: true
   })
   db.user2 = await createUser({
-    username: 'robin',
-    password: 'trustNo1',
+    googleId: '478135781687',
+    firstName: 'hupu',
+    lastName: 'ankka',
     active: false,
     admin: false
   })
   db.user1Profile = await createProfile({
     userId: db.user1.id,
-    lastName: 'Man',
-    firstName: 'Bat',
+    lastName: 'ankka',
+    firstName: 'tupu',
     birthday: new Date('1970-01-01').toISOString(),
     email: 'batman@example.com',
     phone: '+358 40 41561',
@@ -49,8 +51,8 @@ beforeAll(async done => {
   })
   db.user2Profile = await createProfile({
     userId: db.user2.id,
-    lastName: 'Man',
-    firstName: 'Robin',
+    lastName: 'ankka',
+    firstName: 'hupu',
     birthday: new Date('1970-01-01').toISOString(),
     email: 'robin@example.com',
     phone: '09 4561 4561',
@@ -121,16 +123,17 @@ describe('Fetching profiles', () => {
 describe('Creating and updating profiles', () => {
   it('should persist/update profile and return the created/updated profile', async () => {
     const user = await createUser({
-      username: 'mrfreeze',
-      password: 'ikuinenjää',
-      active: false,
-      admin: false
+      googleId: '87637432435428',
+      firstName: 'tupu',
+      lastName: 'ankka',
+      active: true,
+      admin: true
     })
 
     const attrs = {
       userId: user.id,
-      lastName: 'Freeze',
-      firstName: 'Mr',
+      lastName: 'ankka',
+      firstName: 'tupu',
       birthday: new Date('1970-01-01').toISOString(),
       email: 'mrfreeze@example.com',
       phone: '09 4616 1651 156',
@@ -178,10 +181,11 @@ describe('Creating and updating profiles', () => {
 
   it('should ignore passed id attribute', async () => {
     const user = await createUser({
-      username: 'joker',
-      password: 'blah',
-      active: false,
-      admin: false
+      googleId: '18973217912375',
+      firstName: 'Joker',
+      lastName: 'Coolguy',
+      active: true,
+      admin: true
     })
 
     const attrs = {
@@ -222,10 +226,11 @@ describe('Creating and updating profiles', () => {
 
   it('should not allow two profiles with the same email', async () => {
     const user = await createUser({
-      username: 'scarecrow',
-      password: 'blah',
-      active: false,
-      admin: false
+      googleId: '984324891222327',
+      firstName: 'tupu',
+      lastName: 'ankka',
+      active: true,
+      admin: true
     })
 
     const profile = {
@@ -281,10 +286,11 @@ describe('Fetching profileSkills', () => {
 describe('Creating, updating and deleting profileSkills', () => {
   it('should persist profileSkill and return the created profileSkill', async () => {
     const user = await createUser({
-      username: 'pinquin',
-      password: 'blah',
+      googleId: '897321324798324',
+      firstName: 'tupu',
+      lastName: 'ankka',
       active: true,
-      admin: false
+      admin: true
     })
 
     const profile = await createProfile({
@@ -342,10 +348,11 @@ describe('Creating, updating and deleting profileSkills', () => {
 
   it('should ignore profileId in body', async () => {
     const user = await createUser({
-      username: 'riddler',
-      password: 'blah',
+      googleId: '35723871489',
+      firstName: 'tupu',
+      lastName: 'ankka',
       active: true,
-      admin: false
+      admin: true
     })
 
     const profile = await createProfile({

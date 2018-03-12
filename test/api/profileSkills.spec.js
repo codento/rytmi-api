@@ -24,16 +24,18 @@ beforeAll(async done => {
     description: 'blah blah'
   })
   db.user1 = await createUser({
-    username: 'asdf',
-    password: 'trustNo1',
+    googleId: '8732157813573548',
+    firstName: 'tupu',
+    lastName: 'ankka',
     active: true,
     admin: true
   })
   db.user2 = await createUser({
-    username: 'fdsa',
-    password: 'trustNo1',
-    active: false,
-    admin: false
+    googleId: '15648713281568',
+    firstName: 'hupu',
+    lastName: 'ankka',
+    active: true,
+    admin: true
   })
   db.user1Profile = await createProfile({
     userId: db.user1.id,
