@@ -79,7 +79,7 @@ export default () => {
         if (err instanceof NotAuthorizedError) {
           res.status(403).json(utils.errorTemplate(403, 'Not authorized'))
         } else if (err instanceof ServerError) {
-          res.status(500).json(utils.errorTemplate(500, 'Some horrible happened on a server side.', err.message))
+          res.status(500).json(utils.errorTemplate(500, 'Something horrible happened on a server side.', err.message))
         } else {
           res.status(400).json(utils.errorTemplate(400, 'Authentication error', err.message))
         }
