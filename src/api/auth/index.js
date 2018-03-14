@@ -31,15 +31,32 @@ async function verify (idToken) {
 
   let user = await userService.getByGoogleId(googleId)
   if (!user) {
-    user = await userService.create({
-      googleId: googleId,
-      firstName: ticketPayload.given_name,
-      lastName: ticketPayload.family_name,
-      active: true,
-      admin: false
-    })
-    if (!user) {
+    try {
+      user = await userService.create({
+        googleId: googleId,
+        firstName: ticketPayload.given_name,
+        lastName: ticketPayload.family_name,
+        active: true,
+        admin: false
+      })
+    } catch (err) {
       throw new ServerError('Could not create user')
+    }
+  }
+
+  let profile = await profileService.getByUserId(user.id)
+  if (!profile) {
+    try {
+      profile = await profileService.create({
+        userId: user.id,
+        firstName: ticketPayload.given_name,
+        lastName: ticketPayload.family_name,
+        email: ticketPayload.email,
+        photoPath: ticketPayload.picture,
+        active: true
+      })
+    } catch (err) {
+      throw new ServerError('Could not create profile')
     }
   }
 
@@ -52,12 +69,10 @@ async function verify (idToken) {
   }
   const token = jwt.sign(payload, process.env.JWT_SECRET)
 
-  const profile = await profileService.getByUserId(user.id)
-
   return {
     message: 'Welcome to rytmi app',
     userId: user.id,
-    profileId: profile ? profile.id : null,
+    profileId: profile.id,
     jwt: {
       token: token,
       expires: expires
