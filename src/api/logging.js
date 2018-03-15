@@ -18,13 +18,6 @@ const logger = new (winston.Logger)({
       silent: env === 'test',
       colorize: true,
       timestamp: tsFormat
-    }),
-    new (winston.transports.File)({
-      silent: env === 'test',
-      filename: `${logDir}/log.log`,
-      timestamp: tsFormat,
-      maxsize: 100 * 1024,
-      maxFiles: 2
     })
   ]
 })

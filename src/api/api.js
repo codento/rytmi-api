@@ -37,7 +37,7 @@ export default () => {
   api.use(bodyParser.json())
 
   api.get('/', (req, res) => {
-    logger.debug('GET /api/')
+    logger.debug('New request for /api/ from', req.url)
     res.json({ version })
   })
 
