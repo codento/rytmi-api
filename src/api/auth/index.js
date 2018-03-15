@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken'
 import utils from '../utils'
 import UserService from '../../services/users'
 import ProfileService from '../../services/profiles'
+import logger from '../logging'
 
 require('dotenv').config()
 
@@ -23,7 +24,8 @@ async function verify (idToken) {
   })
 
   const ticketPayload = ticket.getPayload()
-  if (ticketPayload.hd !== 'codento.com') {
+  if (ticketPayload.hd !== process.env.GOOGLE_ORG_DOMAIN) {
+    logger.error('Unauthorized login attempt from', ticketPayload.hd, 'with following info:', ticketPayload.sub)
     throw new NotAuthorizedError('Domain not authorized')
   }
 
@@ -40,6 +42,7 @@ async function verify (idToken) {
         admin: false
       })
     } catch (err) {
+      logger.error('Trouble creating user', err.message)
       throw new ServerError('Could not create user')
     }
   }
@@ -56,6 +59,7 @@ async function verify (idToken) {
         active: true
       })
     } catch (err) {
+      logger.error('Trouble creating profile', err.message)
       throw new ServerError('Could not create profile')
     }
   }
@@ -70,7 +74,7 @@ async function verify (idToken) {
   const token = jwt.sign(payload, process.env.JWT_SECRET)
 
   return {
-    message: 'Welcome to rytmi app',
+    message: 'Welcome to Rytmi app',
     userId: user.id,
     profileId: profile.id,
     jwt: {
@@ -91,6 +95,7 @@ export default () => {
         res.json(authInfo)
       })
       .catch(err => {
+        logger.debug('Catched error:', err.message)
         if (err instanceof NotAuthorizedError) {
           res.status(403).json(utils.errorTemplate(403, 'Not authorized'))
         } else if (err instanceof ServerError) {
