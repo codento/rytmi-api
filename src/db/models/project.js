@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     },
     endDate: {
-      type: DataTypes.Date,
+      type: DataTypes.DATE,
       allowNull: false
     }
   })
