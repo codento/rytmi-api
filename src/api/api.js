@@ -10,6 +10,7 @@ import skills from './skills'
 import profileSkills from './profileSkills'
 import auth from './auth'
 import utils from './utils'
+import projects from './projects'
 import logger, { httpLogger } from './logging'
 
 require('dotenv').config()
@@ -61,6 +62,7 @@ export default () => {
   api.use('/skills', skills())
   api.use('/profileskills', profileSkills())
   api.use('/users', users())
+  api.use('/projects', projects())
 
   api.use(validateErrorHandler)
   api.use(errorHandler)

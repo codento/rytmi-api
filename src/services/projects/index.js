@@ -9,4 +9,9 @@ export default class ProjectService extends CrudService {
   getByProjectId (projectId) {
     return models.Project.findOne({where: {id: projectId}})
   }
+
+  getAll () {
+    return models.Project.findAll()
+  }
+
 }
