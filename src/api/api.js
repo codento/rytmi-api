@@ -1,5 +1,6 @@
 import { version } from '../../package.json'
 import { Router } from 'express'
+import jwt, { UnauthorizedError } from 'express-jwt'
 
 import bodyParser from 'body-parser'
 import { ValidationError } from 'sequelize'
@@ -27,9 +28,19 @@ function errorHandler (err, req, res, next) {
   if (res.headersSent) {
     return next(err)
   }
-  res
-    .status(500)
-    .json(utils.errorTemplate(500, err))
+  if (err instanceof UnauthorizedError) {
+    res
+      .status(401)
+      .json(
+        utils.errorTemplate(401, 'Unauthorized error', err)
+      )
+  } else {
+    res
+      .status(500)
+      .json(
+        utils.errorTemplate(500, 'Server error', err.message)
+      )
+  }
 }
 
 export default () => {
@@ -43,11 +54,13 @@ export default () => {
 
   api.use(httpLogger)
 
-  api.use('/users', users())
+  api.use('/auth', auth())
+  api.use(jwt({secret: process.env.JWT_SECRET}).unless({path: ['/auth']})) // TODO: Study where this should actually be placed. Now unless don't work, just the order matters.
+
   api.use('/profiles', profiles())
   api.use('/skills', skills())
   api.use('/profileskills', profileSkills())
-  api.use('/auth', auth())
+  api.use('/users', users())
 
   api.use(validateErrorHandler)
   api.use(errorHandler)
