@@ -79,6 +79,7 @@
     "sequelize-cli": "^3.2.0",
     "spectacle-docs": "^0.9.13",
     "superagent": "^3.8.2",
+    "superagent-defaults": "^0.1.14",
     "supertest": "^3.0.0"
   }
 }

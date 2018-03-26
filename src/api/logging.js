@@ -9,7 +9,7 @@ const logger = new (winston.Logger)({
   level: env === 'production' ? 'info' : 'debug',
   transports: [
     new (winston.transports.Console)({
-      // silent: env === 'test',
+      silent: env === 'test',
       colorize: true,
       timestamp: tsFormat
     })

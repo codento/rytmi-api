@@ -15,7 +15,7 @@ describe('Logging in', () => {
   it('should return a jwt for existing user', async () => {
     logger.debug('Creating user')
     const user = await userService.create({
-      googleId: '123456',
+      googleId: '456165135781687432435471',
       firstName: 'tupu',
       lastName: 'ankka',
       active: true,
@@ -48,30 +48,26 @@ describe('Logging in', () => {
   })
 
   it('should create a new user if googleid not found', async () => {
-    try {
-      const payload = {
-        sub: '1432178643217',
-        hd: process.env.GOOGLE_ORG_DOMAIN,
-        given_name: 'Al',
-        family_name: 'Pacino',
-        email: 'al@pacino.com'
-      }
-      require('google-auth-library').__setMockPayload(payload)
-
-      logger.debug('')
-      const response = await request
-        .post('/api/auth')
-        .set('Accept', 'application/json')
-        .send({id_token: 'fdasf.fads.fadsfad'})
-        .expect('Content-Type', /json/)
-        .expect(200)
-
-      expect(response.body.message).toBe('Welcome to Rytmi app')
-      expect(response.body.userId).not.toBe(null)
-      const user = userService.get(response.body.userId)
-      expect(user.googleId).toBe(payload.sub)
-    } catch (err) {
-      logger.debug('error: ', err)
+    const payload = {
+      sub: '1432178643217',
+      hd: process.env.GOOGLE_ORG_DOMAIN,
+      given_name: 'Al',
+      family_name: 'Pacino',
+      email: 'al@pacino.com'
     }
+    require('google-auth-library').__setMockPayload(payload)
+
+    logger.debug('')
+    const response = await request
+      .post('/api/auth')
+      .set('Accept', 'application/json')
+      .send({id_token: 'fdasf.fads.fadsfad'})
+      .expect('Content-Type', /json/)
+      .expect(200)
+
+    expect(response.body.message).toBe('Welcome to Rytmi app')
+    expect(response.body.userId).not.toBe(null)
+    const user = userService.get(response.body.userId)
+    expect(user.googleId).toBe(payload.sub)
   })
 })
