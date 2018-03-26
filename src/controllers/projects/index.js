@@ -6,9 +6,9 @@ const projectService = new ProjectService()
 
 let projectController = baseController('project', projectService)
 
-projectController.getAll = wrapAsync(async (req, res) => {
-  const projects = await projectService.getAll()
-  res.json(projects)
+projectController.delete = wrapAsync(async (req, res) => {
+  const removed = await projectService.delete(req.project.id)
+  res.status(200).send('Project with id: ' + req.project.id + ' was removed successfully.')
 })
 
 module.exports = {
