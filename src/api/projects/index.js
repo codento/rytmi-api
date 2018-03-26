@@ -7,6 +7,11 @@ export default () => {
   router.param('id', findObjectOr404)
 
   router.get('/', projectController.getAll)
+  router.post('/', projectController.create)
+
+  router.get('/:id', projectController.get)
+  router.put('/:id', projectController.update)
+  router.delete('/:id', projectController.delete)
 
   return router
 }
