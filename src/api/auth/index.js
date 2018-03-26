@@ -14,6 +14,7 @@ class ServerError extends Error {}
 const router = Router()
 
 async function verify (idToken) {
+  logger.debug('Verifying ' + idToken)
   const userService = new UserService()
   const profileService = new ProfileService()
   const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
@@ -22,8 +23,9 @@ async function verify (idToken) {
     idToken: idToken,
     audience: process.env.GOOGLE_CLIENT_ID
   })
-
+  logger.debug('ticket: ' + ticket)
   const ticketPayload = ticket.getPayload()
+  logger.debug('ticketPayload: ' + ticketPayload)
   if (ticketPayload.hd !== process.env.GOOGLE_ORG_DOMAIN) {
     logger.error('Unauthorized login attempt from', ticketPayload.hd, 'with following info:', ticketPayload.sub)
     throw new NotAuthorizedError('Domain not authorized')
@@ -68,6 +70,7 @@ async function verify (idToken) {
   const payload = {
     googleId: user.googleId,
     userId: user.id,
+    admin: user.admin,
     email: ticketPayload.email,
     exp: expires
   }
@@ -95,9 +98,9 @@ export default () => {
         res.json(authInfo)
       })
       .catch(err => {
-        logger.debug('Catched error:', err.message)
+        logger.error('Catched error:', err.message, err.stack)
         if (err instanceof NotAuthorizedError) {
-          res.status(403).json(utils.errorTemplate(403, 'Not authorized'))
+          res.status(401).json(utils.errorTemplate(401, 'Not authorized'))
         } else if (err instanceof ServerError) {
           res.status(500).json(utils.errorTemplate(500, 'Something horrible happened on a server side.', err.message))
         } else {

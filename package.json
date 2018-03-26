@@ -50,6 +50,7 @@
     "cors": "^2.8.4",
     "dotenv": "^4.0.0",
     "express": "^4.16.2",
+    "express-jwt": "^5.3.1",
     "express-winston": "^2.5.0",
     "google-auth-library": "^1.2.1",
     "jsonwebtoken": "^8.1.1",
@@ -78,6 +79,7 @@
     "sequelize-cli": "^3.2.0",
     "spectacle-docs": "^0.9.13",
     "superagent": "^3.8.2",
+    "superagent-defaults": "^0.1.14",
     "supertest": "^3.0.0"
   }
 }

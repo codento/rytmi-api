@@ -1,8 +1,11 @@
 import { generatePost } from '../utils'
 import app from '../../src/api/app'
 import supertest from 'supertest'
+import defaults from 'superagent-defaults'
+import testUserToken from './token'
 
-const request = supertest(app)
+const request = defaults(supertest(app))
+
 const profileEndpoint = '/api/profiles/'
 const skillEndpointFor =
   profile => profileEndpoint + profile.id + '/skills/'
@@ -14,6 +17,9 @@ const createProfileSkill =
 const db = {}
 
 beforeAll(async done => {
+  request.set('Authorization', `Bearer ${testUserToken}`)
+  request.set('Accept', 'application/json')
+
   db.skill1 = await createSkill({
     name: 'Symbian C++',
     description: 'blah blah'
@@ -86,6 +92,7 @@ beforeAll(async done => {
     visibleInCV: true,
     description: 'blah'
   })
+
   done()
 })
 
@@ -93,7 +100,6 @@ describe('Fetching profiles', () => {
   it('should return active profiles', async () => {
     const active = await request
       .get(profileEndpoint)
-      .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
     expect(active.body).toContainEqual(db.user1Profile)
@@ -103,7 +109,6 @@ describe('Fetching profiles', () => {
   it('should return all profiles', async () => {
     const all = await request
       .get(profileEndpoint + '/all')
-      .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
     expect(all.body).toEqual(
@@ -113,7 +118,6 @@ describe('Fetching profiles', () => {
   it('should fetch profile by id', async () => {
     const fetched = await request
       .get(profileEndpoint + db.user1Profile.id)
-      .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
     expect(fetched.body).toMatchObject(db.user1Profile)
@@ -152,7 +156,6 @@ describe('Creating and updating profiles', () => {
 
     const fetched = await request
       .get(profileEndpoint + created.body.id)
-      .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
     expect(fetched.body).toMatchObject(created.body)
@@ -173,7 +176,6 @@ describe('Creating and updating profiles', () => {
 
     const fetchedAgain = await request
       .get(profileEndpoint + created.body.id)
-      .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
     expect(fetchedAgain.body).toMatchObject(updatedAttrs)
@@ -205,7 +207,6 @@ describe('Creating and updating profiles', () => {
 
     const fetched = await request
       .get(profileEndpoint + created.body.id)
-      .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
     expect(fetched.body.id).not.toBe(attrs.id)
@@ -218,7 +219,6 @@ describe('Creating and updating profiles', () => {
 
     const fetchedAgain = await request
       .get(profileEndpoint + created.body.id)
-      .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
     expect(fetchedAgain.body.id).not.toBe(attrs.id)
@@ -255,7 +255,6 @@ describe('Fetching profileSkills', () => {
   it('should return profileSkills for the user', async () => {
     const profileSkills = await request
       .get(skillEndpointFor(db.user1Profile))
-      .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
     expect(profileSkills.body).toEqual(
@@ -265,7 +264,6 @@ describe('Fetching profileSkills', () => {
   it('should return profileSkill by id', async () => {
     const profileSkill = await request
       .get(skillEndpointFor(db.user1Profile) + db.user1ProfileSkill1.id)
-      .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
     expect(profileSkill.body).toMatchObject(db.user1ProfileSkill1)
@@ -318,7 +316,6 @@ describe('Creating, updating and deleting profileSkills', () => {
 
     const fetched = await request
       .get(skillEndpointFor(profile) + created.body.id)
-      .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
     expect(fetched.body).toMatchObject(created.body)
@@ -340,7 +337,6 @@ describe('Creating, updating and deleting profileSkills', () => {
 
     const fetchedAgain = await request
       .get(skillEndpointFor(profile) + updated.body.id)
-      .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
     expect(fetchedAgain.body).toMatchObject(updated.body)
@@ -386,7 +382,6 @@ describe('Creating, updating and deleting profileSkills', () => {
 
     return request
       .get(profileEndpoint + db.user1Profile.id + '/skills/' + db.user1ProfileSkill1.id)
-      .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(404)
     // TODO: decide what 404 body should contain

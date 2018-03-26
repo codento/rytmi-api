@@ -1,13 +1,20 @@
 import { generatePost } from '../utils'
 import app from '../../src/api/app'
 import supertest from 'supertest'
+import defaults from 'superagent-defaults'
+import testUserToken from './token'
 
-const request = supertest(app)
+const request = defaults(supertest(app))
 const endpoint = '/api/users/'
+
 const createUser = generatePost(request, endpoint)
+
 const db = {}
 
 beforeAll(async done => {
+  request.set('Authorization', `Bearer ${testUserToken}`)
+  request.set('Accept', 'application/json')
+
   db.user1 = await createUser({
     googleId: '123456',
     firstName: 'tupu',
@@ -29,6 +36,7 @@ beforeAll(async done => {
     active: false,
     admin: false
   })
+
   done()
 })
 
@@ -36,7 +44,6 @@ describe('Fetching Users', () => {
   it('should return all users', async () => {
     const all = await request
       .get(endpoint)
-      .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
     expect(all.body).toEqual(
@@ -45,7 +52,6 @@ describe('Fetching Users', () => {
 
   it('should return user by id', async () => {
     const fetched = await request.get(endpoint + db.user1.id)
-      .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
     expect(fetched.body).toMatchObject(db.user1)
@@ -53,7 +59,6 @@ describe('Fetching Users', () => {
 
   it('should return 404 for invalid user id', () => {
     return request.get('/api/users/1000')
-      .set('Accept', 'application/json')
       .expect(404)
   })
 })
@@ -61,7 +66,7 @@ describe('Fetching Users', () => {
 describe('Creating and updating users', () => {
   it('should persist and return new user', async () => {
     const user = {
-      'googleId': "456789",
+      'googleId': '456789',
       'firstName': 'new',
       'lastName': 'user',
       'active': true,
@@ -75,7 +80,6 @@ describe('Creating and updating users', () => {
     expect(saved.body).toMatchObject(user)
 
     const fetched = await request.get(endpoint + saved.body.id)
-      .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
     expect(fetched.body).toMatchObject(user)
@@ -116,7 +120,6 @@ describe('Creating and updating users', () => {
 
     const fetched = await request
       .get(endpoint + created.body.id)
-      .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
     expect(fetched.body.id).not.toBe(user.id)
@@ -129,7 +132,6 @@ describe('Creating and updating users', () => {
 
     const fetchedAgain = await request
       .get(endpoint + created.body.id)
-      .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
     expect(fetchedAgain.body.id).not.toBe(user.id)

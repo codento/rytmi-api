@@ -1,5 +1,15 @@
-const app = require('../../src/api/app')
-const request = require('supertest')(app)
+import app from '../../src/api/app'
+import supertest from 'supertest'
+import defaults from 'superagent-defaults'
+import testUserToken from './token'
+
+const request = defaults(supertest(app))
+
+beforeAll(async done => {
+  request.set('Authorization', `Bearer ${testUserToken}`)
+  request.set('Accept', 'application/json')
+  done()
+})
 
 describe('Test the root api path', () => {
   test('It should response 200 the GET method', () => {

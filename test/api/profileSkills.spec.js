@@ -1,8 +1,11 @@
 import { generatePost } from '../utils'
 import app from '../../src/api/app'
 import supertest from 'supertest'
+import defaults from 'superagent-defaults'
+import testUserToken from './token'
 
-const request = supertest(app)
+const request = defaults(supertest(app))
+
 const profileSkillEndpoint = '/api/profileSkills/'
 const profileEndpoint = '/api/profiles/'
 const skillEndpointFor =
@@ -15,6 +18,9 @@ const createProfileSkill =
 const db = {}
 
 beforeAll(async done => {
+  request.set('Authorization', `Bearer ${testUserToken}`)
+  request.set('Accept', 'application/json')
+
   db.skill1 = await createSkill({
     name: 'ArnoldC',
     description: 'blah blah'
