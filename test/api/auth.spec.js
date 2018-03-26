@@ -1,6 +1,5 @@
 import supertest from 'supertest'
 import jwt from 'jsonwebtoken'
-
 import app from '../../src/api/app'
 import logger from './../../src/api/logging'
 import UserService from './../../src/services/users/index'
@@ -57,17 +56,17 @@ describe('Logging in', () => {
     }
     require('google-auth-library').__setMockPayload(payload)
 
-    logger.debug('')
     const response = await request
       .post('/api/auth')
       .set('Accept', 'application/json')
       .send({id_token: 'fdasf.fads.fadsfad'})
       .expect('Content-Type', /json/)
       .expect(200)
+    logger.debug('auth response: ' + JSON.stringify(response.body))
 
     expect(response.body.message).toBe('Welcome to Rytmi app')
-    expect(response.body.userId).not.toBe(null)
-    const user = userService.get(response.body.userId)
-    expect(user.googleId).toBe(payload.sub)
+    const decoded = jwt.verify(response.body.jwt.token, process.env.JWT_SECRET)
+    const user = await userService.getByGoogleId(decoded.googleId)
+    expect(user).not.toBe(null)
   })
 })
