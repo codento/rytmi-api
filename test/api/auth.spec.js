@@ -57,7 +57,7 @@ describe('Logging in', () => {
         email: 'al@pacino.com'
       }
       require('google-auth-library').__setMockPayload(payload)
-    
+
       logger.debug('')
       const response = await request
         .post('/api/auth')
