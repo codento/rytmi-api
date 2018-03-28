@@ -11,14 +11,14 @@
     "start": "nodemon -w src --exec \"babel-node src/api --presets es2015,es2017\"",
     "debug": "nodemon -w src --inspect --exec \"babel-node src/api --presets es2015,es2017\"",
     "build": "babel src -d dist --presets es2015,es2017",
-    "serve": "sequelize db:migrate && node dist/api",
+    "serve": "sequelize db:migrate && sequelize db:seed:all && node dist/api",
     "docker-build": "docker-compose build",
     "test": "jest --forceExit",
     "testwatch": "jest --watch --forceExit",
     "create-html-doc": "node node_modules/spectacle-docs/bin/spectacle.js -t doc/ doc/openapi-spec.json",
     "containers": "docker-compose up -d && echo Rytmi API is now up and running.",
     "stop": "docker-compose down",
-    "migrate": "sequelize db:migrate"
+    "migrate": "sequelize db:migrate && sequelize db:seed:all"
   },
   "jest": {
     "testEnvironment": "node",
