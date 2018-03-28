@@ -1,13 +1,14 @@
 const dbUtils = require('../utils')
 
 const skills = {
-  'Vue.js': '',
   'Node.js': '',
+  'Vue.js': '',
+  'React.js': '',
+  'Angular': '',
+  'Python': '',
+  'Django': '',
   'JavaScript': '',
   'Java': '',
-  'Python': '',
-  'Django': 'Python Web framework',
-  'React.js': '',
   'PHP': '',
   'Linux': '',
   'Kubernetes': '',
