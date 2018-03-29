@@ -20,7 +20,7 @@ module.exports = {
         type: Sequelize.DATE
       },
       endDate: {
-        allowNull: false,
+        allowNull: true,
         type: Sequelize.DATE
       },
       createdAt: {

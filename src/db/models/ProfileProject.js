@@ -11,9 +11,19 @@ module.exports = (sequelize, DataTypes) => {
       unique: 'uniqueIndex'
     },
     title: DataTypes.STRING,
-    active: {
-      type: DataTypes.BOOLEAN,
+    startAt: {
+      type: DataTypes.DATE,
       allowNull: false
+    },
+    finishAt: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    workPercentage: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      min: 0,
+      max: 100
     }
   })
 

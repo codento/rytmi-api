@@ -26,9 +26,19 @@ module.exports = {
       title: {
         type: Sequelize.STRING
       },
-      active: {
+      startAt: {
         allowNull: false,
-        type: Sequelize.BOOLEAN
+        type: Sequelize.DATE
+      },
+      finishAt: {
+        allewNull: true,
+        type: Sequelize.DATE
+      },
+      workPercentage: {
+        allowNull: false,
+        type: Sequelize.INTEGER,
+        min: 0,
+        max: 100
       },
       createdAt: {
         allowNull: false,
