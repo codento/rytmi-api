@@ -7,4 +7,10 @@ const skills = {
   'Geneerinen fasilitointi': ''
 }
 
-module.exports = dbUtils.skillSeeder(skills)
+const skillSeeder = dbUtils.skillSeeder(skills)
+
+module.exports = {
+  up: skillSeeder.up,
+  down: skillSeeder.down,
+  skills: skills
+}

@@ -39,7 +39,7 @@
       "!**/test/**",
       "!**/coverage/**",
       "!**/db/migrations/**",
-      "!**/db/seeders/**"
+      "!**/db/seeders_development/**"
     ]
   },
   "author": "Antti Myyrä",
@@ -80,6 +80,7 @@
     "spectacle-docs": "^0.9.13",
     "superagent": "^3.8.2",
     "superagent-defaults": "^0.1.14",
-    "supertest": "^3.0.0"
+    "supertest": "^3.0.0",
+    "umzug": "^2.1.0"
   }
 }
