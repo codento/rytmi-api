@@ -13,17 +13,22 @@ script:
 after_script:
   - ./cc-test-reporter after-build -t lcov --exit-code $TRAVIS_TEST_RESULT
 before_deploy:
-  - openssl aes-256-cbc -K $encrypted_cb8e96ff1ed8_key -iv $encrypted_cb8e96ff1ed8_iv -in secrets.tar.enc -out /tmp/secrets.tar -d
+  - openssl aes-256-cbc -K $encrypted_941ed670fe2a_key -iv $encrypted_941ed670fe2a_iv -in secrets.tar.enc -out /tmp/secrets.tar -d
   - tar xvf /tmp/secrets.tar -C /tmp
-  - cp /tmp/.env-prod $TRAVIS_BUILD_DIR/.env
+  - cp /tmp/.$TRAVIS_BRANCH.env $TRAVIS_BUILD_DIR/.env
   - ssh-keyscan -H $DEPLOY_HOST 2>&1 | tee -a $HOME/.ssh/known_hosts
   - eval "$(ssh-agent -s)"
   - chmod 600 /tmp/deploy_rsa
   - ssh-add /tmp/deploy_rsa
   - npm run build
 deploy:
-  provider: script
-  skip_cleanup: true
-  script: rsync -r --delete-after --quiet $TRAVIS_BUILD_DIR $DEPLOY_USER@$DEPLOY_HOST:/var/rytmi
-  on:
-    branch: master
+  - provider: script
+    skip_cleanup: true
+    script: rsync -r --delete-after --quiet $TRAVIS_BUILD_DIR $DEPLOY_USER@$DEPLOY_HOST:/var/rytmi-staging
+    on:
+      branch: dev
+  - provider: script
+    skip_cleanup: true
+    script: rsync -r --delete-after --quiet $TRAVIS_BUILD_DIR $DEPLOY_USER@$DEPLOY_HOST:/var/rytmi
+    on:
+      branch: master
