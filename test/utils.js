@@ -1,22 +1,38 @@
-import fs from 'fs'
-import path from 'path'
 import models from '../src/db/models'
+import Umzug from 'umzug'
+
 const sequelize = models.sequelize
 
-export function requireModules (relativePath) {
-  let fullPath = path.join(__dirname, relativePath)
-  return fs.readdirSync(fullPath)
-    .filter(file => (file.indexOf('.') !== 0) && (file.slice(-3) === '.js'))
-    .map(file => require(path.join(fullPath, file)))
-}
+export const migrationsUmzug = new Umzug({
+  storage: 'sequelize',
+  storageOptions: {
+    sequelize: sequelize
+  },
+  migrations: {
+    params: [
+      sequelize.getQueryInterface(), // queryInterface
+      sequelize.constructor // DataTypes
+    ],
+    path: 'src/db/migrations',
+    pattern: /\.js$/
+  }
+})
 
-export function runMigrations (modules) {
-  return modules.reduce((chain, migration) => {
-    return chain.then(() => {
-      return migration.up(sequelize.queryInterface, sequelize.Sequelize)
-    })
-  }, Promise.resolve())
-}
+export const seederUmzug = new Umzug({
+  storage: 'sequelize',
+  storageOptions: {
+    sequelize: sequelize,
+    modelName: 'SequelizeData'
+  },
+  migrations: {
+    params: [
+      sequelize.getQueryInterface(), // queryInterface
+      sequelize.constructor // DataTypes
+    ],
+    path: 'src/db/seeders',
+    pattern: /\.js$/
+  }
+})
 
 export function truncate () {
   const tableNames = Object.keys(sequelize.models)

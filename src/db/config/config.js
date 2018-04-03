@@ -7,7 +7,8 @@ module.exports = {
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     dialect: 'postgres',
-    operatorsAliases: false
+    operatorsAliases: false,
+    seederStorage: 'sequelize'
   },
   test: {
     host: process.env.DB_HOST,
@@ -16,7 +17,8 @@ module.exports = {
     database: process.env.DB_NAME + '_test',
     dialect: 'postgres',
     operatorsAliases: false,
-    logging: false
+    logging: false,
+    seederStorage: 'sequelize'
   },
   production: {
     host: process.env.DB_HOST,
@@ -24,6 +26,7 @@ module.exports = {
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     dialect: 'postgres',
-    operatorsAliases: false
+    operatorsAliases: false,
+    seederStorage: 'sequelize'
   }
 }

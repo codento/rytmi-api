@@ -1,7 +1,8 @@
 require('babel-register')
 require('babel-polyfill')
-const { runMigrations, requireModules } = require('./utils')
+
+const { migrationsUmzug } = require('./utils')
 
 module.exports = function () {
-  return runMigrations(requireModules('../src/db/migrations'))
+  return migrationsUmzug.up()
 }
