@@ -6,7 +6,8 @@ const Op = models.sequelize.Op
 describe('Seeding skills', () => {
   const skillSeeders = [
     '20180328102150-initial-skills',
-    '20180328113116-add-lean-skills'
+    '20180328113116-add-lean-skills',
+    '20180404151000-add-more-skills'
   ]
 
   skillSeeders.forEach(seederId => {
