@@ -1,8 +1,8 @@
-import { generatePost } from '../utils'
+import { generatePost, endpointAuthorizationTest } from '../utils'
 import app from '../../src/api/app'
 import supertest from 'supertest'
 import defaults from 'superagent-defaults'
-import testUserToken from './token'
+import { testUserToken, invalidToken } from './tokens'
 
 const request = defaults(supertest(app))
 
@@ -107,4 +107,11 @@ describe('Fetching profileSkills', () => {
       .expect(200)
     expect(profileSkill.body).toMatchObject(db.user1ProfileSkill1)
   })
+})
+
+describe('Endpoint authorization', () => {
+  request.set('Authorization', `Bearer ${invalidToken}`)
+
+  endpointAuthorizationTest(request.request.get, '/api/profileSkills/')
+  endpointAuthorizationTest(request.request.get, '/api/profileSkills/123')
 })

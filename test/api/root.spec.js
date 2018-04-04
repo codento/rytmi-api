@@ -1,7 +1,7 @@
 import app from '../../src/api/app'
 import supertest from 'supertest'
 import defaults from 'superagent-defaults'
-import testUserToken from './token'
+import { testUserToken } from './tokens'
 
 const request = defaults(supertest(app))
 
