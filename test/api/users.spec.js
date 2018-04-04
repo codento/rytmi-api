@@ -1,8 +1,8 @@
-import { generatePost } from '../utils'
+import { generatePost, endpointAuthorizationTest } from '../utils'
 import app from '../../src/api/app'
 import supertest from 'supertest'
 import defaults from 'superagent-defaults'
-import testUserToken from './token'
+import { testUserToken, invalidToken } from './tokens'
 
 const request = defaults(supertest(app))
 const endpoint = '/api/users/'
@@ -162,4 +162,13 @@ describe('Creating and updating users', () => {
       .expect(400)
     expect(failed.body.error.details).toEqual(validationErrors)
   })
+})
+
+describe('Endpoint authorization', () => {
+  request.set('Authorization', `Bearer ${invalidToken}`)
+
+  endpointAuthorizationTest(request.request.get, '/api/users')
+  endpointAuthorizationTest(request.request.post, '/api/users')
+  endpointAuthorizationTest(request.request.get, '/api/users/1')
+  endpointAuthorizationTest(request.request.put, '/api/users/1')
 })
