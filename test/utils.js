@@ -50,3 +50,10 @@ export function generatePost (request, endpoint) {
       .then(response => response.body)
   }
 }
+
+export function endpointAuthorizationTest (requestMethod, path) {
+  return it(`should return 401 for ${path} without valid jwt`, async () => {
+    return requestMethod(path)
+      .expect(401)
+  })
+}
