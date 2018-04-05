@@ -57,7 +57,7 @@ export default () => {
   api.use(httpLogger)
 
   api.use('/auth', auth())
-  api.use(jwt({secret: process.env.JWT_SECRET}).unless({path: ['/auth']})) // TODO: Study where this should actually be placed. Now unless don't work, just the order matters.
+  // api.use(jwt({secret: process.env.JWT_SECRET}).unless({path: ['/auth']})) // TODO: Study where this should actually be placed. Now unless don't work, just the order matters.
 
   api.use('/profiles', profiles())
   api.use('/skills', skills())
