@@ -69,4 +69,23 @@ describe('Logging in', () => {
     const user = await userService.getByGoogleId(decoded.googleId)
     expect(user).not.toBe(null)
   })
+
+  it('should return 401 for foreign google domain', async () => {
+    const payload = {
+      sub: '4864318943578891',
+      hd: 'foreign.com',
+      given_name: 'Some',
+      family_name: 'Foreigner',
+      email: 'some@foreign.com'
+    }
+    require('google-auth-library').__setMockPayload(payload)
+
+    const response = await request
+      .post('/api/auth')
+      .set('Accept', 'application/json')
+      .send({id_token: 'fdasf.fads.fadsfad'})
+      .expect('Content-Type', /json/)
+      .expect(401)
+    console.log(response)
+  })
 })

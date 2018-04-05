@@ -8,6 +8,32 @@
 
 ## Usage
 
+### Add new skills
+
+Adding new skills to the database is done using Sequelize migrations/seeders.  
+
+create a new seeder file in src/db/seeders:
+
+```javascript
+// src/db/seeders/20180328102150-add-new-skills.js
+const dbUtils = require('../utils')
+
+const skills = {
+  'Agile methods': 'Agile consulting',
+  'Lean methods': '',
+  'S3': 'Sociocracy 3.0 methods',
+  'Facilitating': 'Generic facilitating methods'
+}
+
+module.exports = dbUtils.skillSeeder(skills)
+```
+
+run seeders with command:
+
+```
+sequelize db:seed:all
+```
+
 ## Development
 
 Install dependencies:
@@ -26,7 +52,7 @@ docker-compose up -d postgres
 
 ### Setting environment variables
 
-Copy the `.env.template` file in the project root directory and rename it to `.env`. Fill it with meaningful values.  
+Copy the `.env-default` file in the project root directory and rename it to `.env`. Fill it with meaningful values.  
 Example using the aforementioned dev database:
 
 ```
@@ -36,9 +62,10 @@ DB_PASSWORD=rytmi
 DB_NAME=rytmi
 
 GOOGLE_CLIENT_ID=123456-abcdef.apps.googleusercontent.com
+GOOGLE_ORG_DOMAIN=codento.com
 
 JWT_SECRET=qwerty123456
-JWT_VALID_TIME=3600 # 1h
+JWT_VALID_TIME=3600
 
 PORT=8081
 ```
@@ -60,7 +87,7 @@ sequelize db:migrate
 (Re)generate test data and insert it to the database:
 
 ```
-sequelize db:seed:all
+sequelize db:seed:all --seeders-path src/db/seeders_development
 ```
 
 ### Making changes to the database

@@ -1,38 +1,48 @@
 import { Router } from 'express'
 import { OAuth2Client } from 'google-auth-library'
 import jwt from 'jsonwebtoken'
-import utils from '../utils'
+import { errorTemplate } from '../utils'
 import UserService from '../../services/users'
 import ProfileService from '../../services/profiles'
 import logger from '../logging'
 
 require('dotenv').config()
 
-class NotAuthorizedError extends Error {}
-class ServerError extends Error {}
+const rytmiErrorType = Object.freeze({
+  serverError: 'serverError',
+  authenticationError: 'authenticationError',
+  notAuthorizedError: 'NotAuthorizedError'
+})
 
 const router = Router()
 
-async function verify (idToken) {
-  logger.debug('Verifying ' + idToken)
-  const userService = new UserService()
-  const profileService = new ProfileService()
+async function getTicketPayload (idToken) {
   const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
 
-  const ticket = await client.verifyIdToken({
-    idToken: idToken,
-    audience: process.env.GOOGLE_CLIENT_ID
-  })
-  logger.debug('ticket: ' + ticket)
-  const ticketPayload = ticket.getPayload()
-  logger.debug('ticketPayload: ' + ticketPayload)
-  if (ticketPayload.hd !== process.env.GOOGLE_ORG_DOMAIN) {
-    logger.error('Unauthorized login attempt from', ticketPayload.hd, 'with following info:', ticketPayload.sub)
-    throw new NotAuthorizedError('Domain not authorized')
+  try {
+    const ticket = await client.verifyIdToken({
+      idToken: idToken,
+      audience: process.env.GOOGLE_CLIENT_ID
+    })
+    logger.debug('ticket: ' + ticket)
+    const ticketPayload = ticket.getPayload()
+    logger.debug('ticketPayload: ' + ticketPayload)
+    if (ticketPayload.hd !== process.env.GOOGLE_ORG_DOMAIN) {
+      logger.error('Unauthorized login attempt from', ticketPayload.hd, 'with following info:', ticketPayload.sub)
+      const e = new Error('Domain not authorized')
+      e.rytmiErrorType = rytmiErrorType.NotAuthorizedError
+      throw e
+    }
+
+    return ticketPayload
+  } catch (err) {
+    err.rytmiErrorType = rytmiErrorType.authenticationError
+    throw err
   }
+}
 
-  const googleId = ticketPayload['sub']
-
+async function getOrCreateUser (googleId, ticketPayload) {
+  const userService = new UserService()
   let user = await userService.getByGoogleId(googleId)
   if (!user) {
     try {
@@ -45,15 +55,20 @@ async function verify (idToken) {
       })
     } catch (err) {
       logger.error('Trouble creating user', err.message)
-      throw new ServerError('Could not create user')
+      throw new Error('Could not create user')
     }
   }
+  return user
+}
 
-  let profile = await profileService.getByUserId(user.id)
+async function getOrCreateProfile (userId, ticketPayload) {
+  const profileService = new ProfileService()
+
+  let profile = await profileService.getByUserId(userId)
   if (!profile) {
     try {
       profile = await profileService.create({
-        userId: user.id,
+        userId: userId,
         firstName: ticketPayload.given_name,
         lastName: ticketPayload.family_name,
         email: ticketPayload.email,
@@ -62,27 +77,52 @@ async function verify (idToken) {
       })
     } catch (err) {
       logger.error('Trouble creating profile', err.message)
-      throw new ServerError('Could not create profile')
+      throw new Error('Could not create profile')
     }
   }
+  return profile
+}
 
+function createToken (user) {
   const expires = Math.floor(new Date() / 1000) + parseInt(process.env.JWT_VALID_TIME)
   const payload = {
     googleId: user.googleId,
     userId: user.id,
     admin: user.admin,
-    email: ticketPayload.email,
     exp: expires
   }
-  const token = jwt.sign(payload, process.env.JWT_SECRET)
+
+  return {
+    token: jwt.sign(payload, process.env.JWT_SECRET),
+    expires: expires
+  }
+}
+
+async function verify (idToken) {
+  if (idToken === 'undefined') {
+    const e = new Error('Missing client id')
+    e.rytmiErrorType = rytmiErrorType.authenticationError
+    throw e
+  }
+
+  logger.debug('Verifying ' + idToken)
+
+  const ticketPayload = await getTicketPayload(idToken)
+  const googleId = ticketPayload['sub']
+
+  logger.debug('googleID ' + googleId)
+  const user = await getOrCreateUser(googleId, ticketPayload)
+  const profile = await getOrCreateProfile(user.id, ticketPayload)
+
+  const tokenInfo = createToken(user)
 
   return {
     message: 'Welcome to Rytmi app',
     userId: user.id,
     profileId: profile.id,
     jwt: {
-      token: token,
-      expires: expires
+      token: tokenInfo.token,
+      expires: tokenInfo.expires
     }
   }
 }
@@ -90,21 +130,18 @@ async function verify (idToken) {
 export default () => {
   router.post('/', (req, res) => {
     const idToken = req.body.id_token
-    if (idToken === 'undefined') {
-      res.status(400).json(utils.errorTemplate(400, 'Missing client id'))
-    }
     verify(idToken)
       .then((authInfo) => {
         res.json(authInfo)
       })
       .catch(err => {
         logger.error('Catched error:', err.message, err.stack)
-        if (err instanceof NotAuthorizedError) {
-          res.status(401).json(utils.errorTemplate(401, 'Not authorized'))
-        } else if (err instanceof ServerError) {
-          res.status(500).json(utils.errorTemplate(500, 'Something horrible happened on a server side.', err.message))
-        } else {
-          res.status(400).json(utils.errorTemplate(400, 'Authentication error', err.message))
+        if (err.rytmiErrorType === 'undefined') {
+          res.status(500).json(errorTemplate(500, 'Something happened on a server side. Sorry.', err.message))
+        } else if (err.rytmiErrorType === rytmiErrorType.authenticationError) {
+          res.status(401).json(errorTemplate(400, 'Authentication error', err.message))
+        } else if (err.rytmiErrorType === rytmiErrorType.notAuthorizedError) {
+          res.status(401).json(errorTemplate(401, 'Not authorized', err.message))
         }
       })
   })

@@ -1,3 +1,7 @@
+require('babel-register')
+require('babel-polyfill')
+
+const models = require('../models')
 const rosie = require('rosie')
 const factory = rosie.Factory
 const faker = require('faker')
@@ -15,13 +19,9 @@ factory.define('profileSkill')
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.sequelize.query('SELECT * FROM "Profiles"', {
-      type: queryInterface.sequelize.QueryTypes.SELECT
-    })
+    return models.Profile.all()
       .then(profiles => {
-        return queryInterface.sequelize.query('SELECT * FROM "Skills"', {
-          type: queryInterface.sequelize.QueryTypes.SELECT
-        })
+        return models.Skill.all()
           .then(skills => {
             let profileSkills = []
             profiles.forEach(profile => {

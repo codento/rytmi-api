@@ -1,8 +1,8 @@
-import { generatePost } from '../utils'
+import { generatePost, endpointAuthorizationTest } from '../utils'
 import app from '../../src/api/app'
 import supertest from 'supertest'
 import defaults from 'superagent-defaults'
-import testUserToken from './token'
+import { testUserToken, invalidToken } from './tokens'
 
 const request = defaults(supertest(app))
 const endpoint = '/api/skills/'
@@ -158,4 +158,13 @@ describe('Testing data validation', () => {
     expect(created.status).toBe(400)
     expect(created.body.error.details).toMatchObject(validationErrors)
   })
+})
+
+describe('Endpoint authorization', () => {
+  request.set('Authorization', `Bearer ${invalidToken}`)
+
+  endpointAuthorizationTest(request.request.get, '/api/skills')
+  endpointAuthorizationTest(request.request.post, '/api/skills')
+  endpointAuthorizationTest(request.request.get, '/api/skills/1')
+  endpointAuthorizationTest(request.request.put, '/api/skills/1')
 })
