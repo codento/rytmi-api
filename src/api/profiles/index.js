@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import skills from './skills'
+import projects from './projects'
 import {profileController, findObjectOr404} from '../../controllers/profiles'
 
 const router = Router()
@@ -14,6 +15,7 @@ export default () => {
   router.get('/:id', profileController.get)
   router.put('/:id', profileController.update)
 
+  router.use('/:id/projects', projects())
   router.use('/:id/skills', skills())
 
   return router

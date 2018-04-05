@@ -18,7 +18,7 @@ profileProjectController.getAllInProject = wrapAsync(async (req, res) => {
 })
 
 profileProjectController.getProfilesProjects = wrapAsync(async (req, res) => {
-  const profilesProjects = await profileProjectService.getProfilesProjects(req.params.profileId)
+  const profilesProjects = await profileProjectService.getProfilesProjects(req.profile.id)
   res.json(profilesProjects)
 })
 
