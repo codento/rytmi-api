@@ -86,6 +86,5 @@ describe('Logging in', () => {
       .send({id_token: 'fdasf.fads.fadsfad'})
       .expect('Content-Type', /json/)
       .expect(401)
-    console.log(response)
   })
 })

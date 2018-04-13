@@ -35,7 +35,7 @@ profileProjectController.update = wrapAsync(async (req, res) => {
 
 profileProjectController.delete = wrapAsync(async (req, res) => {
   const profileProject = await profileProjectService.delete(req.ProfileProject.ProfileId, req.ProfileProject.ProjectId, req.body)
-  res.json(profileProject)
+  res.send("Projects profile with id: " + req.ProfileProject.ProfileId + ", was removed successfully")
 })
 
 function findObjectByProfileOr404 (req, res, next, value) {
