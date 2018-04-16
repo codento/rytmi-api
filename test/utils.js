@@ -29,7 +29,7 @@ export const seederUmzug = new Umzug({
       sequelize.getQueryInterface(), // queryInterface
       sequelize.constructor // DataTypes
     ],
-    path: 'src/db/seeders',
+    path: 'src/db/seeders_development',
     pattern: /\.js$/
   }
 })

@@ -71,6 +71,7 @@ beforeAll(async done => {
   db.project1 = await createProject({
     name: 'Kolikoiden kiillottaminen',
     description: 'Lorem ipsum',
+    code: 10001,
     startDate: new Date('2017-01-01').toISOString(),
     endDate: new Date('2018-12-31').toISOString()
   })
@@ -78,6 +79,7 @@ beforeAll(async done => {
   db.project2 = await createProject({
     name: 'Taikaviittailu',
     description: 'superhessu on ikuinen kakkonen',
+    code: 10002,
     startDate: new Date('1970-01-01').toISOString(),
     endDate: null
   })
@@ -141,6 +143,7 @@ describe('Creating, updating and deleting projects', () => {
     const project = {
       name: 'newProject',
       description: 'testing testing',
+      code: 10003,
       startDate: new Date('2000-01-01').toISOString(),
       endDate: new Date('2020-01-01').toISOString()
     }
@@ -333,5 +336,27 @@ describe('Creating, updating and deleting profileProjects', () => {
     const shouldNotExist = await request
       .get(profileEndpointFor(db.project2) + result.ProfileId)
       .expect(404)
+  })
+})
+
+describe('Testing data validations', () => {
+  const project = {}
+
+  beforeEach(async done => {
+    await (project = {
+      name: 'Test',
+      description: 'Testing testing',
+      code: 10005,
+      startDate: new Date('2010-10-10').toISOString(),
+      endDate: new Date('2012-12-12').toISOString()
+    })
+    done()
+  })
+
+  it('Should return 400 if name is empty', async () => {
+    const result = await request
+      .post(projectEndpoint)
+      .send(project)
+    expect(result.status).toBe(400)
   })
 })
