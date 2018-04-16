@@ -2,11 +2,19 @@ module.exports = (sequelize, DataTypes) => {
   let Project = sequelize.define('Project', {
     name: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
+      unique: true,
+      notEmpty: true
     },
     description: {
       type: DataTypes.TEXT,
       allowNull: true
+    },
+    code: {
+      type: Datatypes.INTEGER,
+      allowNull: false,
+      unique: true,
+      min: 0
     },
     startDate: {
       type: DataTypes.DATE,
@@ -14,7 +22,13 @@ module.exports = (sequelize, DataTypes) => {
     },
     endDate: {
       type: DataTypes.DATE,
-      allowNull: true
+      allowNull: true,
+      validate: {
+        isAfter: {
+          args: this.startDate,
+          msg: 'Start date must be before end date!'
+        }
+      }
     }
   })
 

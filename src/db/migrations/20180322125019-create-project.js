@@ -9,11 +9,19 @@ module.exports = {
       },
       name: {
         allowNull: false,
+        unique: true,
+        notEmpty: true,
         type: Sequelize.STRING
       },
       description: {
         allowNull: true,
         type: Sequelize.TEXT
+      },
+      code: {
+        allowNull: false,
+        unique: true,
+        min: 0,
+        type: Sequelize.INTEGER
       },
       startDate: {
         allowNull: false,
