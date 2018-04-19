@@ -31,7 +31,7 @@ beforeAll(async done => {
     active: true,
     admin: true
   })
-
+  
   db.user2 = await createUser({
     googleId: '828784923994',
     firstName: 'aku',
@@ -85,8 +85,8 @@ beforeAll(async done => {
   })
 
   db.profile1Project = await createProfileProject(db.project1, {
-    ProfileId: db.user1Profile.id,
-    ProjectId: db.project1.id,
+    profileId: db.user1Profile.id,
+    projectId: db.project1.id,
     title: 'Työn johtaja',
     startAt: new Date('2017-01-01').toISOString(),
     finishAt: new Date('2018-12-31').toISOString(),
@@ -94,8 +94,8 @@ beforeAll(async done => {
   })
 
   db.profile2Project1 = await createProfileProject(db.project1, {
-    ProfileId: db.user2Profile.id,
-    ProjectId: db.project1.id,
+    profileId: db.user2Profile.id,
+    projectId: db.project1.id,
     title: 'Kiillottaja',
     startAt: new Date('2017-01-02').toISOString(),
     finishAt: new Date('2018-12-31').toISOString(),
@@ -103,8 +103,8 @@ beforeAll(async done => {
   })
 
   db.profile2Project2 = await createProfileProject(db.project2, {
-    ProfileId: db.user2Profile.id,
-    ProjectId: db.project2.id,
+    profileId: db.user2Profile.id,
+    projectId: db.project2.id,
     title: 'Taikaviitta',
     startAt: new Date('1970-01-01').toISOString(),
     finishAt: null,
@@ -254,8 +254,8 @@ describe('Fetching profile\'s projects', async () => {
 describe('Creating, updating and deleting profileProjects', () => {
   it('Should create, update and delete profileProject successfully', async () => {
     const profile1Project2 = {
-      ProfileId: db.user1Profile.id,
-      ProjectId: db.project2.id,
+      profileId: db.user1Profile.id,
+      projectId: db.project2.id,
       title: 'projektiin kuulumaton',
       startAt: new Date('2017-01-01').toISOString(),
       finishAt: new Date('2018-01-01').toISOString(),
@@ -285,8 +285,8 @@ describe('Creating, updating and deleting profileProjects', () => {
     }
 
     const result = {
-      ProfileId: db.user1Profile.id,
-      ProjectId: db.project2.id,
+      profileId: db.user1Profile.id,
+      projectId: db.project2.id,
       title: 'poistetaan pian',
       startAt: new Date('2017-06-31').toISOString(),
       finishAt: new Date('2018-01-01').toISOString(),
@@ -328,32 +328,33 @@ describe('Creating, updating and deleting profileProjects', () => {
       expect.arrayContaining([profileProjectToPreserve, result]))
 
     const removed = await request
-      .delete(profileEndpointFor(db.project2) + result.ProfileId)
+      .delete(profileEndpointFor(db.project2) + result.profileId)
       .expect('Content-Type', "text/html; charset=utf-8")
       .expect(200)
-    expect(removed.text).toEqual('Projects profile with id: ' + result.ProfileId + ', was removed successfully')
+    expect(removed.text).toEqual('Projects profile with id: ' + result.profileId + ', was removed successfully')
 
     const shouldNotExist = await request
-      .get(profileEndpointFor(db.project2) + result.ProfileId)
+      .get(profileEndpointFor(db.project2) + result.profileId)
       .expect(404)
   })
 })
 
 describe('Testing data validations', () => {
-  const project = {}
+  let project = {}
 
-  beforeEach(async done => {
-    await (project = {
+  beforeEach(() => {
+    project = {
       name: 'Test',
       description: 'Testing testing',
       code: 10005,
       startDate: new Date('2010-10-10').toISOString(),
       endDate: new Date('2012-12-12').toISOString()
-    })
-    done()
+    }
   })
 
-  it('Should return 400 if name is empty', async () => {
+  it('Should return 400 if name is empty or null', async () => {
+    project.name = ''
+    console.log(project)
     const result = await request
       .post(projectEndpoint)
       .send(project)

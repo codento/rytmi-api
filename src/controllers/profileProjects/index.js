@@ -29,13 +29,13 @@ profileProjectController.create = wrapAsync(async (req, res) => {
 })
 
 profileProjectController.update = wrapAsync(async (req, res) => {
-  const profileProject = await profileProjectService.update(req.ProfileProject.ProfileId, req.ProfileProject.ProjectId, req.body)
+  const profileProject = await profileProjectService.update(req.ProfileProject.profileId, req.ProfileProject.projectId, req.body)
   res.json(profileProject)
 })
 
 profileProjectController.delete = wrapAsync(async (req, res) => {
-  const profileProject = await profileProjectService.delete(req.ProfileProject.ProfileId, req.ProfileProject.ProjectId, req.body)
-  res.send("Projects profile with id: " + req.ProfileProject.ProfileId + ", was removed successfully")
+  const profileProject = await profileProjectService.delete(req.ProfileProject.profileId, req.ProfileProject.projectId, req.body)
+  res.send("Projects profile with id: " + req.ProfileProject.profileId + ", was removed successfully")
 })
 
 function findObjectByProfileOr404 (req, res, next, value) {

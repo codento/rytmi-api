@@ -4,8 +4,8 @@ const faker = require('faker')
 faker.seed(1337)
 
 factory.define('profileProject')
-  .attr('ProfileId')
-  .attr('ProjectId')
+  .attr('profileId')
+  .attr('projectId')
   .attr('title', () => { return faker.name.jobTitle() })
   .attr('startAt')
   .attr('finishAt')
@@ -40,8 +40,8 @@ module.exports = {
               }
               randomProjects.forEach(project => {
                 profileProjects.push(factory.build('profileProject', {
-                  ProfileId: profile.id,
-                  ProjectId: project.id,
+                  profileId: profile.id,
+                  projectId: project.id,
                   startAt: start,
                   finishAt: finish,
                   workPercentage: 20

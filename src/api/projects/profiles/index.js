@@ -4,14 +4,14 @@ import { profileProjectController, findObjectByProjectOr404 } from '../../../con
 const router = Router()
 
 export default () => {
-  router.param('ProfileId', findObjectByProjectOr404)
+  router.param('profileId', findObjectByProjectOr404)
 
   router.get('/', profileProjectController.getAllInProject)
   router.post('/', profileProjectController.create)
 
-  router.get('/:ProfileId', profileProjectController.get)
-  router.put('/:ProfileId', profileProjectController.update)
-  router.delete('/:ProfileId', profileProjectController.delete)
+  router.get('/:profileId', profileProjectController.get)
+  router.put('/:profileId', profileProjectController.update)
+  router.delete('/:profileId', profileProjectController.delete)
 
   return router
 }

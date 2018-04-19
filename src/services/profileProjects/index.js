@@ -11,34 +11,34 @@ export default class ProfileProjectService extends CrudService {
   }
 
   getProfilesProjects (profileId) {
-    return models.ProfileProject.findAll({where: {ProfileId: profileId}})
+    return models.ProfileProject.findAll({where: {profileId: profileId}})
   }
 
   getProjectsProfiles (projectId) {
-    return models.ProfileProject.findAll({where: {ProjectId: projectId}})
+    return models.ProfileProject.findAll({where: {projectId: projectId}})
   }
 
   getByIds(profileId, projectId) {
     return models.ProfileProject.findOne({
       where: {
-        ProfileId: profileId,
-        ProjectId: projectId
+        profileId: profileId,
+        projectId: projectId
       }
     })
   }
 
   create (projectId, attrs) {
-    attrs.ProjectId = parseInt(projectId)
+    attrs.projectId = parseInt(projectId)
     return super.create(attrs)
   }
 
   update (profileId, projectId, attrs) {
-    attrs.ProfileId = parseInt(profileId)
-    attrs.ProjectId = parseInt(projectId)
+    attrs.profileId = parseInt(profileId)
+    attrs.projectId = parseInt(projectId)
     return models.ProfileProject
       .findOne({where: {
-        ProfileId: profileId,
-        ProjectId: projectId
+        profileId: profileId,
+        projectId: projectId
       }})
       .then(ProfileProject => {
         return ProfileProject
@@ -49,8 +49,8 @@ export default class ProfileProjectService extends CrudService {
   delete (profileId, projectId) {
     return models.ProfileProject
       .findOne({where: {
-        ProfileId: profileId,
-        ProjectId: projectId
+        profileId: profileId,
+        projectId: projectId
       }})
       .then(ProfileProject => {
         return ProfileProject

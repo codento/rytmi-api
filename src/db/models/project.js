@@ -3,8 +3,7 @@ module.exports = (sequelize, DataTypes) => {
     name: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
-      notEmpty: true
+      unique: true
     },
     description: {
       type: DataTypes.TEXT,
@@ -23,18 +22,24 @@ module.exports = (sequelize, DataTypes) => {
     endDate: {
       type: DataTypes.DATE,
       allowNull: true,
-      validate: {
-        isAfterStart: function() {
-          if(this.startDate > this.endDate){
-            throw new Error('Start date must be before endDate')
-          }
+    }
+  }, {
+    validate: {
+      endIsAfterStart: function() {
+        if(this.startDate > this.endDate){
+          throw new Error('Start date must be before end date!')
+        }
+      },
+      nameNotEmpty: function() {
+        if(this.name.length === 0){
+          throw new Error('Name can not be empty!')
         }
       }
     }
   })
 
   Project.associate = (models) => {
-    models.Project.belongsToMany(models.Profile, {through: 'ProfileProject'})
+    models.Project.belongsToMany(models.Profile, {through: 'ProfileProject', foreignKey: 'projectId'})
   }
 
   return Project

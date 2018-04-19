@@ -1,11 +1,11 @@
 module.exports = (sequelize, DataTypes) => {
   let ProfileProject = sequelize.define('ProfileProject', {
-    ProfileId: {
+    profileId: {
       type: DataTypes.INTEGER,
       allowNull: false,
       unique: 'uniqueIndex'
     },
-    ProjectId: {
+    projectId: {
       type: DataTypes.INTEGER,
       allowNull: false,
       unique: 'uniqueIndex'
