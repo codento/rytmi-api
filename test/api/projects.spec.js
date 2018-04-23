@@ -31,7 +31,7 @@ beforeAll(async done => {
     active: true,
     admin: true
   })
-  
+
   db.user2 = await createUser({
     googleId: '828784923994',
     firstName: 'aku',
@@ -354,10 +354,98 @@ describe('Testing data validations', () => {
 
   it('Should return 400 if name is empty or null', async () => {
     project.name = ''
-    console.log(project)
-    const result = await request
+    const empty = await request
       .post(projectEndpoint)
       .send(project)
-    expect(result.status).toBe(400)
+    expect(empty.status).toBe(400)
+    expect(empty.body.error.details[0]).toBe('Name can not be empty!')
+
+    delete project.name
+
+    const nameNull = await request
+      .post(projectEndpoint)
+      .send(project)
+    expect(nameNull.status).toBe(400)
+    expect(nameNull.body.error.details[0]).toBe('Project.name cannot be null')
   })
+
+  it('Should return 400 if name is not unique', async () => {
+    project.name = 'Taikaviittailu'
+    const notUnique = await request
+      .post(projectEndpoint)
+      .send(project)
+    expect(notUnique.status).toBe(400)
+    expect(notUnique.body.error.details[0]).toBe('name must be unique')
+  })
+
+  it('Should return 400 if code is negative or null', async() => {
+    project.code = -1
+    const negative = await request
+      .post(projectEndpoint)
+      .send(project)
+    expect(negative.status).toBe(400)
+    expect(negative.body.error.details[0]).toBe('Code can not be negative!')
+
+    delete project.code
+    const codeNull = await request
+      .post(projectEndpoint)
+      .send(project)
+    expect(codeNull.status).toBe(400)
+    expect(codeNull.body.error.details[0]).toBe('Project.code cannot be null')
+  })
+
+  it('Should return 400 if code is not unique', async() => {
+    project.code = 10001
+    const notUnique = await request
+      .post(projectEndpoint)
+      .send(project)
+    expect(notUnique.status).toBe(400)
+    expect(notUnique.body.error.details[0]).toBe('code must be unique')
+  })
+
+  it('Should return 400 if startDate is null', async() => {
+    delete project.startDate
+    const startDateNull = await request
+      .post(projectEndpoint)
+      .send(project)
+    expect(startDateNull.status).toBe(400)
+    expect(startDateNull.body.error.details[0]).toBe('Project.startDate cannot be null')
+  })
+
+  it('Should accept endDate to be null', async() => {
+    delete project.endDate
+    const endDateNull = await request
+      .post(projectEndpoint)
+      .send(project)
+    expect(endDateNull.status).toBe(201)
+  })
+
+  it('Should return 400 if startDate is after endDate', async() => {
+    project.endDate = new Date('2008-08-08').toISOString()
+    const endBeforeStart = await request
+      .post(projectEndpoint)
+      .send(project)
+    expect(endBeforeStart.status).toBe(400)
+    expect(endBeforeStart.body.error.details[0]).toBe('Start date must be before end date!')
+  })
+
+})
+
+describe('Endpoint authorization', () => {
+  request.set('Authorization', `Bearer ${invalidToken}`)
+
+  endpointAuthorizationTest(request.request.get, '/api/projects')
+  endpointAuthorizationTest(request.request.post, '/api/projects')
+
+  endpointAuthorizationTest(request.request.get, '/api/projects/1')
+  endpointAuthorizationTest(request.request.put, '/api/projects/1')
+  endpointAuthorizationTest(request.request.delete, '/api/projects/1')
+
+  endpointAuthorizationTest(request.request.get, '/api/projects/1/profiles')
+  endpointAuthorizationTest(request.request.post, '/api/projects/1/profiles')
+
+  endpointAuthorizationTest(request.request.get, '/api/projects/1/profiles/1')
+  endpointAuthorizationTest(request.request.post, '/api/projects/1/profiles/1')
+  endpointAuthorizationTest(request.request.delete, '/api/projects/1/profiles/1')
+
 })

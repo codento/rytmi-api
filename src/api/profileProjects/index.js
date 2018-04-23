@@ -9,7 +9,6 @@ router.param('profileId', findObjectOr404)
 export default () => {
 
   router.get('/', profileProjectController.getAll)
-  router.get('/:profileId/projects', profileProjectController.getProfilesProjects)
 
   return router
 }
