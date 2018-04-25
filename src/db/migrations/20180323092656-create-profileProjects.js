@@ -26,11 +26,11 @@ module.exports = {
       title: {
         type: Sequelize.STRING
       },
-      startAt: {
+      startDate: {
         allowNull: false,
         type: Sequelize.DATE
       },
-      finishAt: {
+      endDate: {
         allewNull: true,
         type: Sequelize.DATE
       },

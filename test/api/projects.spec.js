@@ -88,8 +88,8 @@ beforeAll(async done => {
     profileId: db.user1Profile.id,
     projectId: db.project1.id,
     title: 'Työn johtaja',
-    startAt: new Date('2017-01-01').toISOString(),
-    finishAt: new Date('2018-12-31').toISOString(),
+    startDate: new Date('2017-01-01').toISOString(),
+    endDate: new Date('2018-12-31').toISOString(),
     workPercentage: 30
   })
 
@@ -97,8 +97,8 @@ beforeAll(async done => {
     profileId: db.user2Profile.id,
     projectId: db.project1.id,
     title: 'Kiillottaja',
-    startAt: new Date('2017-01-02').toISOString(),
-    finishAt: new Date('2018-12-31').toISOString(),
+    startDate: new Date('2017-01-02').toISOString(),
+    endDate: new Date('2018-12-31').toISOString(),
     workPercentage: 80
   })
 
@@ -106,8 +106,8 @@ beforeAll(async done => {
     profileId: db.user2Profile.id,
     projectId: db.project2.id,
     title: 'Taikaviitta',
-    startAt: new Date('1970-01-01').toISOString(),
-    finishAt: null,
+    startDate: new Date('1970-01-01').toISOString(),
+    endDate: null,
     workPercentage: 20
   })
   done()
@@ -257,8 +257,8 @@ describe('Creating, updating and deleting profileProjects', () => {
       profileId: db.user1Profile.id,
       projectId: db.project2.id,
       title: 'projektiin kuulumaton',
-      startAt: new Date('2017-01-01').toISOString(),
-      finishAt: new Date('2018-01-01').toISOString(),
+      startDate: new Date('2017-01-01').toISOString(),
+      endDate: new Date('2018-01-01').toISOString(),
       workPercentage: 50
     }
 
@@ -280,7 +280,7 @@ describe('Creating, updating and deleting profileProjects', () => {
 
     const update = {
       title: 'poistetaan pian',
-      startAt: new Date('2017-06-31').toISOString(),
+      startDate: new Date('2017-06-31').toISOString(),
       workPercentage: 20
     }
 
@@ -288,8 +288,8 @@ describe('Creating, updating and deleting profileProjects', () => {
       profileId: db.user1Profile.id,
       projectId: db.project2.id,
       title: 'poistetaan pian',
-      startAt: new Date('2017-06-31').toISOString(),
-      finishAt: new Date('2018-01-01').toISOString(),
+      startDate: new Date('2017-06-31').toISOString(),
+      endDate: new Date('2018-01-01').toISOString(),
       workPercentage: 20
     }
 
@@ -429,6 +429,86 @@ describe('Testing data validations', () => {
     expect(endBeforeStart.body.error.details[0]).toBe('Start date must be before end date!')
   })
 
+})
+
+describe('Testing profileProjects data validations', () =>{
+  var pp
+
+  beforeEach(() => {
+    pp = {
+      profileId: db.user1.id,
+      projectId: db.project2.id,
+      title: 'sidekick',
+      startDate: new Date('2010-10-10').toISOString(),
+      endDate: new Date('2012-12-12').toISOString(),
+      workPercentage: 50
+    }
+  })
+
+  it('Should return 400 if profileId is null', async () => {
+    delete pp.profileId
+    const profileIdNull = await request
+      .post(profileEndpointFor(db.project2))
+      .send(pp)
+    expect(profileIdNull.status).toBe(400)
+    expect(profileIdNull.body.error.details[0]).toBe('ProfileProject.profileId cannot be null')
+  })
+
+  it('Should return 400 if startDate is null', async () => {
+    delete pp.startDate
+    const startDateNull = await request
+      .post(profileEndpointFor(db.project2))
+      .send(pp)
+    expect(startDateNull.status).toBe(400)
+    expect(startDateNull.body.error.details[0]).toBe('ProfileProject.startDate cannot be null')
+  })
+
+  it('Should return 400 if workPercentage is null, less than 0 or over 100', async () => {
+    pp.workPercentage = -1
+
+    const negative = await request
+      .post(profileEndpointFor(db.project2))
+      .send(pp)
+    expect(negative.status).toBe(400)
+    expect(negative.body.error.details[0]).toBe('Work percentage must be between 0 and 100!')
+
+    pp.workPercentage = 101
+    const tooBig = await request
+      .post(profileEndpointFor(db.project2))
+      .send(pp)
+    expect(tooBig.status).toBe(400)
+    expect(tooBig.body.error.details[0]).toBe('Work percentage must be between 0 and 100!')
+
+    delete pp.workPercentage
+    const missing = await request
+      .post(profileEndpointFor(db.project2))
+      .send(pp)
+    expect(missing.status).toBe(400)
+    expect(missing.body.error.details[0]).toBe('ProfileProject.workPercentage cannot be null')
+  })
+
+  it('Should return 400 if endDate is before startDate', async () => {
+    pp.endDate = new Date('2008-08-08').toISOString()
+    const endBeforeStart = await request
+      .post(profileEndpointFor(db.project2))
+      .send(pp)
+    expect(endBeforeStart.status).toBe(400)
+    expect(endBeforeStart.body.error.details[0]).toBe('Start date must be before end date!')
+  })
+
+  it('Should return 400 if triplet of profileId, projectId and startDate is not unique', async () => {
+    pp.projectId = db.project1.id
+    pp.startDate = new Date('2017-01-01').toISOString()
+    pp.endDate = new Date('2018-01-01').toISOString()
+    console.log(db.profile1Project.profileId === pp.profileId)
+    console.log(db.profile1Project.projectId === pp.projectId)
+    console.log(db.profile1Project.startDate === pp.startDate)
+    const notUnique = await request
+      .post(profileEndpointFor(db.project1))
+      .send(pp)
+    expect(notUnique.status).toBe(400)
+    expect(notUnique.body.error.details[0]).toBe('testi')
+  })
 })
 
 describe('Endpoint authorization', () => {

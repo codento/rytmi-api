@@ -7,8 +7,8 @@ factory.define('profileProject')
   .attr('profileId')
   .attr('projectId')
   .attr('title', () => { return faker.name.jobTitle() })
-  .attr('startAt')
-  .attr('finishAt')
+  .attr('startDate')
+  .attr('endDate')
   .attr('workPercentage')
   .attr('createdAt', () => new Date())
   .attr('updatedAt', () => new Date())
@@ -42,8 +42,8 @@ module.exports = {
                 profileProjects.push(factory.build('profileProject', {
                   profileId: profile.id,
                   projectId: project.id,
-                  startAt: start,
-                  finishAt: finish,
+                  startDate: start,
+                  endDate: finish,
                   workPercentage: 20
                 }))
               })
