@@ -33,13 +33,7 @@ module.exports = (sequelize, DataTypes) => {
           throw new Error('Start date must be before end date!')
         }
       }
-    },
-    indexes: [
-      {
-        unique: true,
-        fields: ['profileId', 'projectId', 'startDate']
-      }
-    ]
+    }
   })
 
   return ProfileProject

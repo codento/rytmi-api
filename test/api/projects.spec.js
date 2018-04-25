@@ -497,17 +497,17 @@ describe('Testing profileProjects data validations', () =>{
   })
 
   it('Should return 400 if triplet of profileId, projectId and startDate is not unique', async () => {
-    pp.projectId = db.project1.id
-    pp.startDate = new Date('2017-01-01').toISOString()
-    pp.endDate = new Date('2018-01-01').toISOString()
-    console.log(db.profile1Project.profileId === pp.profileId)
-    console.log(db.profile1Project.projectId === pp.projectId)
-    console.log(db.profile1Project.startDate === pp.startDate)
+    pp.profileId = db.user2Profile.id
+    pp.projectId = db.project2.id
+    pp.startDate = db.profile2Project2.startDate
+
     const notUnique = await request
-      .post(profileEndpointFor(db.project1))
+      .post(profileEndpointFor(db.project2))
       .send(pp)
     expect(notUnique.status).toBe(400)
-    expect(notUnique.body.error.details[0]).toBe('testi')
+    expect(notUnique.body.error.details[0]).toBe('profileId must be unique')
+    expect(notUnique.body.error.details[1]).toBe('projectId must be unique')
+    expect(notUnique.body.error.details[2]).toBe('startDate must be unique')
   })
 })
 
