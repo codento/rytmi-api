@@ -24,7 +24,8 @@ profileProjectController.getProfilesProjects = wrapAsync(async (req, res) => {
 
 profileProjectController.create = wrapAsync(async (req, res) => {
   const project = req.project
-  const profileProject = await profileProjectService.create(project.id, req.body)
+  const profile = req.profile
+  const profileProject = await profileProjectService.create(project.id, profile.id, req.body)
   res.status(201).json(profileProject)
 })
 

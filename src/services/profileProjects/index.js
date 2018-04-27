@@ -27,8 +27,9 @@ export default class ProfileProjectService extends CrudService {
     })
   }
 
-  create (projectId, attrs) {
+  create (projectId, profileId, attrs) {
     attrs.projectId = parseInt(projectId)
+    attrs.profileId = parseInt(profileId)
     return super.create(attrs)
   }
 

@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { profileProjectController, findObjectByProfileOr404} from '../../../controllers/profileProjects'
+import { profileProjectController } from '../../../controllers/profileProjects'
 
 const router = Router()
 
