@@ -11,7 +11,8 @@ const profileEndpoint = '/api/profiles/'
 const profileEndpointFor =
   project => projectEndpoint + project.id + '/profiles/'
 const projectEndpointFor =
-  profile => profileEndpoint + profile.id + '/projects'
+  profile => profileEndpoint + profile.id + '/projects/'
+const profileProjectEndpoint = '/api/profileprojects/'
 const createProject = generatePost(request, projectEndpoint)
 const createUser = generatePost(request, '/api/users/')
 const createProfile = generatePost(request, '/api/profiles')
@@ -138,8 +139,11 @@ describe('Fetching projects', () => {
   })
 })
 
-describe('Creating, updating and deleting projects', () => {
-  it('should persist/update/delete project and return the created/updated project or delete-message', async () => {
+describe('Creating, updating and deleting projects', async () => {
+  let id
+
+  await it('Should persist project and return the created project', async () => {
+
     const project = {
       name: 'newProject',
       description: 'testing testing',
@@ -154,42 +158,53 @@ describe('Creating, updating and deleting projects', () => {
       .expect(201)
     expect(created.body).toMatchObject(project)
 
+    id = created.body.id
+
     const fetched = await request
-      .get(projectEndpoint + created.body.id)
+      .get(projectEndpoint + id)
       .expect('Content-Type', /json/)
       .expect(200)
     expect(fetched.body).toMatchObject(created.body)
 
+  })
+
+  await it('Should update project and return the updated project', async () => {
+
     const updatedProject = {
       name: 'updated',
-      description: 'still testing'
+      description: 'still testing',
+      code: 10003,
+      startDate: new Date('2000-01-01').toISOString(),
+      endDate: new Date('2020-01-01').toISOString()
     }
 
     const updated = await request
-      .put(projectEndpoint + created.body.id)
+      .put(projectEndpoint + id)
       .send(updatedProject)
       .expect(200)
     expect(updated.body).toMatchObject(updatedProject)
 
     const fetchedAgain = await request
-      .get(projectEndpoint + created.body.id)
+      .get(projectEndpoint + id)
       .expect('Content-Type', /json/)
       .expect(200)
     expect(fetchedAgain.body).toMatchObject(updatedProject)
+  })
 
+  await it('Should delete project and return delete-message', async () => {
     const remove = await request
-      .delete(projectEndpoint + updated.body.id)
+      .delete(projectEndpoint + id)
       .expect('Content-Type', "text/html; charset=utf-8")
       .expect(200)
-    expect(remove.text).toEqual('Project with id: ' + updated.body.id + ' was removed successfully.')
+    expect(remove.text).toEqual('Project with id: ' + id + ' was removed successfully.')
 
     const shouldNotExist = await request
-      .get(projectEndpoint + updated.body.id)
+      .get(projectEndpoint + id)
       .expect(404)
   })
 })
 
-describe("Fetching project's profiles", () => {
+describe('Fetching project\'s profiles', () => {
   console.log('Results are profileProject objects')
 
   it('Should return profiles in project', async () => {
@@ -201,29 +216,9 @@ describe("Fetching project's profiles", () => {
     expect(projectsProfiles.body).toEqual(
       expect.arrayContaining([db.profile1Project, db.profile2Project1]))
   })
-
-  it('Should return profileProject by id', async () => {
-    const fetched = await request
-      .get(profileEndpointFor(db.project1) + db.user1Profile.id)
-      .expect('Content-Type', /json/)
-      .expect(200)
-    expect(fetched.body).toMatchObject(db.profile1Project)
-  })
-
-  it('Should return 404 for invalid profileId', async () => {
-    return request
-      .get(profileEndpointFor(db.project1) + 1000)
-      .expect(404)
-  })
-
-  it('Should return 404 if requesting with profiles id that\'s not in the project', async () => {
-    return request
-      .get(profileEndpointFor(db.project2) + db.user1Profile.id)
-      .expect(404)
-  })
 })
 
-describe('Fetching profile\'s projects', async () => {
+describe('Fetching profile\'s projects', () => {
   console.log('Results are profileProject objects')
 
   it('Should return profile\'s projects', async () => {
@@ -232,6 +227,28 @@ describe('Fetching profile\'s projects', async () => {
       .expect('Content-Type', /json/)
       .expect(200)
     expect(fetched.body).toEqual(expect.arrayContaining([db.profile2Project1, db.profile2Project2]))
+  })
+})
+
+describe('Fetching profileProjects', () => {
+  it('Should return all profileProjects', async () => {
+    const all = await request
+      .get(profileProjectEndpoint)
+      .expect(200)
+    expect(all.body).toEqual(expect.arrayContaining([db.profile1Project, db.profile2Project1, db.profile2Project2]))
+  })
+
+  it('Should return profileProject by id', async () => {
+    const result = await request
+      .get(profileProjectEndpoint + db.profile1Project.id)
+      .expect(200)
+    expect(result.body).toMatchObject(db.profile1Project)
+  })
+
+  it('Should return 404 if profileProject with given id does not exist', async () =>{
+    const notFound = await request
+      .get(profileProjectEndpoint + 1234)
+      .expect(404)
   })
 })
 

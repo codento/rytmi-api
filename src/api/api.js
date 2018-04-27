@@ -64,7 +64,7 @@ export default () => {
   api.use('/profileskills', profileSkills())
   api.use('/users', users())
   api.use('/projects', projects())
-  api.use('/profileProjects', profileProjects())
+  api.use('/profileprojects', profileProjects())
 
   api.use(validateErrorHandler)
   api.use(errorHandler)
