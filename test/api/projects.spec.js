@@ -191,14 +191,6 @@ describe('Creating, updating and deleting projects', () => {
 
 describe("Fetching project's profiles", () => {
   console.log('Results are profileProject objects')
-  const test = {}
-
-  beforeAll(() => {
-    test.ProfileProject1 = Object.assign({}, db.profile1Project)
-    test.ProfileProject2 = Object.assign({}, db.profile2Project1)
-    delete test.ProfileProject1.id
-    delete test.ProfileProject2.id
-  })
 
   it('Should return profiles in project', async () => {
     const projectsProfiles = await request
@@ -207,7 +199,7 @@ describe("Fetching project's profiles", () => {
       .expect(200)
 
     expect(projectsProfiles.body).toEqual(
-      expect.arrayContaining([test.ProfileProject1, test.ProfileProject2]))
+      expect.arrayContaining([db.profile1Project, db.profile2Project1]))
   })
 
   it('Should return profileProject by id', async () => {
@@ -215,7 +207,7 @@ describe("Fetching project's profiles", () => {
       .get(profileEndpointFor(db.project1) + db.user1Profile.id)
       .expect('Content-Type', /json/)
       .expect(200)
-    expect(fetched.body).toMatchObject(test.ProfileProject1)
+    expect(fetched.body).toMatchObject(db.profile1Project)
   })
 
   it('Should return 404 for invalid profileId', async () => {
@@ -233,110 +225,18 @@ describe("Fetching project's profiles", () => {
 
 describe('Fetching profile\'s projects', async () => {
   console.log('Results are profileProject objects')
-  const test = {}
-
-  beforeAll(() => {
-    test.ProfileProject1 = Object.assign({}, db.profile2Project1)
-    test.ProfileProject2 = Object.assign({}, db.profile2Project2)
-    delete test.ProfileProject1.id
-    delete test.ProfileProject2.id
-  })
 
   it('Should return profile\'s projects', async () => {
     const fetched = await request
       .get(projectEndpointFor(db.user2Profile))
       .expect('Content-Type', /json/)
       .expect(200)
-    expect(fetched.body).toEqual(expect.arrayContaining([test.ProfileProject1, test.ProfileProject2]))
+    expect(fetched.body).toEqual(expect.arrayContaining([db.profile2Project1, db.profile2Project2]))
   })
 })
 
 describe('Creating, updating and deleting profileProjects', () => {
-  it('Should create, update and delete profileProject successfully', async () => {
-    const profile1Project2 = {
-      profileId: db.user1Profile.id,
-      projectId: db.project2.id,
-      title: 'projektiin kuulumaton',
-      startDate: new Date('2017-01-01').toISOString(),
-      endDate: new Date('2018-01-01').toISOString(),
-      workPercentage: 50
-    }
-
-    // --- CREATE ---
-
-    const created = await request
-      .post(profileEndpointFor(db.project2))
-      .send(profile1Project2)
-      .expect(201)
-    expect(created.body).toMatchObject(profile1Project2)
-
-    const fetched = await request
-      .get(profileEndpointFor(db.project2) + db.user1Profile.id)
-      .expect('Content-Type', /json/)
-      .expect(200)
-    expect(fetched.body).toMatchObject(profile1Project2)
-
-    // --- UPDATE ---
-
-    const update = {
-      title: 'poistetaan pian',
-      startDate: new Date('2017-06-31').toISOString(),
-      workPercentage: 20
-    }
-
-    const result = {
-      profileId: db.user1Profile.id,
-      projectId: db.project2.id,
-      title: 'poistetaan pian',
-      startDate: new Date('2017-06-31').toISOString(),
-      endDate: new Date('2018-01-01').toISOString(),
-      workPercentage: 20
-    }
-
-    const updated = await request
-      .put(profileEndpointFor(db.project2) + db.user1Profile.id)
-      .send(update)
-      .expect(200)
-    expect(updated.body).toMatchObject(result)
-
-    const fetchedAgain = await request
-      .get(profileEndpointFor(db.project2) + db.user1Profile.id)
-      .expect('Content-Type', /json/)
-      .expect(200)
-
-    // NOTE: createdAt, updatedAt and Id need to be removed from the compared object
-
-    delete fetchedAgain.body.createdAt
-    delete fetchedAgain.body.updatedAt
-    delete fetchedAgain.body.id
-
-    expect(fetchedAgain.body).toMatchObject(result)
-
-    // --- DELETE ---
-    const profileProjectToPreserve = Object.assign({}, db.profile2Project2)
-    delete profileProjectToPreserve.id
-
-    const fetchAll = await request
-      .get(profileEndpointFor(db.project2))
-      .expect('Content-Type', /json/)
-      .expect(200)
-
-    delete fetchAll.body[1].createdAt
-    delete fetchAll.body[1].updatedAt
-
-    expect(fetchAll.body).toEqual(
-      expect.arrayContaining([profileProjectToPreserve, result]))
-
-    const removed = await request
-      .delete(profileEndpointFor(db.project2) + result.profileId)
-      .expect('Content-Type', "text/html; charset=utf-8")
-      .expect(200)
-    expect(removed.text).toEqual('Projects profile with id: ' + result.profileId + ', was removed successfully')
-
-    const shouldNotExist = await request
-      .get(profileEndpointFor(db.project2) + result.profileId)
-      .expect(404)
-  })
+  // TODO: Do this test!
 })
 
 describe('Testing data validations', () => {

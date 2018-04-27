@@ -1,5 +1,10 @@
 module.exports = (sequelize, DataTypes) => {
   let ProfileProject = sequelize.define('ProfileProject', {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true
+    },
     profileId: {
       type: DataTypes.INTEGER,
       allowNull: false
