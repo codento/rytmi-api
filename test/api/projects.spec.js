@@ -408,34 +408,25 @@ describe('Testing data validations', () => {
   })
 
 })
-/*
+
 describe('Testing profileProjects data validations', () =>{
   var pp
 
   beforeEach(() => {
     pp = {
-      profileId: db.user1.id,
+      profileId: db.user1Profile.id,
       projectId: db.project2.id,
       title: 'sidekick',
       startDate: new Date('2010-10-10').toISOString(),
-      endDate: new Date('2012-12-12').toISOString(),
+      endDate: new Date('2020-12-12').toISOString(),
       workPercentage: 50
     }
-  })
-
-  it('Should return 400 if profileId is null', async () => {
-    delete pp.profileId
-    const profileIdNull = await request
-      .post(profileEndpointFor(db.project2))
-      .send(pp)
-    expect(profileIdNull.status).toBe(400)
-    expect(profileIdNull.body.error.details[0]).toBe('ProfileProject.profileId cannot be null')
   })
 
   it('Should return 400 if startDate is null', async () => {
     delete pp.startDate
     const startDateNull = await request
-      .post(profileEndpointFor(db.project2))
+      .post(profileEndpointFor(db.project2) + db.user1Profile.id)
       .send(pp)
     expect(startDateNull.status).toBe(400)
     expect(startDateNull.body.error.details[0]).toBe('ProfileProject.startDate cannot be null')
@@ -445,21 +436,21 @@ describe('Testing profileProjects data validations', () =>{
     pp.workPercentage = -1
 
     const negative = await request
-      .post(profileEndpointFor(db.project2))
+      .post(profileEndpointFor(db.project2) + db.user1Profile.id)
       .send(pp)
     expect(negative.status).toBe(400)
     expect(negative.body.error.details[0]).toBe('Work percentage must be between 0 and 100!')
 
     pp.workPercentage = 101
     const tooBig = await request
-      .post(profileEndpointFor(db.project2))
+      .post(profileEndpointFor(db.project2) + db.user1Profile.id)
       .send(pp)
     expect(tooBig.status).toBe(400)
     expect(tooBig.body.error.details[0]).toBe('Work percentage must be between 0 and 100!')
 
     delete pp.workPercentage
     const missing = await request
-      .post(profileEndpointFor(db.project2))
+      .post(profileEndpointFor(db.project2) + db.user1Profile.id)
       .send(pp)
     expect(missing.status).toBe(400)
     expect(missing.body.error.details[0]).toBe('ProfileProject.workPercentage cannot be null')
@@ -468,19 +459,17 @@ describe('Testing profileProjects data validations', () =>{
   it('Should return 400 if endDate is before startDate', async () => {
     pp.endDate = new Date('2008-08-08').toISOString()
     const endBeforeStart = await request
-      .post(profileEndpointFor(db.project2))
+      .post(profileEndpointFor(db.project2) + db.user1Profile.id)
       .send(pp)
     expect(endBeforeStart.status).toBe(400)
     expect(endBeforeStart.body.error.details[0]).toBe('Start date must be before end date!')
   })
 
   it('Should return 400 if triplet of profileId, projectId and startDate is not unique', async () => {
-    pp.profileId = db.user2Profile.id
-    pp.projectId = db.project2.id
-    pp.startDate = db.profile2Project2.startDate
+    pp.startDate = db.profile1Project.startDate
 
     const notUnique = await request
-      .post(profileEndpointFor(db.project2))
+      .post(profileEndpointFor(db.project1) + db.user1Profile.id)
       .send(pp)
     expect(notUnique.status).toBe(400)
     expect(notUnique.body.error.details[0]).toBe('profileId must be unique')
@@ -500,11 +489,11 @@ describe('Endpoint authorization', () => {
   endpointAuthorizationTest(request.request.delete, '/api/projects/1')
 
   endpointAuthorizationTest(request.request.get, '/api/projects/1/profiles')
-  endpointAuthorizationTest(request.request.post, '/api/projects/1/profiles')
-
-  endpointAuthorizationTest(request.request.get, '/api/projects/1/profiles/1')
   endpointAuthorizationTest(request.request.post, '/api/projects/1/profiles/1')
-  endpointAuthorizationTest(request.request.delete, '/api/projects/1/profiles/1')
 
+  endpointAuthorizationTest(request.request.get, '/api/profileprojects')
+
+  endpointAuthorizationTest(request.request.get, '/api/profileprojects/1')
+  endpointAuthorizationTest(request.request.put, '/api/profileprojects/1')
+  endpointAuthorizationTest(request.request.delete, '/api/profileprojects/1')
 })
-*/
