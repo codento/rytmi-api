@@ -12,6 +12,8 @@ export default () => {
   router.get('/', profileProjectController.getAll)
 
   router.get('/:id', profileProjectController.get)
+  router.put('/:id', profileProjectController.update)
+  router.delete('/:id', profileProjectController.delete)
 
   return router
 }

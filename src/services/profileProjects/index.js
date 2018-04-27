@@ -33,30 +33,14 @@ export default class ProfileProjectService extends CrudService {
     return super.create(attrs)
   }
 
-  update (profileId, projectId, attrs) {
-    attrs.profileId = parseInt(profileId)
-    attrs.projectId = parseInt(projectId)
+  update (id, attrs) {
     return models.ProfileProject
       .findOne({where: {
-        profileId: profileId,
-        projectId: projectId
+        id: id
       }})
       .then(ProfileProject => {
         return ProfileProject
           .update(attrs)
       })
   }
-
-  delete (profileId, projectId) {
-    return models.ProfileProject
-      .findOne({where: {
-        profileId: profileId,
-        projectId: projectId
-      }})
-      .then(ProfileProject => {
-        return ProfileProject
-          .destroy()
-      })
-  }
-
 }

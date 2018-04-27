@@ -85,7 +85,7 @@ beforeAll(async done => {
     endDate: null
   })
 
-/*  db.profile1Project = await createProfileProject(db.project1, db.user1Profile, {
+  db.profile1Project = await createProfileProject(db.project1, db.user1Profile, {
     profileId: db.user1Profile.id,
     projectId: db.project1.id,
     title: 'Työn johtaja',
@@ -110,7 +110,7 @@ beforeAll(async done => {
     startDate: new Date('1970-01-01').toISOString(),
     endDate: null,
     workPercentage: 20
-  }) */
+  })
   done()
 })
 
@@ -140,9 +140,9 @@ describe('Fetching projects', () => {
 })
 
 describe('Creating, updating and deleting projects', async () => {
-  let id
 
-  await it('Should persist project and return the created project', async () => {
+  it('Should persist project and return the created project', async () => {
+    let id
 
     const project = {
       name: 'newProject',
@@ -166,10 +166,6 @@ describe('Creating, updating and deleting projects', async () => {
       .expect(200)
     expect(fetched.body).toMatchObject(created.body)
 
-  })
-
-  await it('Should update project and return the updated project', async () => {
-
     const updatedProject = {
       name: 'updated',
       description: 'still testing',
@@ -189,9 +185,7 @@ describe('Creating, updating and deleting projects', async () => {
       .expect('Content-Type', /json/)
       .expect(200)
     expect(fetchedAgain.body).toMatchObject(updatedProject)
-  })
 
-  await it('Should delete project and return delete-message', async () => {
     const remove = await request
       .delete(projectEndpoint + id)
       .expect('Content-Type', "text/html; charset=utf-8")
@@ -203,7 +197,7 @@ describe('Creating, updating and deleting projects', async () => {
       .expect(404)
   })
 })
-/*
+
 describe('Fetching project\'s profiles', () => {
   console.log('Results are profileProject objects')
 
@@ -252,10 +246,77 @@ describe('Fetching profileProjects', () => {
   })
 })
 
-describe('Creating, updating and deleting profileProjects', () => {
+describe('Creating, updating and deleting profileProjects', async () => {
   // TODO: Do this test!
+
+  it('Should test creating updating and deleting', async () => {
+    let id
+
+    const created = {
+      startDate: new Date('2017-12-12').toISOString(),
+      title: 'sidekick',
+      workPercentage: 20
+    }
+
+    const create = await request
+      .post(profileEndpointFor(db.project2) + db.user1Profile.id)
+      .send(created)
+      .expect(201)
+    expect(create.body).toMatchObject(created)
+
+    id = create.body.id
+
+    const fetch = await request
+      .get(profileProjectEndpoint + create.body.id)
+      .expect(200)
+    expect(fetch.body).toMatchObject(create.body)
+
+    const all = await request
+      .get(profileProjectEndpoint)
+      .expect(200)
+    expect(all.body).toEqual(
+      expect.arrayContaining([db.profile1Project, db.profile2Project1, db.profile2Project2, create.body]))
+
+    const foundByProject = await request
+      .get(profileEndpointFor(db.project2))
+      .expect(200)
+    expect(foundByProject.body).toEqual(
+      expect.arrayContaining([db.profile2Project2, create.body]))
+
+    const foundByProfile = await request
+      .get(projectEndpointFor(db.user1Profile))
+      .expect(200)
+    expect(foundByProfile.body).toEqual(
+      expect.arrayContaining([db.profile1Project, create.body]))
+
+    const updated = {
+      startDate: new Date('2017-12-12').toISOString(),
+      title: 'updated value',
+      workPercentage: 25
+    }
+
+    const update = await request
+      .put(profileProjectEndpoint + id)
+      .send(updated)
+      .expect(200)
+    expect(update.body).toMatchObject(updated)
+
+    const fetchedAgain = await request
+      .get(profileProjectEndpoint + id)
+      .expect(200)
+    expect(fetchedAgain.body).toMatchObject(update.body)
+
+    const removed = await request
+      .delete(profileProjectEndpoint + id)
+      .expect(200)
+    expect(removed.text).toBe("Projects profile with id: " + id + ", was removed successfully")
+
+    const shouldNotExist = await request
+      .get(profileProjectEndpoint + id)
+      .expect(404)
+  })
 })
-*/
+
 describe('Testing data validations', () => {
   let project = {}
 
