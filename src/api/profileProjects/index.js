@@ -3,9 +3,6 @@ import { profileProjectController, findObjectOr404 } from '../../controllers/pro
 
 const router = Router()
 
-router.param('projectId', findObjectOr404)
-router.param('profileId', findObjectOr404)
-
 export default () => {
   router.param('id', findObjectOr404)
 

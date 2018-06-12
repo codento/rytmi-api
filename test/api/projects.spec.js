@@ -140,7 +140,6 @@ describe('Fetching projects', () => {
 })
 
 describe('Creating, updating and deleting projects', async () => {
-
   it('Should persist project and return the created project', async () => {
     let id
 
@@ -177,6 +176,7 @@ describe('Creating, updating and deleting projects', async () => {
     const updated = await request
       .put(projectEndpoint + id)
       .send(updatedProject)
+      .expect('Content-Type', /json/)
       .expect(200)
     expect(updated.body).toMatchObject(updatedProject)
 

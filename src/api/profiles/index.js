@@ -5,9 +5,9 @@ import {profileController, findObjectOr404} from '../../controllers/profiles'
 
 const router = Router()
 
-router.param('id', findObjectOr404)
-
 export default () => {
+  router.param('id', findObjectOr404)
+
   router.get('/', profileController.getList)
   router.post('/', profileController.create)
   router.get('/all', profileController.getAllDeprecated)

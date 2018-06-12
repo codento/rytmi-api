@@ -10,15 +10,15 @@ export default class ProfileProjectService extends CrudService {
     return models.ProfileProject.findAll()
   }
 
-  getProfilesProjects (profileId) {
+  getByProfileId (profileId) {
     return models.ProfileProject.findAll({where: {profileId: profileId}})
   }
 
-  getProjectsProfiles (projectId) {
+  getByProjectId (projectId) {
     return models.ProfileProject.findAll({where: {projectId: projectId}})
   }
 
-  getByIds(profileId, projectId) {
+  getByIds (profileId, projectId) {
     return models.ProfileProject.findOne({
       where: {
         profileId: profileId,
