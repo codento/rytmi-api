@@ -8,9 +8,9 @@ const router = Router()
 router.param('id', findObjectOr404)
 
 export default () => {
-  router.get('/', profileController.getActive)
+  router.get('/', profileController.getList)
   router.post('/', profileController.create)
-  router.get('/all', profileController.getAll)
+  router.get('/all', profileController.getAllDeprecated)
 
   router.get('/:id', profileController.get)
   router.put('/:id', profileController.update)
