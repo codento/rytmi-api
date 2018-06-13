@@ -49,6 +49,6 @@ function findObjectByProfileOr404 (req, res, next, value) {
 
 module.exports = {
   profileSkillController: profileSkillController,
-  findObjectOr404: findObjectOr404('profileSkill', profileSkillService),
+  findProfileSkillOr404: findObjectOr404('profileSkill', profileSkillService),
   findObjectByProfileOr404: findObjectByProfileOr404
 }

@@ -41,5 +41,5 @@ profileController.getList = wrapAsync(async (req, res) => {
 
 module.exports = {
   profileController: profileController,
-  findObjectOr404: findObjectOr404('profile', profileService)
+  findProfileOr404: findObjectOr404('profile', profileService)
 }

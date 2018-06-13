@@ -6,5 +6,5 @@ const userService = new UserService()
 
 module.exports = {
   userController: baseController('user', userService),
-  findObjectOr404: findObjectOr404('user', userService)
+  findUserOr404: findObjectOr404('user', userService)
 }

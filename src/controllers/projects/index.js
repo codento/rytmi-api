@@ -13,5 +13,5 @@ projectController.delete = wrapAsync(async (req, res) => {
 
 module.exports = {
   projectController: projectController,
-  findObjectOr404: findObjectOr404('project', projectService)
+  findProjectOr404: findObjectOr404('project', projectService)
 }

@@ -1,10 +1,10 @@
 import { Router } from 'express'
-import {skillController, findObjectOr404} from '../../controllers/skills'
+import {skillController, findSkillOr404} from '../../controllers/skills'
 
 const router = Router()
 
 export default () => {
-  router.param('id', findObjectOr404)
+  router.param('id', findSkillOr404)
 
   router.get('/', skillController.getAll)
   router.post('/', skillController.create)
