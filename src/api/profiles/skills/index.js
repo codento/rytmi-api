@@ -1,10 +1,10 @@
 import { Router } from 'express'
-import {profileSkillController, findObjectByProfileOr404} from '../../../controllers/profileSkills'
+import {profileSkillController, findProfileSkillFromProfileOr404} from '../../../controllers/profileSkills'
 
 const router = Router()
 
 export default () => {
-  router.param('profileSkillId', findObjectByProfileOr404)
+  router.param('profileSkillId', findProfileSkillFromProfileOr404)
 
   router.get('/', profileSkillController.getByProfile)
   router.post('/', profileSkillController.create)

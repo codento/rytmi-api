@@ -6,5 +6,5 @@ const skillService = new SkillService()
 
 module.exports = {
   skillController: baseController('skill', skillService),
-  findObjectOr404: findObjectOr404('skill', skillService)
+  findSkillOr404: findObjectOr404('skill', skillService)
 }

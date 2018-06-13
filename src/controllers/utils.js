@@ -14,9 +14,6 @@ module.exports = {
               .json(errorTemplate(404, objName + ' not found'))
           }
         })
-        .catch(err => {
-          res.status(500).send(err)
-        })
     }
   },
   wrapAsync: (fn) => {

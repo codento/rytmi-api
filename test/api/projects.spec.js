@@ -1,17 +1,15 @@
-import { generatePost, endpointAuthorizationTest } from '../utils'
-import app from '../../src/api/app'
 import supertest from 'supertest'
 import defaults from 'superagent-defaults'
+import { generatePost, endpointAuthorizationTest } from '../utils'
+import app from '../../src/api/app'
 import { testUserToken, invalidToken } from './tokens'
 
 const request = defaults(supertest(app))
 
 const projectEndpoint = '/api/projects/'
 const profileEndpoint = '/api/profiles/'
-const profileEndpointFor =
-  project => projectEndpoint + project.id + '/profiles/'
-const projectEndpointFor =
-  profile => profileEndpoint + profile.id + '/projects/'
+const profileEndpointFor = project => projectEndpoint + project.id + '/profiles/'
+const projectEndpointFor = profile => profileEndpoint + profile.id + '/projects/'
 const profileProjectEndpoint = '/api/profileprojects/'
 const createProject = generatePost(request, projectEndpoint)
 const createUser = generatePost(request, '/api/users/')
@@ -90,7 +88,7 @@ beforeAll(async done => {
     projectId: db.project1.id,
     title: 'Työn johtaja',
     startDate: new Date('2017-01-01').toISOString(),
-    endDate: new Date('2018-12-31').toISOString(),
+    endDate: new Date('2100-12-31').toISOString(),
     workPercentage: 30
   })
 
@@ -99,7 +97,7 @@ beforeAll(async done => {
     projectId: db.project1.id,
     title: 'Kiillottaja',
     startDate: new Date('2017-01-02').toISOString(),
-    endDate: new Date('2018-12-31').toISOString(),
+    endDate: new Date('2018-05-31').toISOString(),
     workPercentage: 80
   })
 
@@ -132,15 +130,14 @@ describe('Fetching projects', () => {
     expect(fetched.body).toMatchObject(db.project1)
   })
 
-  it('Should return 404 if project doesn\'t exist', async () => {
-    const shouldNotExist = await request
+  it('Should return 404 if project doesn\'t exist', () => {
+    return request
       .get(projectEndpoint + 100)
       .expect(404)
   })
 })
 
 describe('Creating, updating and deleting projects', async () => {
-
   it('Should persist project and return the created project', async () => {
     let id
 
@@ -177,6 +174,7 @@ describe('Creating, updating and deleting projects', async () => {
     const updated = await request
       .put(projectEndpoint + id)
       .send(updatedProject)
+      .expect('Content-Type', /json/)
       .expect(200)
     expect(updated.body).toMatchObject(updatedProject)
 
@@ -186,21 +184,17 @@ describe('Creating, updating and deleting projects', async () => {
       .expect(200)
     expect(fetchedAgain.body).toMatchObject(updatedProject)
 
-    const remove = await request
+    await request
       .delete(projectEndpoint + id)
-      .expect('Content-Type', "text/html; charset=utf-8")
-      .expect(200)
-    expect(remove.text).toEqual('Project with id: ' + id + ' was removed successfully.')
+      .expect(204)
 
-    const shouldNotExist = await request
+    return request
       .get(projectEndpoint + id)
       .expect(404)
   })
 })
 
 describe('Fetching project\'s profiles', () => {
-  console.log('Results are profileProject objects')
-
   it('Should return profiles in project', async () => {
     const projectsProfiles = await request
       .get(profileEndpointFor(db.project1))
@@ -210,17 +204,41 @@ describe('Fetching project\'s profiles', () => {
     expect(projectsProfiles.body).toEqual(
       expect.arrayContaining([db.profile1Project, db.profile2Project1]))
   })
+
+  it('Should return 200 when profile in project', async () => {
+    const response = await request
+      .get(profileEndpointFor(db.project1) + db.user2Profile.id)
+      .expect(200)
+    expect(response.body).toMatchObject(db.profile2Project1)
+  })
+
+  it('Should return 404 when valid profile not in project', () => {
+    return request
+      .get(profileEndpointFor(db.project2) + db.user1Profile.id)
+      .expect(404)
+  })
 })
 
 describe('Fetching profile\'s projects', () => {
-  console.log('Results are profileProject objects')
-
   it('Should return profile\'s projects', async () => {
     const fetched = await request
       .get(projectEndpointFor(db.user2Profile))
       .expect('Content-Type', /json/)
       .expect(200)
     expect(fetched.body).toEqual(expect.arrayContaining([db.profile2Project1, db.profile2Project2]))
+  })
+
+  it('Should return 200 when project in profile', async () => {
+    const response = await request
+      .get(projectEndpointFor(db.user1Profile) + db.project1.id)
+      .expect(200)
+    expect(response.body).toMatchObject(db.profile1Project)
+  })
+
+  it('Should return 404 when valid project not in profile', () => {
+    return request
+      .get(projectEndpointFor(db.user1Profile) + db.project2.id)
+      .expect(404)
   })
 })
 
@@ -239,79 +257,65 @@ describe('Fetching profileProjects', () => {
     expect(result.body).toMatchObject(db.profile1Project)
   })
 
-  it('Should return 404 if profileProject with given id does not exist', async () =>{
-    const notFound = await request
+  it('Should return 404 if profileProject with given id does not exist', () => {
+    return request
       .get(profileProjectEndpoint + 1234)
       .expect(404)
+  })
+
+  it('should only return profileprojects in future', async () => {
+    const infuture = await request
+      .get(profileProjectEndpoint + '?infuture=true')
+      .expect(200)
+    expect(infuture.body).toEqual(expect.arrayContaining([db.profile1Project, db.profile2Project2]))
   })
 })
 
 describe('Creating, updating and deleting profileProjects', async () => {
-  // TODO: Do this test!
-
   it('Should test creating updating and deleting', async () => {
     let id
 
-    const created = {
+    const project = {
       startDate: new Date('2017-12-12').toISOString(),
       title: 'sidekick',
       workPercentage: 20
     }
 
-    const create = await request
+    const created = await request
       .post(profileEndpointFor(db.project2) + db.user1Profile.id)
-      .send(created)
+      .send(project)
       .expect(201)
-    expect(create.body).toMatchObject(created)
+    expect(created.body).toMatchObject(project)
 
-    id = create.body.id
+    id = created.body.id
 
-    const fetch = await request
-      .get(profileProjectEndpoint + create.body.id)
+    const fetched = await request
+      .get(profileProjectEndpoint + id)
       .expect(200)
-    expect(fetch.body).toMatchObject(create.body)
+    expect(fetched.body).toMatchObject(created.body)
 
-    const all = await request
-      .get(profileProjectEndpoint)
-      .expect(200)
-    expect(all.body).toEqual(
-      expect.arrayContaining([db.profile1Project, db.profile2Project1, db.profile2Project2, create.body]))
-
-    const foundByProject = await request
-      .get(profileEndpointFor(db.project2))
-      .expect(200)
-    expect(foundByProject.body).toEqual(
-      expect.arrayContaining([db.profile2Project2, create.body]))
-
-    const foundByProfile = await request
-      .get(projectEndpointFor(db.user1Profile))
-      .expect(200)
-    expect(foundByProfile.body).toEqual(
-      expect.arrayContaining([db.profile1Project, create.body]))
-
-    const updated = {
+    const projectUpdate = {
       startDate: new Date('2017-12-12').toISOString(),
       title: 'updated value',
       workPercentage: 25
     }
 
-    const update = await request
+    const updated = await request
       .put(profileProjectEndpoint + id)
-      .send(updated)
+      .send(projectUpdate)
       .expect(200)
-    expect(update.body).toMatchObject(updated)
+    expect(updated.body).toMatchObject(projectUpdate)
 
     const fetchedAgain = await request
       .get(profileProjectEndpoint + id)
       .expect(200)
-    expect(fetchedAgain.body).toMatchObject(update.body)
+    expect(fetchedAgain.body).toMatchObject(updated.body)
 
-    const removed = await request
+    await request
       .delete(profileProjectEndpoint + id)
-      .expect(200)
-    expect(removed.text).toBe("Projects profile with id: " + id + ", was removed successfully")
+      .expect(204)
 
-    const shouldNotExist = await request
+    return request
       .get(profileProjectEndpoint + id)
       .expect(404)
   })
@@ -356,7 +360,7 @@ describe('Testing data validations', () => {
     expect(notUnique.body.error.details[0]).toBe('name must be unique')
   })
 
-  it('Should return 400 if code is negative or null', async() => {
+  it('Should return 400 if code is negative or null', async () => {
     project.code = -1
     const negative = await request
       .post(projectEndpoint)
@@ -372,7 +376,7 @@ describe('Testing data validations', () => {
     expect(codeNull.body.error.details[0]).toBe('Project.code cannot be null')
   })
 
-  it('Should return 400 if code is not unique', async() => {
+  it('Should return 400 if code is not unique', async () => {
     project.code = 10001
     const notUnique = await request
       .post(projectEndpoint)
@@ -381,7 +385,7 @@ describe('Testing data validations', () => {
     expect(notUnique.body.error.details[0]).toBe('code must be unique')
   })
 
-  it('Should return 400 if startDate is null', async() => {
+  it('Should return 400 if startDate is null', async () => {
     delete project.startDate
     const startDateNull = await request
       .post(projectEndpoint)
@@ -390,7 +394,7 @@ describe('Testing data validations', () => {
     expect(startDateNull.body.error.details[0]).toBe('Project.startDate cannot be null')
   })
 
-  it('Should accept endDate to be null', async() => {
+  it('Should accept endDate to be null', async () => {
     delete project.endDate
     const endDateNull = await request
       .post(projectEndpoint)
@@ -398,7 +402,7 @@ describe('Testing data validations', () => {
     expect(endDateNull.status).toBe(201)
   })
 
-  it('Should return 400 if startDate is after endDate', async() => {
+  it('Should return 400 if startDate is after endDate', async () => {
     project.endDate = new Date('2008-08-08').toISOString()
     const endBeforeStart = await request
       .post(projectEndpoint)
@@ -406,10 +410,9 @@ describe('Testing data validations', () => {
     expect(endBeforeStart.status).toBe(400)
     expect(endBeforeStart.body.error.details[0]).toBe('Start date must be before end date!')
   })
-
 })
 
-describe('Testing profileProjects data validations', () =>{
+describe('Testing profileProjects data validations', () => {
   var pp
 
   beforeEach(() => {
