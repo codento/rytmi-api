@@ -239,7 +239,7 @@ describe('Fetching profileProjects', () => {
     expect(result.body).toMatchObject(db.profile1Project)
   })
 
-  it('Should return 404 if profileProject with given id does not exist', async () =>{
+  it('Should return 404 if profileProject with given id does not exist', async () => {
     const notFound = await request
       .get(profileProjectEndpoint + 1234)
       .expect(404)
@@ -356,7 +356,7 @@ describe('Testing data validations', () => {
     expect(notUnique.body.error.details[0]).toBe('name must be unique')
   })
 
-  it('Should return 400 if code is negative or null', async() => {
+  it('Should return 400 if code is negative or null', async () => {
     project.code = -1
     const negative = await request
       .post(projectEndpoint)
@@ -372,7 +372,7 @@ describe('Testing data validations', () => {
     expect(codeNull.body.error.details[0]).toBe('Project.code cannot be null')
   })
 
-  it('Should return 400 if code is not unique', async() => {
+  it('Should return 400 if code is not unique', async () => {
     project.code = 10001
     const notUnique = await request
       .post(projectEndpoint)
@@ -381,7 +381,7 @@ describe('Testing data validations', () => {
     expect(notUnique.body.error.details[0]).toBe('code must be unique')
   })
 
-  it('Should return 400 if startDate is null', async() => {
+  it('Should return 400 if startDate is null', async () => {
     delete project.startDate
     const startDateNull = await request
       .post(projectEndpoint)
@@ -390,7 +390,7 @@ describe('Testing data validations', () => {
     expect(startDateNull.body.error.details[0]).toBe('Project.startDate cannot be null')
   })
 
-  it('Should accept endDate to be null', async() => {
+  it('Should accept endDate to be null', async () => {
     delete project.endDate
     const endDateNull = await request
       .post(projectEndpoint)
@@ -398,7 +398,7 @@ describe('Testing data validations', () => {
     expect(endDateNull.status).toBe(201)
   })
 
-  it('Should return 400 if startDate is after endDate', async() => {
+  it('Should return 400 if startDate is after endDate', async () => {
     project.endDate = new Date('2008-08-08').toISOString()
     const endBeforeStart = await request
       .post(projectEndpoint)
@@ -406,10 +406,9 @@ describe('Testing data validations', () => {
     expect(endBeforeStart.status).toBe(400)
     expect(endBeforeStart.body.error.details[0]).toBe('Start date must be before end date!')
   })
-
 })
 
-describe('Testing profileProjects data validations', () =>{
+describe('Testing profileProjects data validations', () => {
   var pp
 
   beforeEach(() => {
