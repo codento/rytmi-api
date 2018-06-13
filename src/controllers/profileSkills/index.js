@@ -31,7 +31,7 @@ profileSkillController.delete = wrapAsync(async (req, res) => {
   res.status(204).json(profileSkill)
 })
 
-function findObjectByProfileOr404 (req, res, next, value) {
+function findProfileSkillFromProfileOr404 (req, res, next, value) {
   const profile = req.profile
   profileSkillService.getByIds(profile.id, value)
     .then(profileSkill => {
@@ -50,5 +50,5 @@ function findObjectByProfileOr404 (req, res, next, value) {
 module.exports = {
   profileSkillController: profileSkillController,
   findProfileSkillOr404: findObjectOr404('profileSkill', profileSkillService),
-  findObjectByProfileOr404: findObjectByProfileOr404
+  findProfileSkillFromProfileOr404: findProfileSkillFromProfileOr404
 }
