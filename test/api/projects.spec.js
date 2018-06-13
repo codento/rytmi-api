@@ -8,10 +8,8 @@ const request = defaults(supertest(app))
 
 const projectEndpoint = '/api/projects/'
 const profileEndpoint = '/api/profiles/'
-const profileEndpointFor =
-  project => projectEndpoint + project.id + '/profiles/'
-const projectEndpointFor =
-  profile => profileEndpoint + profile.id + '/projects/'
+const profileEndpointFor = project => projectEndpoint + project.id + '/profiles/'
+const projectEndpointFor = profile => profileEndpoint + profile.id + '/projects/'
 const profileProjectEndpoint = '/api/profileprojects/'
 const createProject = generatePost(request, projectEndpoint)
 const createUser = generatePost(request, '/api/users/')
@@ -132,8 +130,8 @@ describe('Fetching projects', () => {
     expect(fetched.body).toMatchObject(db.project1)
   })
 
-  it('Should return 404 if project doesn\'t exist', async () => {
-    const shouldNotExist = await request
+  it('Should return 404 if project doesn\'t exist', () => {
+    return request
       .get(projectEndpoint + 100)
       .expect(404)
   })
@@ -190,7 +188,7 @@ describe('Creating, updating and deleting projects', async () => {
       .delete(projectEndpoint + id)
       .expect(204)
 
-    const shouldNotExist = await request
+    return request
       .get(projectEndpoint + id)
       .expect(404)
   })
@@ -212,7 +210,7 @@ describe('Fetching project\'s profiles', () => {
       .get(profileEndpointFor(db.project1) + db.user2Profile.id)
       .expect(200)
     expect(response.body).toMatchObject(db.profile2Project1)
-})
+  })
 
   it('Should return 404 when valid profile not in project', () => {
     return request
@@ -235,7 +233,7 @@ describe('Fetching profile\'s projects', () => {
       .get(projectEndpointFor(db.user1Profile) + db.project1.id)
       .expect(200)
     expect(response.body).toMatchObject(db.profile1Project)
-})
+  })
 
   it('Should return 404 when valid project not in profile', () => {
     return request
@@ -256,81 +254,62 @@ describe('Fetching profileProjects', () => {
     const result = await request
       .get(profileProjectEndpoint + db.profile1Project.id)
       .expect(200)
+    console.log('profile1Project', result)
     expect(result.body).toMatchObject(db.profile1Project)
   })
 
-  it('Should return 404 if profileProject with given id does not exist', async () => {
-    const notFound = await request
+  it('Should return 404 if profileProject with given id does not exist', () => {
+    return request
       .get(profileProjectEndpoint + 1234)
       .expect(404)
   })
 })
 
 describe('Creating, updating and deleting profileProjects', async () => {
-  // TODO: Do this test!
-
   it('Should test creating updating and deleting', async () => {
     let id
 
-    const created = {
+    const project = {
       startDate: new Date('2017-12-12').toISOString(),
       title: 'sidekick',
       workPercentage: 20
     }
 
-    const create = await request
+    const created = await request
       .post(profileEndpointFor(db.project2) + db.user1Profile.id)
-      .send(created)
+      .send(project)
       .expect(201)
-    expect(create.body).toMatchObject(created)
+    expect(created.body).toMatchObject(project)
 
-    id = create.body.id
+    id = created.body.id
 
-    const fetch = await request
-      .get(profileProjectEndpoint + create.body.id)
+    const fetched = await request
+      .get(profileProjectEndpoint + id)
       .expect(200)
-    expect(fetch.body).toMatchObject(create.body)
+    expect(fetched.body).toMatchObject(created.body)
 
-    const all = await request
-      .get(profileProjectEndpoint)
-      .expect(200)
-    expect(all.body).toEqual(
-      expect.arrayContaining([db.profile1Project, db.profile2Project1, db.profile2Project2, create.body]))
-
-    const foundByProject = await request
-      .get(profileEndpointFor(db.project2))
-      .expect(200)
-    expect(foundByProject.body).toEqual(
-      expect.arrayContaining([db.profile2Project2, create.body]))
-
-    const foundByProfile = await request
-      .get(projectEndpointFor(db.user1Profile))
-      .expect(200)
-    expect(foundByProfile.body).toEqual(
-      expect.arrayContaining([db.profile1Project, create.body]))
-
-    const updated = {
+    const projectUpdate = {
       startDate: new Date('2017-12-12').toISOString(),
       title: 'updated value',
       workPercentage: 25
     }
 
-    const update = await request
+    const updated = await request
       .put(profileProjectEndpoint + id)
-      .send(updated)
+      .send(projectUpdate)
       .expect(200)
-    expect(update.body).toMatchObject(updated)
+    expect(updated.body).toMatchObject(projectUpdate)
 
     const fetchedAgain = await request
       .get(profileProjectEndpoint + id)
       .expect(200)
-    expect(fetchedAgain.body).toMatchObject(update.body)
+    expect(fetchedAgain.body).toMatchObject(updated.body)
 
     await request
       .delete(profileProjectEndpoint + id)
       .expect(204)
 
-    const shouldNotExist = await request
+    return request
       .get(profileProjectEndpoint + id)
       .expect(404)
   })
