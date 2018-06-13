@@ -254,7 +254,6 @@ describe('Fetching profileProjects', () => {
     const result = await request
       .get(profileProjectEndpoint + db.profile1Project.id)
       .expect(200)
-    console.log('profile1Project', result)
     expect(result.body).toMatchObject(db.profile1Project)
   })
 
