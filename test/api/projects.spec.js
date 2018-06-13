@@ -206,6 +206,19 @@ describe('Fetching project\'s profiles', () => {
     expect(projectsProfiles.body).toEqual(
       expect.arrayContaining([db.profile1Project, db.profile2Project1]))
   })
+
+  it('Should return 200 when profile in project', async () => {
+    const response = await request
+      .get(profileEndpointFor(db.project1) + db.user2Profile.id)
+      .expect(200)
+    expect(response.body).toMatchObject(db.profile2Project1)
+})
+
+  it('Should return 404 when valid profile not in project', () => {
+    return request
+      .get(profileEndpointFor(db.project2) + db.user1Profile.id)
+      .expect(404)
+  })
 })
 
 describe('Fetching profile\'s projects', () => {
@@ -215,6 +228,19 @@ describe('Fetching profile\'s projects', () => {
       .expect('Content-Type', /json/)
       .expect(200)
     expect(fetched.body).toEqual(expect.arrayContaining([db.profile2Project1, db.profile2Project2]))
+  })
+
+  it('Should return 200 when project in profile', async () => {
+    const response = await request
+      .get(projectEndpointFor(db.user1Profile) + db.project1.id)
+      .expect(200)
+    expect(response.body).toMatchObject(db.profile1Project)
+})
+
+  it('Should return 404 when valid project not in profile', () => {
+    return request
+      .get(projectEndpointFor(db.user1Profile) + db.project2.id)
+      .expect(404)
   })
 })
 
