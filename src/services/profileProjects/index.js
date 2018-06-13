@@ -1,13 +1,24 @@
 import CrudService from '../crud'
 import models from '../../db/models'
 
+const Op = models.sequelize.Op
+
 export default class ProfileProjectService extends CrudService {
   constructor () {
     super(models.ProfileProject)
   }
 
-  getAll () {
-    return models.ProfileProject.findAll()
+  getInFuture () {
+    return models.ProfileProject.findAll({
+      where: {
+        endDate: {
+          [Op.or]: {
+            [Op.eq]: null,
+            [Op.gt]: new Date()
+          }
+        }
+      }
+    })
   }
 
   getByProfileId (profileId) {

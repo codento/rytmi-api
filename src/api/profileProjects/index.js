@@ -6,7 +6,7 @@ const router = Router()
 export default () => {
   router.param('id', findProfileProjectOr404)
 
-  router.get('/', profileProjectController.getAll)
+  router.get('/', profileProjectController.getList)
 
   router.get('/:id', profileProjectController.get)
   router.put('/:id', profileProjectController.update)

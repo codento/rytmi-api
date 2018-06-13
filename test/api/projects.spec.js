@@ -88,7 +88,7 @@ beforeAll(async done => {
     projectId: db.project1.id,
     title: 'Työn johtaja',
     startDate: new Date('2017-01-01').toISOString(),
-    endDate: new Date('2018-12-31').toISOString(),
+    endDate: new Date('2100-12-31').toISOString(),
     workPercentage: 30
   })
 
@@ -97,7 +97,7 @@ beforeAll(async done => {
     projectId: db.project1.id,
     title: 'Kiillottaja',
     startDate: new Date('2017-01-02').toISOString(),
-    endDate: new Date('2018-12-31').toISOString(),
+    endDate: new Date('2018-05-31').toISOString(),
     workPercentage: 80
   })
 
@@ -261,6 +261,13 @@ describe('Fetching profileProjects', () => {
     return request
       .get(profileProjectEndpoint + 1234)
       .expect(404)
+  })
+
+  it('should only return profileprojects in future', async () => {
+    const infuture = await request
+      .get(profileProjectEndpoint + '?infuture=true')
+      .expect(200)
+    expect(infuture.body).toEqual(expect.arrayContaining([db.profile1Project, db.profile2Project2]))
   })
 })
 

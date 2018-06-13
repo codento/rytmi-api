@@ -7,6 +7,24 @@ const profileProjectService = new ProfileProjectService()
 
 let profileProjectController = baseController('profileProject', profileProjectService)
 
+profileProjectController.getList = wrapAsync(async (req, res) => {
+  const qs = req.query
+  let infuture = false
+  if ('infuture' in qs) {
+    if (qs.infuture === 'true') {
+      infuture = true
+    } else {
+      res.status(404).json(errorTemplate(400, 'infuture accepts only \'true\''))
+    }
+  }
+
+  const profileProjects = infuture
+    ? await profileProjectService.getInFuture()
+    : await profileProjectService.getAll()
+
+  res.json(profileProjects)
+})
+
 profileProjectController.getByProject = wrapAsync(async (req, res) => {
   const projectsProfiles = await profileProjectService.getByProjectId(req.project.id)
   res.json(projectsProfiles)

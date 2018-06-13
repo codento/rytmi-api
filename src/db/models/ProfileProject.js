@@ -39,6 +39,19 @@ module.exports = (sequelize, DataTypes) => {
         }
       }
     }
+  }, {
+    indexes: [
+      {
+        name: 'profileId-projectId-startDate-index',
+        fields: ['profileId', 'projectId', 'startDate'],
+        unique: true,
+        type: 'UNIQUE'
+      },
+      {
+        name: 'idx_profileprojects_enddate',
+        fields: ['endDate']
+      }
+    ]
   })
 
   return ProfileProject
