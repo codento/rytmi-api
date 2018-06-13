@@ -1,7 +1,7 @@
-import { generatePost, endpointAuthorizationTest } from '../utils'
-import app from '../../src/api/app'
 import supertest from 'supertest'
 import defaults from 'superagent-defaults'
+import { generatePost, endpointAuthorizationTest } from '../utils'
+import app from '../../src/api/app'
 import { testUserToken, invalidToken } from './tokens'
 
 const request = defaults(supertest(app))
@@ -186,11 +186,9 @@ describe('Creating, updating and deleting projects', async () => {
       .expect(200)
     expect(fetchedAgain.body).toMatchObject(updatedProject)
 
-    const remove = await request
+    await request
       .delete(projectEndpoint + id)
-      .expect('Content-Type', "text/html; charset=utf-8")
-      .expect(200)
-    expect(remove.text).toEqual('Project with id: ' + id + ' was removed successfully.')
+      .expect(204)
 
     const shouldNotExist = await request
       .get(projectEndpoint + id)
@@ -199,8 +197,6 @@ describe('Creating, updating and deleting projects', async () => {
 })
 
 describe('Fetching project\'s profiles', () => {
-  console.log('Results are profileProject objects')
-
   it('Should return profiles in project', async () => {
     const projectsProfiles = await request
       .get(profileEndpointFor(db.project1))
@@ -213,8 +209,6 @@ describe('Fetching project\'s profiles', () => {
 })
 
 describe('Fetching profile\'s projects', () => {
-  console.log('Results are profileProject objects')
-
   it('Should return profile\'s projects', async () => {
     const fetched = await request
       .get(projectEndpointFor(db.user2Profile))
@@ -306,10 +300,9 @@ describe('Creating, updating and deleting profileProjects', async () => {
       .expect(200)
     expect(fetchedAgain.body).toMatchObject(update.body)
 
-    const removed = await request
+    await request
       .delete(profileProjectEndpoint + id)
-      .expect(200)
-    expect(removed.text).toBe("Projects profile with id: " + id + ", was removed successfully")
+      .expect(204)
 
     const shouldNotExist = await request
       .get(profileProjectEndpoint + id)
