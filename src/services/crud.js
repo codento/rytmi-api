@@ -13,6 +13,11 @@ export default class CrudService {
       .findAll()
   }
 
+  getFiltered (criteria) {
+    return this.model
+      .findAll({where: criteria})
+  }
+
   create (attrs) {
     delete attrs.id
     return this.model

@@ -11,4 +11,4 @@ module.exports = {
   down: (queryInterface, Sequelize) => {
     return queryInterface.removeIndex('ProfileProjects', 'profileId-projectId-startDate-index')
   }
-};
+}

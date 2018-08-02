@@ -97,20 +97,43 @@ beforeAll(async done => {
 })
 
 describe('Fetching profiles', () => {
-  it('should return active profiles', async () => {
-    const active = await request
+  it('should redirect to right path', async () => {
+    await request
       .get(profileEndpoint)
+      .expect(301)
+      .expect('Location', '?active=true')
+  })
+
+  it('should return active profiles using qs', async () => {
+    const active = await request
+      .get(`${profileEndpoint}?active=true`)
       .expect('Content-Type', /json/)
       .expect(200)
     expect(active.body).toContainEqual(db.user1Profile)
     expect(active.body).not.toContainEqual(db.user2Profile)
   })
 
-  it('should return all profiles', async () => {
+  it('should return 404 with wrong active value', async () => {
+    await request
+      .get(`${profileEndpoint}?active=foo`)
+      .expect(404)
+  })
+
+  it('should return all profiles with deprecation warning', async () => {
     const all = await request
       .get(profileEndpoint + '/all')
+      .expect(299)
       .expect('Content-Type', /json/)
+    expect(all.headers).toHaveProperty('warning')
+    expect(all.body).toEqual(
+      expect.arrayContaining([db.user1Profile, db.user2Profile]))
+  })
+
+  it('should return all profiles', async () => {
+    const all = await request
+      .get(profileEndpoint + '?active=*')
       .expect(200)
+      .expect('Content-Type', /json/)
     expect(all.body).toEqual(
       expect.arrayContaining([db.user1Profile, db.user2Profile]))
   })

@@ -6,11 +6,6 @@ export default class ProfileService extends CrudService {
     super(models.Profile)
   }
 
-  getActive () {
-    return models.Profile
-      .findAll({where: {active: true}})
-  }
-
   getByUserId (userId) {
     return models.Profile
       .findOne({where: {userId: userId}})

@@ -5,21 +5,41 @@ import {errorTemplate} from '../../api/utils'
 
 const profileProjectService = new ProfileProjectService()
 
-let profileProjectController = baseController('ProfileProject', profileProjectService)
+let profileProjectController = baseController('profileProject', profileProjectService)
 
-profileProjectController.getAll = wrapAsync(async (req, res) => {
-  const profileProjects = await profileProjectService.getAll()
+profileProjectController.getList = wrapAsync(async (req, res) => {
+  const qs = req.query
+  let infuture = false
+  if ('infuture' in qs) {
+    if (qs.infuture === 'true') {
+      infuture = true
+    } else {
+      res.status(404).json(errorTemplate(400, 'infuture accepts only \'true\''))
+    }
+  }
+
+  const profileProjects = infuture
+    ? await profileProjectService.getInFuture()
+    : await profileProjectService.getAll()
+
   res.json(profileProjects)
 })
 
-profileProjectController.getAllInProject = wrapAsync(async (req, res) => {
-  const projectsProfiles = await profileProjectService.getProjectsProfiles(req.project.id)
+profileProjectController.getByProject = wrapAsync(async (req, res) => {
+  const projectsProfiles = await profileProjectService.getByProjectId(req.project.id)
   res.json(projectsProfiles)
 })
 
-profileProjectController.getProfilesProjects = wrapAsync(async (req, res) => {
-  const profilesProjects = await profileProjectService.getProfilesProjects(req.profile.id)
+profileProjectController.getByProfile = wrapAsync(async (req, res) => {
+  const profilesProjects = await profileProjectService.getByProfileId(req.profile.id)
   res.json(profilesProjects)
+})
+
+profileProjectController.getByIds = wrapAsync(async (req, res) => {
+  const profile = req.profile
+  const project = req.project
+  const profileProjects = await profileProjectService.getByIds(profile.id, project.id)
+  res.json(profileProjects)
 })
 
 profileProjectController.create = wrapAsync(async (req, res) => {
@@ -29,51 +49,40 @@ profileProjectController.create = wrapAsync(async (req, res) => {
   res.status(201).json(profileProject)
 })
 
-profileProjectController.update = wrapAsync(async (req, res) => {
-  const profileProject = await profileProjectService.update(req.ProfileProject.id, req.body)
-  res.json(profileProject)
-})
-
 profileProjectController.delete = wrapAsync(async (req, res) => {
-  const profileProject = await profileProjectService.delete(req.ProfileProject.id)
-  res.status(200).send("Projects profile with id: " + req.ProfileProject.id + ", was removed successfully")
+  await profileProjectService.delete(req.profileProject.id)
+  res.status(204).send()
 })
 
-function findObjectByProfileOr404 (req, res, next, value) {
+function findProjectFromProfileOr404 (req, res, next, value) {
   const profile = req.profile
   profileProjectService.getByIds(profile.id, value)
     .then(ProfileProject => {
-      if(ProfileProject) {
-        req.ProfileProject = ProfileProject
+      if (ProfileProject) {
+        req.profileProject = ProfileProject
         next()
       } else {
         res.status(404).json(errorTemplate(404, 'profileProject not found'))
       }
-    })
-    .catch(err => {
-      res.status(500).send(err)
     })
 }
 
-function findObjectByProjectOr404 (req, res, next, value) {
+function findProfileFromProjectOr404 (req, res, next, value) {
   const project = req.project
   profileProjectService.getByIds(value, project.id)
     .then(ProfileProject => {
-      if(ProfileProject) {
-        req.ProfileProject = ProfileProject
+      if (ProfileProject) {
+        req.profileProject = ProfileProject
         next()
       } else {
         res.status(404).json(errorTemplate(404, 'profileProject not found'))
       }
-    })
-    .catch(err => {
-      res.status(500).send(err)
     })
 }
 
 module.exports = {
   profileProjectController: profileProjectController,
-  findObjectOr404: findObjectOr404('ProfileProject', profileProjectService),
-  findObjectByProfileOr404: findObjectByProfileOr404,
-  findObjectByProjectOr404: findObjectByProjectOr404
+  findProfileProjectOr404: findObjectOr404('profileProject', profileProjectService),
+  findProjectFromProfileOr404: findProjectFromProfileOr404,
+  findProfileFromProjectOr404: findProfileFromProjectOr404
 }

@@ -1,14 +1,17 @@
 import { Router } from 'express'
-import { profileProjectController } from '../../../controllers/profileProjects'
-import { findObjectOr404 as findProfileOr404 } from '../../../controllers/profiles'
+import { profileProjectController, findProfileFromProjectOr404 } from '../../../controllers/profileProjects'
+import { findProfileOr404 } from '../../../controllers/profiles'
 
 const router = Router()
 
 export default () => {
-  router.param('profileId', findProfileOr404)
+  router.param('profileId', findProfileFromProjectOr404)
+  router.param('anyProjectId', findProfileOr404)
 
-  router.get('/', profileProjectController.getAllInProject)
-  router.post('/:profileId', profileProjectController.create)
+  router.get('/', profileProjectController.getByProject)
+
+  router.get('/:profileId', profileProjectController.get)
+  router.post('/:anyProjectId', profileProjectController.create)
 
   return router
 }
