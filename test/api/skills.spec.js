@@ -133,6 +133,18 @@ describe('Creating and updating skills', () => {
       .expect(400)
     expect(failed.body.error.details).toEqual(validationErrors)
   })
+
+  it('should delete a given id', async () => {
+    await request
+      .delete(endpoint + 1)
+      .expect(204)
+  })
+
+  it('should return 404 if a non-existent id is given', async () => {
+    await request
+      .delete(endpoint + '1729')
+      .expect(404)
+  })
 })
 
 describe('Testing data validation', () => {
