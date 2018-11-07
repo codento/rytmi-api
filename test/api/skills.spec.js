@@ -135,8 +135,15 @@ describe('Creating and updating skills', () => {
   })
 
   it('should delete a given id', async () => {
+    const newSkill = await request
+      .post(endpoint)
+      .send({
+        name: 'php',
+        description: 'i was young and needed the money'
+      })
+
     await request
-      .delete(endpoint + 1)
+      .delete(endpoint + newSkill.body.id)
       .expect(204)
   })
 
