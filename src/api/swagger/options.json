@@ -1,0 +1,31 @@
+{
+    "swaggerDefinition": {
+        "openapi": "3.0.2",
+        "info": {
+            "title": "Rytmi api",
+            "version": "0.1.0",
+            "description": "Rytmi Codento Management System"
+        },
+        "servers": [
+            {
+                "url": "/api"
+            }
+        ],
+        "security": [
+            {
+                "BearerAuth": []
+            }
+        ],
+        "components": {
+            "securitySchemes": {
+                "BearerAuth": {
+                    "type": "http",
+                    "scheme": "bearer"
+                }
+            }
+        }
+    },
+    "apis": [
+        "src/api/**/index.js"
+    ]
+}

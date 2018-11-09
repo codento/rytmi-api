@@ -1,0 +1,19 @@
+{
+    "id": 5,
+    "lastName": "Murazik",
+    "firstName": "Austen",
+    "birthday": "1992-11-27T15:12:26.455Z",
+    "email": "Cleta.Hayes@gmail.com",
+    "phone": "022-065-3147 x3303",
+    "title": "Dynamic Creative Orchestrator",
+    "description": "Soluta placeat adipisci ea rerum. Quasi quae magnam voluptates non facilis sit qui nemo.",
+    "links": [
+        "https://theresia.biz",
+        "https://lou.org"
+    ],
+    "photoPath": "https://s3.amazonaws.com/uifaces/faces/twitter/maz/128.jpg",
+    "active": true,
+    "createdAt": "2018-10-30T12:36:01.322Z",
+    "updatedAt": "2018-10-30T12:36:01.322Z",
+    "userId": 5
+}

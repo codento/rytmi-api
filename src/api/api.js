@@ -13,6 +13,7 @@ import utils from './utils'
 import projects from './projects'
 import profileProjects from './profileProjects'
 import logger, { httpLogger } from './logging'
+import swagger from './swagger'
 
 require('dotenv').config()
 
@@ -55,6 +56,8 @@ export default () => {
   })
 
   api.use(httpLogger)
+
+  api.use('/swagger', swagger())
 
   api.use('/auth', auth())
   api.use(jwt({secret: process.env.JWT_SECRET}).unless({path: ['/auth']})) // TODO: Study where this should actually be placed. Now unless don't work, just the order matters.
