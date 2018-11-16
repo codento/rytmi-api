@@ -46,3 +46,6 @@ dist
 
 # thanks Steve
 .DS_Store
+
+# IDEA project config dir
+.idea
