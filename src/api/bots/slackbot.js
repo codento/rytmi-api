@@ -4,17 +4,19 @@
     Requires SLACK_ACCESS_TOKEN to be added into .env
     Get the token from Slack Rytmi App Settings...
 */
-const { WebClient } = require('@slack/client')
+import { WebClient } from '@slack/client'
+import logger from '../logging'
 
-// const slackAccessToken = process.env.SLACK_ACCESS_TOKEN
-const slackAccessToken = 'xoxp-2168861492-432013230340-483095709202-4c19bfccd24ea06967767aaaf2fe6305'
-const usersUpdateInterval = 86400000 // this could be set as env...
-const rytmiUrl = 'https://s.rytmi.codento.com/home'
-const remainderText = 'A new skill was just added into Rytmi. Go and check it out! ' + rytmiUrl
+require('dotenv').config()
 
 let client
 let userIds = []
 let usersUpdatedAt
+
+const slackAccessToken = process.env.SLACK_ACCESS_TOKEN
+const usersUpdateInterval = parseInt(process.env.SLACK_USERS_REFRESH_FREQUENCY)
+const rytmiUrl = 'https://s.rytmi.codento.com/home'
+const remainderText = 'A new skill was just added into Rytmi. Check it out here: ' + rytmiUrl
 
 if (slackAccessToken && slackAccessToken.length > 0) {
   client = new WebClient(slackAccessToken)
@@ -22,7 +24,7 @@ if (slackAccessToken && slackAccessToken.length > 0) {
 
 const sendSlackMessages = () => {
   if (!client) {
-    console.error('Slack client not initialized!')
+    logger.error('Slack client not initialized!')
     return
   }
 
@@ -36,21 +38,16 @@ const sendSlackMessages = () => {
 }
 
 const sendSlackMessageForUsers = () => {
-  let count = 0
   for (let id of userIds) {
     if (id) {
-      count++
+      sendDefaultMessage(String(id))
     }
   }
-  if (count > 100) {
-    console.log('lots of users')
-  }
-  sendDefaultMessage('UCQ0D6SA0')
 }
 const sendDefaultMessage = (conversationId) => {
   client.chat.postMessage({ channel: conversationId, text: remainderText })
     .then((res) => {
-      console.log('Message sent: ', res.ts)
+      logger.debug('Message sent: ', res.ts)
     })
     .catch(console.error)
 }
@@ -67,9 +64,9 @@ const getSlackUsers = () => {
 
       usersUpdatedAt = Date.now()
 
-      console.log(userIds.length + ' slack users. Updated at: ' + usersUpdatedAt)
+      logger.debug(userIds.length + ' slack users. Updated at: ' + usersUpdatedAt)
     })
-    .catch(console.error)
+    .catch(logger.error)
 }
 
 const timeToUpdate = () => {
