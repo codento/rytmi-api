@@ -5,7 +5,7 @@ const models = require('../models')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('SkillCategories', {
+    await queryInterface.createTable('SkillGroups', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -25,7 +25,7 @@ module.exports = {
         type: Sequelize.DATE
       }
     })
-    await queryInterface.createTable('SkillSubcategories', {
+    await queryInterface.createTable('SkillCategories', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -36,11 +36,11 @@ module.exports = {
         allowNull: false,
         type: Sequelize.STRING
       },
-      categoryId: {
+      SkillGroupId: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: 'SkillCategories',
+          model: 'SkillGroups',
           key: 'id'
         }
       },
@@ -53,21 +53,21 @@ module.exports = {
         type: Sequelize.DATE
       }
     })
-    const category = await models.SkillCategory.create({title: 'Uncategorized'})
-    await models.SkillSubcategory.create({categoryId: category.id, title: 'Uncategorized'})
-    return queryInterface.addColumn('Skills', 'subcategoryId', {
+    const group = await models.SkillGroup.create({title: 'Uncategorized'})
+    await models.SkillCategory.create({SkillGroupId: group.id, title: 'Uncategorized'})
+    return queryInterface.addColumn('Skills', 'SkillCategoryId', {
       type: Sequelize.INTEGER,
       allowNull: false,
       defaultValue: 1,
       references: {
-        model: 'SkillSubcategories',
+        model: 'SkillCategories',
         key: 'id'
       }
     })
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.removeColumn('Skills', 'subcategoryId')
-    await queryInterface.dropTable('SkillSubcategories')
+    await queryInterface.removeColumn('Skills', 'SkillCategoryId')
+    await queryInterface.dropTable('SkillGroups')
     return queryInterface.dropTable('SkillCategories')
   }
 }

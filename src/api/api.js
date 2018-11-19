@@ -12,6 +12,8 @@ import auth from './auth'
 import utils from './utils'
 import projects from './projects'
 import profileProjects from './profileProjects'
+import skillCategories from './skillCategories'
+import skillGroups from './skillGroups'
 import logger, { httpLogger } from './logging'
 import swagger from './swagger'
 
@@ -68,6 +70,8 @@ export default () => {
   api.use('/users', users())
   api.use('/projects', projects())
   api.use('/profileprojects', profileProjects())
+  api.use('/skillcategories', skillCategories())
+  api.use('/skillgroups', skillGroups())
 
   api.use(validateErrorHandler)
   api.use(errorHandler)
