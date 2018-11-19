@@ -29,6 +29,8 @@ const sendSlackMessages = () => {
   }
 
   if (!usersUpdatedAt || timeToUpdate()) {
+    usersUpdatedAt = Date.now()
+
     getSlackUsers().then(() => {
       sendSlackMessageForUsers()
     })
@@ -58,11 +60,11 @@ const getSlackUsers = () => {
       for (let member of res.members) {
         if (member.deleted === false && member.is_restricted === false &&
             member.is_bot === false && member.id !== 'USLACKBOT') {
-          userIds.push(member.id)
+          if (userIds.indexOf(String(member.id)) === -1) {
+            userIds.push(member.id)
+          }
         }
       }
-
-      usersUpdatedAt = Date.now()
 
       logger.debug(userIds.length + ' slack users. Updated at: ' + usersUpdatedAt)
     })
