@@ -1,11 +1,23 @@
 import { Router } from 'express'
 import {skillController, findSkillOr404} from '../../controllers/skills'
+import SlackBot from '../bots/slackbot'
 
 const router = Router()
 
 export default () => {
   router.param('id', findSkillOr404)
-
+  /**
+   * Middleware for running SlackBot for every POST request
+   *
+   * TODO: Should we support PUT also? and how to deal with failed db insert?
+   *
+   */
+  router.all('/', function (req, res, next) {
+    if (req.method && req.method === 'POST') {
+      SlackBot.sendSlackMessages()
+    }
+    next()
+  })
   /**
   * @swagger
   * /skills:
