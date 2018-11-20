@@ -112,10 +112,4 @@ will add a new model under `db/models` and the migration file for that model. Yo
 
 ### Doc generation
 
-API documentation is generated from YAML file at doc/openapi-spec.yaml. This is first converted into JSON, for example with yaml2json tool found at https://github.com/bronze1man/yaml2json .
-
-After conversion, documentation is easily generated with Spectacle.
-
-```
-npm run create-html-doc
-```
+API documentation is generated of commented in-code OpenAPI specification. The swagger generated documentation is served at /src/swagger/.

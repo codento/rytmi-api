@@ -15,11 +15,13 @@ beforeAll(async done => {
 
   db.skill1 = await createSkill({
     name: 'COBOL',
-    description: 'blah blah'
+    description: 'blah blah',
+    SkillCategoryId: 1
   })
   db.skill2 = await createSkill({
     name: 'PL/SQL',
-    description: 'blah blah'
+    description: 'blah blah',
+    SkillCategoryId: 1
   })
   done()
 })
@@ -43,7 +45,8 @@ describe('Creating and updating skills', () => {
   it('should persist skill and return the created skill', async () => {
     const skill = {
       name: 'Progress 4GL',
-      description: 'blah blah'
+      description: 'blah blah',
+      SkillCategoryId: 1
     }
 
     const created = await request
@@ -84,7 +87,8 @@ describe('Creating and updating skills', () => {
     const skill = {
       id: 9999999,
       name: 'JSF 1.0',
-      description: 'blah blah'
+      description: 'blah blah',
+      SkillCategoryId: 1
     }
 
     const created = await request
@@ -117,7 +121,8 @@ describe('Creating and updating skills', () => {
   it('should not allow two skills with the same name', async () => {
     const skill = {
       name: 'Oracle Forms',
-      description: 'blah blah'
+      description: 'blah blah',
+      SkillCategoryId: 1
     }
 
     const validationErrors = ['name must be unique']
@@ -149,7 +154,8 @@ describe('Testing data validation', () => {
 
   it('should include mandatory fields in validation errors', async () => {
     const validationErrors = [
-      'Skill.name cannot be null'
+      'Skill.name cannot be null',
+      'Skill.SkillCategoryId cannot be null'
     ]
 
     const created = await request
