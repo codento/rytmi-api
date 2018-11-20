@@ -112,4 +112,8 @@ will add a new model under `db/models` and the migration file for that model. Yo
 
 ### Doc generation
 
-API documentation is generated of commented in-code OpenAPI specification. The swagger generated documentation is served at /src/swagger/.
+API documentation is generated of commented in-code OpenAPI specification. The swagger generated documentation is served at:
+
+```
+/api/swagger/
+```
