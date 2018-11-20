@@ -14,7 +14,8 @@ module.exports = {
       },
       title: {
         allowNull: false,
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        unique: true
       },
       createdAt: {
         allowNull: false,
@@ -34,7 +35,8 @@ module.exports = {
       },
       title: {
         allowNull: false,
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        unique: true
       },
       SkillGroupId: {
         type: Sequelize.INTEGER,

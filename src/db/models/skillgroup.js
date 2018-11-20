@@ -1,6 +1,10 @@
 module.exports = (sequelize, DataTypes) => {
   const SkillGroup = sequelize.define('SkillGroup', {
-    title: DataTypes.STRING
+    title: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true
+    }
   })
 
   SkillGroup.associate = function (models) {

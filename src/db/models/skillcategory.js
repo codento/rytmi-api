@@ -1,6 +1,10 @@
 module.exports = (sequelize, DataTypes) => {
   let SkillCategory = sequelize.define('SkillCategory', {
-    title: DataTypes.STRING,
+    title: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true
+    },
     SkillGroupId: {
       type: DataTypes.INTEGER,
       allowNull: false
