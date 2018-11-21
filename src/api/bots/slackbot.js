@@ -24,7 +24,7 @@ if (slackAccessToken && slackAccessToken.length > 0) {
 
 const sendSlackMessages = () => {
   if (!client) {
-    logger.error('Slack client not initialized!')
+    logger.debug('SlackBot client not configured.')
     return
   }
 
