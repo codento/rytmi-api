@@ -5,28 +5,24 @@ import defaults from 'superagent-defaults'
 import { testUserToken, invalidToken } from './tokens'
 
 const request = defaults(supertest(app))
-const endpoint = '/api/skills/'
-const createSkill = generatePost(request, endpoint)
+const endpoint = '/api/skillgroups/'
+const createSkillGroup = generatePost(request, endpoint)
 const db = {}
 
 beforeAll(async done => {
   request.set('Authorization', `Bearer ${testUserToken}`)
   request.set('Accept', 'application/json')
 
-  db.skill1 = await createSkill({
-    name: 'COBOL',
-    description: 'blah blah',
-    SkillCategoryId: 1
+  db.skillGroup1 = await createSkillGroup({
+    title: 'Man made tech'
   })
-  db.skill2 = await createSkill({
-    name: 'PL/SQL',
-    description: 'blah blah',
-    SkillCategoryId: 1
+  db.skillGroup2 = await createSkillGroup({
+    title: 'Alien made tech'
   })
   done()
 })
 
-describe('Test skills', () => {
+describe('Test skillgroups', () => {
   test('It should response 200 the GET method', () => {
     return request
       .get(endpoint)
@@ -41,19 +37,17 @@ describe('Test skills', () => {
   })
 })
 
-describe('Creating and updating skills', () => {
-  it('should persist skill and return the created skill', async () => {
-    const skill = {
-      name: 'Progress 4GL',
-      description: 'blah blah',
-      SkillCategoryId: 1
+describe('Creating and updating skillgroups', () => {
+  it('should persist skillgroup and return the created skillgroup', async () => {
+    const skillGroup = {
+      title: 'Advanced alien tech'
     }
 
     const created = await request
       .post(endpoint)
-      .send(skill)
+      .send(skillGroup)
       .expect(201)
-    expect(created.body).toMatchObject(skill)
+    expect(created.body).toMatchObject(skillGroup)
 
     const fetched = await request
       .get(endpoint + created.body.id)
@@ -63,20 +57,19 @@ describe('Creating and updating skills', () => {
     expect(fetched.body).toMatchObject(created.body)
   })
 
-  it('should update skill and return the updated skill', async () => {
-    const skill = {
-      name: 'Updated name for skill 1',
-      description: 'Updated description for skill 1'
+  it('should update skillgroup and return the updated skillgroup', async () => {
+    const skillGroup = {
+      title: 'Core fusion techs'
     }
 
     const updated = await request
-      .put(endpoint + db.skill1.id)
-      .send(skill)
+      .put(endpoint + db.skillGroup1.id)
+      .send(skillGroup)
       .expect(200)
-    expect(updated.body).toMatchObject(skill)
+    expect(updated.body).toMatchObject(skillGroup)
 
     const fetched = await request
-      .get(endpoint + db.skill1.id)
+      .get(endpoint + db.skillGroup1.id)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
@@ -84,57 +77,55 @@ describe('Creating and updating skills', () => {
   })
 
   it('should ignore passed id attribute', async () => {
-    const skill = {
+    const skillGroup = {
       id: 9999999,
-      name: 'JSF 1.0',
-      description: 'blah blah',
-      SkillCategoryId: 1
+      title: 'Is this a Group?',
+      SkillGroupId: 1
     }
 
     const created = await request
       .post(endpoint)
-      .send(skill)
+      .send(skillGroup)
       .expect(201)
-    expect(created.body.id).not.toBe(skill.id)
+    expect(created.body.id).not.toBe(skillGroup.id)
 
     const fetched = await request
       .get(endpoint + created.body.id)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-    expect(fetched.body.id).not.toBe(skill.id)
+    expect(fetched.body.id).not.toBe(skillGroup.id)
 
     const updated = await request
       .put(endpoint + created.body.id)
-      .send(skill)
+      .send(skillGroup)
       .expect(200)
-    expect(updated.body.id).not.toBe(skill.id)
+    expect(updated.body.id).not.toBe(skillGroup.id)
 
     const fetchedAgain = await request
       .get(endpoint + created.body.id)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-    expect(fetchedAgain.body.id).not.toBe(skill.id)
+    expect(fetchedAgain.body.id).not.toBe(skillGroup.id)
   })
 
-  it('should not allow two skills with the same name', async () => {
-    const skill = {
-      name: 'Oracle Forms',
-      description: 'blah blah',
-      SkillCategoryId: 1
+  it('should not allow two skillgroups with the same title', async () => {
+    const skillGroup = {
+      title: 'Oracle knowledge',
+      SkillGroupId: 1
     }
 
-    const validationErrors = ['name must be unique']
+    const validationErrors = ['title must be unique']
 
     await request
       .post(endpoint)
-      .send(skill)
+      .send(skillGroup)
       .expect(201)
 
     const failed = await request
       .post(endpoint)
-      .send(skill)
+      .send(skillGroup)
       .expect(400)
     expect(failed.body.error.details).toEqual(validationErrors)
   })
@@ -142,20 +133,19 @@ describe('Creating and updating skills', () => {
 
 describe('Testing data validation', () => {
   it('should return 400 with invalid data', async () => {
-    const skill = {
-      description: 'desc'
+    const skillGroup = {
+      tile: 'Title'
     }
 
     const created = await request
       .post(endpoint)
-      .send(skill)
+      .send(skillGroup)
     expect(created.status).toBe(400)
   })
 
   it('should include mandatory fields in validation errors', async () => {
     const validationErrors = [
-      'Skill.name cannot be null',
-      'Skill.SkillCategoryId cannot be null'
+      'SkillGroup.title cannot be null'
     ]
 
     const created = await request
@@ -169,8 +159,8 @@ describe('Testing data validation', () => {
 describe('Endpoint authorization', () => {
   request.set('Authorization', `Bearer ${invalidToken}`)
 
-  endpointAuthorizationTest(request.request.get, '/api/skills')
-  endpointAuthorizationTest(request.request.post, '/api/skills')
-  endpointAuthorizationTest(request.request.get, '/api/skills/1')
-  endpointAuthorizationTest(request.request.put, '/api/skills/1')
+  endpointAuthorizationTest(request.request.get, '/api/skillgroups')
+  endpointAuthorizationTest(request.request.post, '/api/skillgroups')
+  endpointAuthorizationTest(request.request.get, '/api/skillsgroups/1')
+  endpointAuthorizationTest(request.request.put, '/api/skillsgroups/1')
 })
