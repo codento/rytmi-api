@@ -22,11 +22,13 @@ beforeAll(async done => {
 
   db.skill1 = await createSkill({
     name: 'Symbian C++',
-    description: 'blah blah'
+    description: 'blah blah',
+    SkillCategoryId: 1
   })
   db.skill2 = await createSkill({
     name: 'ABAP',
-    description: 'blah blah'
+    description: 'blah blah',
+    SkillCategoryId: 1
   })
   db.user1 = await createUser({
     googleId: '489324891358',
@@ -414,7 +416,8 @@ describe('Creating, updating and deleting profileSkills', () => {
   it('should not allow multiple profileskills with the same profile/skill-combination', async () => {
     const skill = await createSkill({
       name: 'Coldfusion',
-      description: 'blah blah'
+      description: 'blah blah',
+      SkillCategoryId: 1
     })
 
     const profileSkill = {
