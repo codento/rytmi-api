@@ -117,3 +117,15 @@ API documentation is generated of commented in-code OpenAPI specification. The s
 ```
 /api/swagger/
 ```
+
+### Slack
+
+Rytmi API has a Slack support with a Slackbot that can send a Slack message(s) after new skills were added into Rytmi database. Configuring the Slackbot is straight forward. First create a Slack app and install it to your workspace. Create a Slack channel #rytmi for the Slackbot to send messages to. Lastly get the Slack apps access token and add it into the .env for attribute SLACK_ACCESS_TOKEN as a value.
+
+Slackbot is triggered by doing a http GET locally into endpoint http://localhost:PORT/slackbot. This will trigger the Slackbot to check if there are new skills in Rytmi database. If new skills are found, then a Slack message is composed from the new skills and sent to the target Slack channel (#rytmi by default).
+
+The triggering of the Slackbot can be run periodically i.e. as a cron job. The Slackbot can be tested by using curl or wget. In example with wget:
+
+```
+ wget http://localhost:8081/slackbot -O /dev/null 
+```
