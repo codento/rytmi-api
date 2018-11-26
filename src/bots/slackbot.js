@@ -15,7 +15,7 @@ let latestSkillId
 
 const slackAccessToken = process.env.SLACK_ACCESS_TOKEN
 const slackTargetChannel = '#rytmi'
-const slackDefaultText = 'The following new skills were added today into the Rytmi: '
+const slackDefaultText = 'The following new skills were added lately into the Rytmi: '
 
 if (slackAccessToken && slackAccessToken.length > 0) {
   client = new WebClient(slackAccessToken)
