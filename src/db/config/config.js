@@ -8,7 +8,8 @@ module.exports = {
     database: process.env.DB_NAME,
     dialect: 'postgres',
     operatorsAliases: false,
-    seederStorage: 'sequelize'
+    seederStorage: 'sequelize',
+    logging: console.log
   },
   test: {
     host: process.env.DB_HOST,
@@ -17,8 +18,8 @@ module.exports = {
     database: process.env.DB_NAME + '_test',
     dialect: 'postgres',
     operatorsAliases: false,
-    logging: false,
-    seederStorage: 'sequelize'
+    seederStorage: 'sequelize',
+    logging: console.log
   },
   production: {
     host: process.env.DB_HOST,
