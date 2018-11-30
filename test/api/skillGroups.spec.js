@@ -80,7 +80,7 @@ describe('Creating and updating skillgroups', () => {
     const skillGroup = {
       id: 9999999,
       title: 'Is this a Group?',
-      SkillGroupId: 1
+      skillGroupId: 1
     }
 
     const created = await request
@@ -113,7 +113,7 @@ describe('Creating and updating skillgroups', () => {
   it('should not allow two skillgroups with the same title', async () => {
     const skillGroup = {
       title: 'Oracle knowledge',
-      SkillGroupId: 1
+      skillGroupId: 1
     }
 
     const validationErrors = ['title must be unique']

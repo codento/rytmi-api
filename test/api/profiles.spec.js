@@ -23,12 +23,12 @@ beforeAll(async done => {
   db.skill1 = await createSkill({
     name: 'Symbian C++',
     description: 'blah blah',
-    SkillCategoryId: 1
+    skillCategoryId: 1
   })
   db.skill2 = await createSkill({
     name: 'ABAP',
     description: 'blah blah',
-    SkillCategoryId: 1
+    skillCategoryId: 1
   })
   db.user1 = await createUser({
     googleId: '489324891358',
@@ -417,7 +417,7 @@ describe('Creating, updating and deleting profileSkills', () => {
     const skill = await createSkill({
       name: 'Coldfusion',
       description: 'blah blah',
-      SkillCategoryId: 1
+      skillCategoryId: 1
     })
 
     const profileSkill = {

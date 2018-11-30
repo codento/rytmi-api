@@ -6,13 +6,13 @@ module.exports = (sequelize, DataTypes) => {
       unique: true
     },
     description: DataTypes.TEXT,
-    SkillCategoryId: {
+    skillCategoryId: {
       type: DataTypes.INTEGER,
       allowNull: false
     }
   })
   Skill.associate = function (models) {
-    models.Skill.belongsTo(models.SkillCategory, { foreignKey: 'SkillCategoryId' })
+    models.Skill.belongsTo(models.SkillCategory, { foreignKey: 'skillCategoryId' })
   }
   return Skill
 }

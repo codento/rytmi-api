@@ -31,7 +31,7 @@ factory.define('skillGroup')
 
 factory.define('skillCategory')
   .attr('title')
-  .attr('SkillGroupId')
+  .attr('skillGroupId')
   .attr('createdAt', () => new Date())
   .attr('updatedAt', () => new Date())
 
@@ -44,14 +44,14 @@ module.exports = {
     categoryTitles.forEach(title => {
       categories.push(factory.build('skillCategory', {
         title: title,
-        SkillGroupId: groupModels[faker.random.number(groupModels.length - 1)].id
+        skillGroupId: groupModels[faker.random.number(groupModels.length - 1)].id
       }))
     })
     await queryInterface.bulkInsert('SkillCategories', categories)
     const categoryModels = await models.SkillCategory.findAll()
     const skills = await models.Skill.findAll()
     skills.forEach(skill => {
-      skill.SkillCategoryId = categoryModels[faker.random.number(categoryModels.length - 1)].id
+      skill.skillCategoryId = categoryModels[faker.random.number(categoryModels.length - 1)].id
       skill.save()
     })
   },

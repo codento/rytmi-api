@@ -1,7 +1,6 @@
+import { format } from 'date-fns'
 require('babel-register')
 require('babel-polyfill')
-
-const models = require('../models')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -55,8 +54,20 @@ module.exports = {
         type: Sequelize.DATE
       }
     })
-    const group = await models.SkillGroup.create({title: 'Uncategorized'})
-    await models.SkillCategory.create({SkillGroupId: group.id, title: 'Uncategorized'})
+
+    const now = format(new Date())
+    await queryInterface.sequelize.query('INSERT INTO public."SkillGroups" ("id", "title", "createdAt", "updatedAt") VALUES (DEFAULT, \'Uncategorized\', \'' + now + '\', \'' + now + '\') RETURNING *', {
+      type: queryInterface.sequelize.QueryTypes.INSERT
+    })
+
+    const groupIdQueryResult = await queryInterface.sequelize.query('SELECT id from public."SkillGroups" WHERE title=\'Uncategorized\'', {
+      type: queryInterface.sequelize.QueryTypes.SELECT
+    })
+
+    await queryInterface.sequelize.query('INSERT INTO public."SkillCategories" ("id", "title", "SkillGroupId", "createdAt", "updatedAt") VALUES (DEFAULT, \'Uncategorized\', ' + groupIdQueryResult[0].id + ', \'' + now + '\', \'' + now + '\') RETURNING *', {
+      type: queryInterface.sequelize.QueryTypes.INSERT
+    })
+
     return queryInterface.addColumn('Skills', 'SkillCategoryId', {
       type: Sequelize.INTEGER,
       allowNull: false,
@@ -68,7 +79,7 @@ module.exports = {
     })
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.removeColumn('Skills', 'SkillCategoryId')
+    await queryInterface.removeColumn('Skills', 'skillCategoryId')
     await queryInterface.dropTable('SkillGroups')
     return queryInterface.dropTable('SkillCategories')
   }
