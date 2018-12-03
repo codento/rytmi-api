@@ -458,10 +458,10 @@ describe('Testing data validation', () => {
 
   it('should include mandatory fields in profile validation errors', async () => {
     const validationErrors = [
-      'Profile.lastName cannot be null',
-      'Profile.firstName cannot be null',
-      'Profile.email cannot be null',
-      'Profile.active cannot be null'
+      'profile.lastName cannot be null',
+      'profile.firstName cannot be null',
+      'profile.email cannot be null',
+      'profile.active cannot be null'
     ]
 
     const created = await request

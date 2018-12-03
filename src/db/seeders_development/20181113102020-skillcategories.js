@@ -49,7 +49,7 @@ module.exports = {
     })
     await queryInterface.bulkInsert('SkillCategories', categories)
     const categoryModels = await models.SkillCategory.findAll()
-    const skills = await models.Skill.findAll()
+    const skills = await models.skill.findAll()
     skills.forEach(skill => {
       skill.skillCategoryId = categoryModels[faker.random.number(categoryModels.length - 1)].id
       skill.save()

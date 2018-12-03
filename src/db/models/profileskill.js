@@ -34,8 +34,8 @@ module.exports = (sequelize, DataTypes) => {
   })
 
   ProfileSkill.associate = (models) => {
-    models.ProfileSkill.belongsTo(models.Profile, {foreignKey: 'profileId'})
-    models.ProfileSkill.belongsTo(models.Skill, {foreignKey: 'skillId'})
+    models.ProfileSkill.belongsTo(models.profile, {foreignKey: 'profileId'})
+    models.ProfileSkill.belongsTo(models.skill, {foreignKey: 'skillId'})
   }
 
   return ProfileSkill

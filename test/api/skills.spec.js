@@ -154,8 +154,8 @@ describe('Testing data validation', () => {
 
   it('should include mandatory fields in validation errors', async () => {
     const validationErrors = [
-      'Skill.name cannot be null',
-      'Skill.skillCategoryId cannot be null'
+      'skill.name cannot be null',
+      'skill.skillCategoryId cannot be null'
     ]
 
     const created = await request

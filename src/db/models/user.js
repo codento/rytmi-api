@@ -33,7 +33,7 @@ module.exports = (sequelize, DataTypes) => {
   )
 
   User.associate = (models) => {
-    models.User.hasOne(models.Profile, {foreignKey: 'userId'})
+    models.User.hasOne(models.profile, {foreignKey: 'userId'})
   }
 
   return User

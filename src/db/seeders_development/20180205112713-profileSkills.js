@@ -19,9 +19,9 @@ factory.define('profileSkill')
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return models.Profile.all()
+    return models.profile.all()
       .then(profiles => {
-        return models.Skill.all()
+        return models.skill.all()
           .then(skills => {
             let profileSkills = []
             profiles.forEach(profile => {

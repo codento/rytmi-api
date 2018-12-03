@@ -3,11 +3,11 @@ import models from '../../db/models'
 
 export default class ProfileService extends CrudService {
   constructor () {
-    super(models.Profile)
+    super(models.profile)
   }
 
   getByUserId (userId) {
-    return models.Profile
+    return models.profile
       .findOne({where: {userId: userId}})
   }
 
