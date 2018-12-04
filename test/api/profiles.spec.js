@@ -473,10 +473,10 @@ describe('Testing data validation', () => {
 
   it('should include mandatory fields in profileskill validation errors', async () => {
     const validationErrors = [
-      'ProfileSkill.skillId cannot be null',
-      'ProfileSkill.knows cannot be null',
-      'ProfileSkill.wantsTo cannot be null',
-      'ProfileSkill.visibleInCV cannot be null'
+      'profileSkill.skillId cannot be null',
+      'profileSkill.knows cannot be null',
+      'profileSkill.wantsTo cannot be null',
+      'profileSkill.visibleInCV cannot be null'
     ]
 
     const created = await request

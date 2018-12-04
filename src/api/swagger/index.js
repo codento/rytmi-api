@@ -23,7 +23,7 @@ const schemas = function () {
 
   schemas['profile']['example'] = profileExample
   schemas['ProfileProject']['example'] = profileProjectExample
-  schemas['ProfileSkill']['example'] = profileSkillExample
+  schemas['profileSkill']['example'] = profileSkillExample
   schemas['Project']['example'] = projectExample
   schemas['skill']['example'] = skillExample
   schemas['User']['example'] = userExample

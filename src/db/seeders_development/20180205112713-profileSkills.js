@@ -39,12 +39,12 @@ module.exports = {
                 }))
               })
             })
-            return queryInterface.bulkInsert('ProfileSkills', profileSkills)
+            return queryInterface.bulkInsert('profileSkill', profileSkills)
           })
       })
   },
 
   down: (queryInterface, Sequelize) => {
-    return queryInterface.bulkDelete('ProfileSkills')
+    return queryInterface.bulkDelete('profileSkill')
   }
 }
