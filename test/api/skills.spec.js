@@ -6,10 +6,17 @@ import { testUserToken, invalidToken } from './tokens'
 
 const request = defaults(supertest(app))
 const endpoint = '/api/skills/'
+const profileEndpoint = '/api/profiles/'
 const createSkill = generatePost(request, endpoint)
+const createUser = generatePost(request, '/api/users/')
+const createProfile = generatePost(request, profileEndpoint)
+const skillEndpointFor =
+  profile => profileEndpoint + profile.id + '/skills/'
+const createProfileSkill =
+  (profile, attrs) => generatePost(request, skillEndpointFor(profile))(attrs)
 const db = {}
 
-beforeAll(async done => {
+beforeAll(async () => {
   request.set('Authorization', `Bearer ${testUserToken}`)
   request.set('Accept', 'application/json')
 
@@ -21,16 +28,48 @@ beforeAll(async done => {
     name: 'PL/SQL',
     description: 'blah blah'
   })
-  done()
+
+  try {
+    db.user1 = await createUser({
+      googleId: '214144214',
+      firstName: 'Balle',
+      lastName: 'Bankka',
+      active: true,
+      admin: true
+    })
+    db.user1Profile = await createProfile({
+      userId: db.user1.id,
+      lastName: 'Balle',
+      firstName: 'Bankka',
+      birthday: new Date('1970-01-01').toISOString(),
+      email: 'Bankka@example.com',
+      phone: '+358 40 41561',
+      title: 'Hero',
+      description: 'Lorem',
+      links: ['http://example.com'],
+      photoPath: 'http://example.com/batman.png',
+      active: true
+    })
+    db.user1ProfileSkill1 = await createProfileSkill(db.user1Profile, {
+      profileId: db.user1Profile.id,
+      skillId: db.skill1.id,
+      knows: 5,
+      wantsTo: 1,
+      visibleInCV: true,
+      description: 'blah'
+    })
+  } catch (error) {
+    console.log(error)
+  }
 })
 
 describe('Test skills', () => {
-  test('It should response 200 the GET method', () => {
+  test('It should response 200 the GET method', async () => {
     return request
       .get(endpoint)
       .expect(200)
   })
-  test('respond with json', () => {
+  test('respond with json', async () => {
     return request
       .get(endpoint)
       .set('Accept', 'application/json')
@@ -134,17 +173,29 @@ describe('Creating and updating skills', () => {
     expect(failed.body.error.details).toEqual(validationErrors)
   })
 
-  it('should delete a given id', async () => {
+  it('should soft delete a given id', async () => {
     const newSkill = await request
       .post(endpoint)
       .send({
         name: 'php',
         description: 'i was young and needed the money'
       })
-
+    const { id } = newSkill.body
+    console.log(db)
+    await createProfileSkill(db.user1Profile, {
+      profileId: db.user1Profile.id,
+      skillId: id,
+      knows: 5,
+      wantsTo: 1,
+      visibleInCV: true,
+      description: 'blah'
+    })
     await request
       .delete(endpoint + newSkill.body.id)
       .expect(204)
+    await request.get(`/api/skills/${newSkill.body.id}`).expect(404)
+    const profileSkillsResponse = await request.get(`/api/profileSkills/`)
+    expect(profileSkillsResponse.body.find(profSkill => profSkill.skillId === id)).toBe(undefined)
   })
 
   it('should return 404 if a non-existent id is given', async () => {
