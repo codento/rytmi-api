@@ -348,7 +348,7 @@ describe('Testing data validations', () => {
       .post(projectEndpoint)
       .send(project)
     expect(nameNull.status).toBe(400)
-    expect(nameNull.body.error.details[0]).toBe('Project.name cannot be null')
+    expect(nameNull.body.error.details[0]).toBe('project.name cannot be null')
   })
 
   it('Should return 400 if name is not unique', async () => {
@@ -373,7 +373,7 @@ describe('Testing data validations', () => {
       .post(projectEndpoint)
       .send(project)
     expect(codeNull.status).toBe(400)
-    expect(codeNull.body.error.details[0]).toBe('Project.code cannot be null')
+    expect(codeNull.body.error.details[0]).toBe('project.code cannot be null')
   })
 
   it('Should return 400 if code is not unique', async () => {
@@ -391,7 +391,7 @@ describe('Testing data validations', () => {
       .post(projectEndpoint)
       .send(project)
     expect(startDateNull.status).toBe(400)
-    expect(startDateNull.body.error.details[0]).toBe('Project.startDate cannot be null')
+    expect(startDateNull.body.error.details[0]).toBe('project.startDate cannot be null')
   })
 
   it('Should accept endDate to be null', async () => {

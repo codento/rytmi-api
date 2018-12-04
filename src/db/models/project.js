@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  let Project = sequelize.define('Project', {
+  let Project = sequelize.define('project', {
     name: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -23,6 +23,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true
     }
   }, {
+    freezeTableName: true,
     validate: {
       endIsAfterStart: function () {
         if (this.startDate > this.endDate) {
@@ -43,7 +44,7 @@ module.exports = (sequelize, DataTypes) => {
   })
 
   Project.associate = (models) => {
-    models.Project.belongsToMany(models.profile, {through: 'ProfileProject', foreignKey: 'projectId'})
+    models.project.belongsToMany(models.profile, {through: 'ProfileProject', foreignKey: 'projectId'})
   }
 
   return Project
