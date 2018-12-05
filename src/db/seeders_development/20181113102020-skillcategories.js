@@ -57,7 +57,7 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.removeConstraint('skill', 'Skills_categoryId_fkey')
+    await queryInterface.removeConstraint('skill', 'Skills_skillCategoryId_fkey')
     await queryInterface.bulkDelete('skillCategory')
     return queryInterface.bulkDelete('skillGroup')
   }

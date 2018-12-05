@@ -12,7 +12,14 @@ module.exports = {
     return queryInterface.renameTable('Skills', 'skill')
   },
 
-  down: (queryInterface, Sequelize) => {
-    // TODO
+  down: async (queryInterface, Sequelize) => {
+    await queryInterface.renameTable('user', 'Users')
+    await queryInterface.renameTable('skillCategory', 'SkillCategories')
+    await queryInterface.renameTable('skillGroup', 'SkillGroups')
+    await queryInterface.renameTable('profileProject', 'ProfileProjects')
+    await queryInterface.renameTable('project', 'Projects')
+    await queryInterface.renameTable('profile', 'Profiles')
+    await queryInterface.renameTable('profileSkill', 'ProfileSkills')
+    return queryInterface.renameTable('skill', 'Skills')
   }
 }
