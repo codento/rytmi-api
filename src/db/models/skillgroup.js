@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
   })
 
   SkillGroup.associate = function (models) {
-    models.skillGroup.hasMany(models.SkillCategory, { foreignKey: 'skillGroupId' })
+    models.skillGroup.hasMany(models.skillCategory, { foreignKey: 'skillGroupId' })
   }
 
   return SkillGroup

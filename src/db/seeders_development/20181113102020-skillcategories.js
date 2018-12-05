@@ -38,7 +38,7 @@ factory.define('skillCategory')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const groups = groupTitles.map(title => factory.build('skillGroup', { title }))
-    await queryInterface.bulkInsert('SkillGroups', groups)
+    await queryInterface.bulkInsert('skillGroup', groups)
     const groupModels = await models.skillGroup.findAll()
     const categories = []
     categoryTitles.forEach(title => {
@@ -47,8 +47,8 @@ module.exports = {
         skillGroupId: groupModels[faker.random.number(groupModels.length - 1)].id
       }))
     })
-    await queryInterface.bulkInsert('SkillCategories', categories)
-    const categoryModels = await models.SkillCategory.findAll()
+    await queryInterface.bulkInsert('skillCategory', categories)
+    const categoryModels = await models.skillCategory.findAll()
     const skills = await models.skill.findAll()
     skills.forEach(skill => {
       skill.skillCategoryId = categoryModels[faker.random.number(categoryModels.length - 1)].id
@@ -57,8 +57,8 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.removeConstraint('Skills', 'Skills_categoryId_fkey')
-    await queryInterface.bulkDelete('SkillCategories')
-    return queryInterface.bulkDelete('SkillGroups')
+    await queryInterface.removeConstraint('skill', 'Skills_categoryId_fkey')
+    await queryInterface.bulkDelete('skillCategory')
+    return queryInterface.bulkDelete('skillGroup')
   }
 }

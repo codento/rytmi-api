@@ -2,6 +2,7 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
+    await queryInterface.renameTable('SkillCategories', 'skillCategory')
     await queryInterface.renameTable('SkillGroups', 'skillGroup')
     await queryInterface.renameTable('ProfileProjects', 'profileProject')
     await queryInterface.renameTable('Projects', 'project')

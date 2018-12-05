@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
     freezeTableName: true
   })
   Skill.associate = function (models) {
-    models.skill.belongsTo(models.SkillCategory, { foreignKey: 'skillCategoryId' })
+    models.skill.belongsTo(models.skillCategory, { foreignKey: 'skillCategoryId' })
   }
   return Skill
 }
