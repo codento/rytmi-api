@@ -22,11 +22,13 @@ beforeAll(async () => {
 
   db.skill1 = await createSkill({
     name: 'COBOL',
-    description: 'blah blah'
+    description: 'blah blah',
+    SkillCategoryId: 1
   })
   db.skill2 = await createSkill({
     name: 'PL/SQL',
-    description: 'blah blah'
+    description: 'blah blah',
+    SkillCategoryId: 1
   })
 
   try {
@@ -82,7 +84,8 @@ describe('Creating and updating skills', () => {
   it('should persist skill and return the created skill', async () => {
     const skill = {
       name: 'Progress 4GL',
-      description: 'blah blah'
+      description: 'blah blah',
+      SkillCategoryId: 1
     }
 
     const created = await request
@@ -123,7 +126,8 @@ describe('Creating and updating skills', () => {
     const skill = {
       id: 9999999,
       name: 'JSF 1.0',
-      description: 'blah blah'
+      description: 'blah blah',
+      SkillCategoryId: 1
     }
 
     const created = await request
@@ -156,7 +160,8 @@ describe('Creating and updating skills', () => {
   it('should not allow two skills with the same name', async () => {
     const skill = {
       name: 'Oracle Forms',
-      description: 'blah blah'
+      description: 'blah blah',
+      SkillCategoryId: 1
     }
 
     const validationErrors = ['name must be unique']
@@ -178,10 +183,10 @@ describe('Creating and updating skills', () => {
       .post(endpoint)
       .send({
         name: 'php',
-        description: 'i was young and needed the money'
+        description: 'i was young and needed the money',
+        SkillCategoryId: 1
       })
     const { id } = newSkill.body
-    console.log(db)
     await createProfileSkill(db.user1Profile, {
       profileId: db.user1Profile.id,
       skillId: id,
@@ -219,7 +224,8 @@ describe('Testing data validation', () => {
 
   it('should include mandatory fields in validation errors', async () => {
     const validationErrors = [
-      'Skill.name cannot be null'
+      'Skill.name cannot be null',
+      'Skill.SkillCategoryId cannot be null'
     ]
 
     const created = await request

@@ -12,7 +12,10 @@ import auth from './auth'
 import utils from './utils'
 import projects from './projects'
 import profileProjects from './profileProjects'
+import skillCategories from './skillCategories'
+import skillGroups from './skillGroups'
 import logger, { httpLogger } from './logging'
+import swagger from './swagger'
 
 require('dotenv').config()
 
@@ -56,6 +59,8 @@ export default () => {
 
   api.use(httpLogger)
 
+  api.use('/swagger', swagger())
+
   api.use('/auth', auth())
   api.use(jwt({secret: process.env.JWT_SECRET}).unless({path: ['/auth']})) // TODO: Study where this should actually be placed. Now unless don't work, just the order matters.
 
@@ -65,6 +70,8 @@ export default () => {
   api.use('/users', users())
   api.use('/projects', projects())
   api.use('/profileprojects', profileProjects())
+  api.use('/skillcategories', skillCategories())
+  api.use('/skillgroups', skillGroups())
 
   api.use(validateErrorHandler)
   api.use(errorHandler)
