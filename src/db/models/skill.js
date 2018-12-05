@@ -10,9 +10,6 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false
     }
-  },
-  {
-    freezeTableName: true
   })
   Skill.associate = function (models) {
     models.skill.belongsTo(models.skillCategory, { foreignKey: 'skillCategoryId' })

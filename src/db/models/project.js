@@ -23,7 +23,6 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true
     }
   }, {
-    freezeTableName: true,
     validate: {
       endIsAfterStart: function () {
         if (this.startDate > this.endDate) {

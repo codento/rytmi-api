@@ -5,9 +5,6 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       unique: true
     }
-  },
-  {
-    freezeTableName: true
   })
 
   SkillGroup.associate = function (models) {

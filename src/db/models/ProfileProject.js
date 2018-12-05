@@ -27,7 +27,6 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     }
   }, {
-    freezeTableName: true,
     validate: {
       workPercentageValidator: function () {
         if (this.workPercentage > 100 || this.workPercentage < 0) {

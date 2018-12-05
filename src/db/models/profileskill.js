@@ -31,9 +31,6 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     },
     description: DataTypes.TEXT
-  },
-  {
-    freezeTableName: true
   })
 
   ProfileSkill.associate = (models) => {

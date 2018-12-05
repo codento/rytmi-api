@@ -42,13 +42,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       allowNull: false
     }
-  },
-  {
-    freezeTableName: true
   })
 
   Profile.associate = (models) => {
-    models.profile.belongsTo(models.User, {foreignKey: 'userId'})
+    models.profile.belongsTo(models.user, {foreignKey: 'userId'})
     models.profile.hasMany(models.profileSkill, {foreignKey: 'profileId'})
     models.profile.belongsToMany(models.project, {through: models.profileProject, foreignKey: 'profileId'})
   }
