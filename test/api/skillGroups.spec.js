@@ -145,7 +145,7 @@ describe('Testing data validation', () => {
 
   it('should include mandatory fields in validation errors', async () => {
     const validationErrors = [
-      'SkillGroup.title cannot be null'
+      'skillGroup.title cannot be null'
     ]
 
     const created = await request

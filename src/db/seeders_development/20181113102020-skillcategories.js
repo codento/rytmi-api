@@ -39,7 +39,7 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     const groups = groupTitles.map(title => factory.build('skillGroup', { title }))
     await queryInterface.bulkInsert('SkillGroups', groups)
-    const groupModels = await models.SkillGroup.findAll()
+    const groupModels = await models.skillGroup.findAll()
     const categories = []
     categoryTitles.forEach(title => {
       categories.push(factory.build('skillCategory', {
