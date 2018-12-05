@@ -44,7 +44,7 @@ module.exports = (sequelize, DataTypes) => {
   })
 
   Project.associate = (models) => {
-    models.project.belongsToMany(models.profile, {through: 'ProfileProject', foreignKey: 'projectId'})
+    models.project.belongsToMany(models.profile, {through: models.profileProject, foreignKey: 'projectId'})
   }
 
   return Project

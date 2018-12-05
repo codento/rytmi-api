@@ -17,7 +17,7 @@ const createProfile = generatePost(request, '/api/profiles')
 const createProfileProject =
   (project, profile, attrs) => generatePost(request, profileEndpointFor(project) + profile.id)(attrs)
 const db = {}
-// TODO: Remainig consts
+// TODO: Remaining consts
 
 beforeAll(async done => {
   request.set('Authorization', `Bearer ${testUserToken}`)
@@ -432,7 +432,7 @@ describe('Testing profileProjects data validations', () => {
       .post(profileEndpointFor(db.project2) + db.user1Profile.id)
       .send(pp)
     expect(startDateNull.status).toBe(400)
-    expect(startDateNull.body.error.details[0]).toBe('ProfileProject.startDate cannot be null')
+    expect(startDateNull.body.error.details[0]).toBe('profileProject.startDate cannot be null')
   })
 
   it('Should return 400 if workPercentage is null, less than 0 or over 100', async () => {
@@ -456,7 +456,7 @@ describe('Testing profileProjects data validations', () => {
       .post(profileEndpointFor(db.project2) + db.user1Profile.id)
       .send(pp)
     expect(missing.status).toBe(400)
-    expect(missing.body.error.details[0]).toBe('ProfileProject.workPercentage cannot be null')
+    expect(missing.body.error.details[0]).toBe('profileProject.workPercentage cannot be null')
   })
 
   it('Should return 400 if endDate is before startDate', async () => {

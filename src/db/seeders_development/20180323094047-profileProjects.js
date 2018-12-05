@@ -48,12 +48,12 @@ module.exports = {
                 }))
               })
             })
-            return queryInterface.bulkInsert('ProfileProjects', profileProjects)
+            return queryInterface.bulkInsert('profileProject', profileProjects)
           })
       })
   },
 
   down: (queryInterface, Sequelize) => {
-    return queryInterface.bulkDelete('ProfileProjects')
+    return queryInterface.bulkDelete('profileProject')
   }
 }
