@@ -5,12 +5,12 @@ export default class CrudService {
 
   get (id) {
     return this.model
-      .findById(id)
+      .findById(id, {attributes: { exclude: ['deletedAt'] }})
   }
 
   getAll () {
     return this.model
-      .findAll()
+      .findAll({attributes: { exclude: ['deletedAt'] }})
   }
 
   getFiltered (criteria) {
@@ -23,12 +23,12 @@ export default class CrudService {
     return this.model
       .build(attrs)
       .save()
+      .then(created => this.get(created.id))
   }
 
   update (id, attrs) {
     attrs.id = parseInt(id)
-    return this.model
-      .findById(id)
+    return this.get(id)
       .then(modelInstance => {
         return modelInstance
           .update(attrs)
@@ -36,8 +36,7 @@ export default class CrudService {
   }
 
   delete (id) {
-    return this.model
-      .findById(id)
+    return this.get(id)
       .then(modelInstance => {
         return modelInstance
           .destroy()

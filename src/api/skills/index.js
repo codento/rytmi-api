@@ -116,5 +116,7 @@ export default () => {
   */
   router.put('/:id', skillController.update)
 
+  router.delete('/:id', skillController.delete)
+
   return router
 }

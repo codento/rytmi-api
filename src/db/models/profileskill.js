@@ -31,11 +31,14 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     },
     description: DataTypes.TEXT
+  },
+  {
+    paranoid: true
   })
 
   ProfileSkill.associate = (models) => {
     models.ProfileSkill.belongsTo(models.Profile, {foreignKey: 'profileId'})
-    models.ProfileSkill.belongsTo(models.Skill, {foreignKey: 'skillId'})
+    models.ProfileSkill.belongsTo(models.Skill, {foreignKey: 'skillId', hooks: true})
   }
 
   return ProfileSkill

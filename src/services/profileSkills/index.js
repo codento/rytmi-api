@@ -8,7 +8,7 @@ export default class ProfileSkillService extends CrudService {
 
   getByProfileId (profileId) {
     return models.ProfileSkill
-      .findAll({where: {profileId: profileId}})
+      .findAll({where: {profileId: profileId}, attributes: { exclude: ['deletedAt'] }})
   }
 
   getByIds (profileId, profileSkillId) {
