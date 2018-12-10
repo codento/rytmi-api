@@ -1,4 +1,3 @@
-import { format } from 'date-fns'
 require('babel-register')
 require('babel-polyfill')
 
@@ -54,8 +53,7 @@ module.exports = {
         type: Sequelize.DATE
       }
     })
-
-    const now = format(new Date())
+    const now = new Date().toISOString()
     await queryInterface.sequelize.query('INSERT INTO public."SkillGroups" ("id", "title", "createdAt", "updatedAt") VALUES (DEFAULT, \'Uncategorized\', \'' + now + '\', \'' + now + '\') RETURNING *', {
       type: queryInterface.sequelize.QueryTypes.INSERT
     })
