@@ -32,8 +32,34 @@ module.exports = {
     })
   },
 
-  down: (queryInterface, Sequelize) => {
-    // TODO
-    return queryInterface.renameColumn('SkillCategories', 'skillGroupId', 'SkillGroupId')
+  down: async (queryInterface, Sequelize) => {
+    // Skills-table
+    // 1) drop constraint
+    await queryInterface.removeConstraint('Skills', 'Skills_SkillCategoryId_fkey')
+
+    // 2) rename column
+    await queryInterface.renameColumn('Skills', 'skillCategoryId', 'SkillCategoryId')
+
+    // 3) add constraint back
+    await queryInterface.addConstraint('Skills', ['SkillCategoryId'], {
+      type: 'foreign key',
+      name: 'Skills_skillCategoryId_fkey',
+      references: {
+        table: 'SkillCategories',
+        field: 'id'
+      }
+    })
+
+    // Do the same for SkillCategories-table
+    await queryInterface.removeConstraint('SkillCategories', 'SkillCategories_SkillGroupId_fkey')
+    await queryInterface.renameColumn('SkillCategories', 'skillGroupId', 'SkillGroupId')
+    return queryInterface.addConstraint('SkillCategories', ['SkillGroupId'], {
+      type: 'foreign key',
+      name: 'SkillCategories_skillGroupId_fkey',
+      references: {
+        table: 'SkillGroups',
+        field: 'id'
+      }
+    })
   }
 }
