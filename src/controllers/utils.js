@@ -13,6 +13,11 @@ module.exports = {
               .status(404)
               .json(errorTemplate(404, objName + ' not found'))
           }
+        }).catch(error => {
+          console.error(error)
+          res
+            .status(500)
+            .json(errorTemplate(500, 'Internal server error', error))
         })
     }
   },
