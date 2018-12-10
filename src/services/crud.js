@@ -5,12 +5,12 @@ export default class CrudService {
 
   get (id) {
     return this.model
-      .findById(id)
+      .findById(id, {attributes: { exclude: ['deletedAt'] }})
   }
 
   getAll () {
     return this.model
-      .findAll()
+      .findAll({attributes: { exclude: ['deletedAt'] }})
   }
 
   getFiltered (criteria) {
