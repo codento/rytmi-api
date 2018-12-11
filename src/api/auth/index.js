@@ -33,7 +33,8 @@ async function getTicketPayload (idToken) {
       e.rytmiErrorType = rytmiErrorType.NotAuthorizedError
       throw e
     }
-
+    // Mock expiration time, which Google would normally return
+    ticketPayload.exp = Math.floor(new Date() / 1000) + 3600
     return ticketPayload
   } catch (err) {
     err.rytmiErrorType = rytmiErrorType.authenticationError
@@ -108,11 +109,9 @@ async function verify (idToken) {
 
   const ticketPayload = await getTicketPayload(idToken)
   const googleId = ticketPayload['sub']
-
   logger.debug('googleID ' + googleId)
   const user = await getOrCreateUser(googleId, ticketPayload)
   const profile = await getOrCreateProfile(user.id, ticketPayload)
-
   const tokenInfo = createToken(user, ticketPayload.exp)
 
   return {
