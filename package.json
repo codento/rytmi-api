@@ -20,7 +20,7 @@
     "containers": "docker-compose up -d && echo Rytmi API is now up and running.",
     "stop": "docker-compose down",
     "migrate": "sequelize db:migrate && sequelize db:seed:all",
-    "lint": "eslint --ext .js **"
+    "lint": "eslint **/*.js"
   },
   "jest": {
     "testEnvironment": "node",
