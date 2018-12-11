@@ -20,8 +20,7 @@
     "containers": "docker-compose up -d && echo Rytmi API is now up and running.",
     "stop": "docker-compose down",
     "migrate": "sequelize db:migrate && sequelize db:seed:all",
-    "lint:tests": "eslint test/**",
-    "lint:src": "eslint src/**"
+    "lint": "eslint --ext .js **"
   },
   "jest": {
     "testEnvironment": "node",
@@ -49,7 +48,7 @@
   "license": "MIT",
   "husky": {
     "hooks": {
-      "pre-push": "npm run lint:src && npm run lint:tests && npm run test"
+      "pre-push": "npm run lint && npm run test"
     }
   },
   "dependencies": {
