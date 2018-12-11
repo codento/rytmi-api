@@ -23,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: 'cascade' })
   }
 
-  Skill.hook('afterDestroy', (skill, options) => {
+  Skill.addHook('afterDestroy', (skill, options) => {
     const { id, deletedAt } = skill.dataValues
     sequelize.models.ProfileSkill.update(
       { deletedAt },
