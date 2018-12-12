@@ -27,7 +27,8 @@ describe('Logging in', () => {
       hd: process.env.GOOGLE_ORG_DOMAIN,
       given_name: 'Matt',
       family_name: 'Damon',
-      email: 'matt@damon.com'
+      email: 'matt@damon.com',
+      exp: Math.round(Date.now())
     }
     require('google-auth-library').__setMockPayload(googleAuthPayload)
 
@@ -52,7 +53,8 @@ describe('Logging in', () => {
       hd: process.env.GOOGLE_ORG_DOMAIN,
       given_name: 'Al',
       family_name: 'Pacino',
-      email: 'al@pacino.com'
+      email: 'al@pacino.com',
+      exp: Math.round(Date.now())
     }
     require('google-auth-library').__setMockPayload(payload)
 

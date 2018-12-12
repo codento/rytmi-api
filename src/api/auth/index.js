@@ -33,8 +33,6 @@ async function getTicketPayload (idToken) {
       e.rytmiErrorType = rytmiErrorType.NotAuthorizedError
       throw e
     }
-    // Mock expiration time, which Google would normally return
-    ticketPayload.exp = Math.floor(new Date() / 1000) + 3600
     return ticketPayload
   } catch (err) {
     err.rytmiErrorType = rytmiErrorType.authenticationError
