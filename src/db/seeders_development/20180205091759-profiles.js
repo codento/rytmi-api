@@ -21,7 +21,7 @@ factory.define('profile')
 module.exports = {
   up: (queryInterface, Sequelize) => {
     let profiles = []
-    return queryInterface.sequelize.query('SELECT * FROM "Users"', {
+    return queryInterface.sequelize.query('SELECT * FROM public."user"', {
       type: queryInterface.sequelize.QueryTypes.SELECT
     })
       .then(users => {
@@ -39,11 +39,11 @@ module.exports = {
           })
           profiles.push(profile)
         })
-        return queryInterface.bulkInsert('Profiles', profiles)
+        return queryInterface.bulkInsert('profile', profiles)
       })
   },
 
   down: (queryInterface, Sequelize) => {
-    return queryInterface.bulkDelete('Profiles')
+    return queryInterface.bulkDelete('profile')
   }
 }

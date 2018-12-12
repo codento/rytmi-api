@@ -15,11 +15,11 @@ factory.define('profileProject')
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.sequelize.query('SELECT * FROM "Profiles"', {
+    return queryInterface.sequelize.query('SELECT * FROM "profile"', {
       type: queryInterface.sequelize.QueryTypes.SELECT
     })
       .then(profiles => {
-        return queryInterface.sequelize.query('SELECT * FROM "Projects"', {
+        return queryInterface.sequelize.query('SELECT * FROM "project"', {
           type: queryInterface.sequelize.QueryTypes.SELECT
         })
           .then(projects => {
@@ -48,12 +48,12 @@ module.exports = {
                 }))
               })
             })
-            return queryInterface.bulkInsert('ProfileProjects', profileProjects)
+            return queryInterface.bulkInsert('profileProject', profileProjects)
           })
       })
   },
 
   down: (queryInterface, Sequelize) => {
-    return queryInterface.bulkDelete('ProfileProjects')
+    return queryInterface.bulkDelete('profileProject')
   }
 }

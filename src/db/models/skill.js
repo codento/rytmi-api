@@ -1,12 +1,12 @@
 module.exports = (sequelize, DataTypes) => {
-  const Skill = sequelize.define('Skill', {
+  const Skill = sequelize.define('skill', {
     name: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true
     },
     description: DataTypes.TEXT,
-    SkillCategoryId: {
+    skillCategoryId: {
       type: DataTypes.INTEGER,
       allowNull: false
     }
@@ -16,8 +16,8 @@ module.exports = (sequelize, DataTypes) => {
   })
 
   Skill.associate = (models) => {
-    models.Skill.belongsTo(models.SkillCategory, { foreignKey: 'SkillCategoryId' })
-    models.Skill.hasMany(models.ProfileSkill, {
+    models.skill.belongsTo(models.skillCategory, { foreignKey: 'skillCategoryId' })
+    models.skill.hasMany(models.profileSkill, {
       foreignKey: 'skillId',
       sourceKey: 'id',
       onDelete: 'cascade' })
@@ -25,7 +25,7 @@ module.exports = (sequelize, DataTypes) => {
 
   Skill.addHook('afterDestroy', (skill, options) => {
     const { id, deletedAt } = skill.dataValues
-    sequelize.models.ProfileSkill.update(
+    sequelize.models.profileSkill.update(
       { deletedAt },
       { where: { skillId: id } })
   })

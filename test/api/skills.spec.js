@@ -23,12 +23,12 @@ beforeAll(async () => {
   db.skill1 = await createSkill({
     name: 'COBOL',
     description: 'blah blah',
-    SkillCategoryId: 1
+    skillCategoryId: 1
   })
   db.skill2 = await createSkill({
     name: 'PL/SQL',
     description: 'blah blah',
-    SkillCategoryId: 1
+    skillCategoryId: 1
   })
 
   try {
@@ -85,7 +85,7 @@ describe('Creating and updating skills', () => {
     const skill = {
       name: 'Progress 4GL',
       description: 'blah blah',
-      SkillCategoryId: 1
+      skillCategoryId: 1
     }
 
     const created = await request
@@ -127,7 +127,7 @@ describe('Creating and updating skills', () => {
       id: 9999999,
       name: 'JSF 1.0',
       description: 'blah blah',
-      SkillCategoryId: 1
+      skillCategoryId: 1
     }
 
     const created = await request
@@ -161,7 +161,7 @@ describe('Creating and updating skills', () => {
     const skill = {
       name: 'Oracle Forms',
       description: 'blah blah',
-      SkillCategoryId: 1
+      skillCategoryId: 1
     }
 
     const validationErrors = ['name must be unique']
@@ -184,7 +184,7 @@ describe('Creating and updating skills', () => {
       .send({
         name: 'php',
         description: 'i was young and needed the money',
-        SkillCategoryId: 1
+        skillCategoryId: 1
       })
     const { id } = newSkill.body
     await createProfileSkill(db.user1Profile, {
@@ -224,8 +224,8 @@ describe('Testing data validation', () => {
 
   it('should include mandatory fields in validation errors', async () => {
     const validationErrors = [
-      'Skill.name cannot be null',
-      'Skill.SkillCategoryId cannot be null'
+      'skill.name cannot be null',
+      'skill.skillCategoryId cannot be null'
     ]
 
     const created = await request

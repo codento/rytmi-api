@@ -5,11 +5,11 @@ const Op = models.sequelize.Op
 
 export default class ProfileProjectService extends CrudService {
   constructor () {
-    super(models.ProfileProject)
+    super(models.profileProject)
   }
 
   getInFuture () {
-    return models.ProfileProject.findAll({
+    return models.profileProject.findAll({
       where: {
         endDate: {
           [Op.or]: {
@@ -22,15 +22,15 @@ export default class ProfileProjectService extends CrudService {
   }
 
   getByProfileId (profileId) {
-    return models.ProfileProject.findAll({where: {profileId: profileId}})
+    return models.profileProject.findAll({where: {profileId: profileId}})
   }
 
   getByProjectId (projectId) {
-    return models.ProfileProject.findAll({where: {projectId: projectId}})
+    return models.profileProject.findAll({where: {projectId: projectId}})
   }
 
   getByIds (profileId, projectId) {
-    return models.ProfileProject.findOne({
+    return models.profileProject.findOne({
       where: {
         profileId: profileId,
         projectId: projectId
@@ -45,12 +45,12 @@ export default class ProfileProjectService extends CrudService {
   }
 
   update (id, attrs) {
-    return models.ProfileProject
+    return models.profileProject
       .findOne({where: {
         id: id
       }})
-      .then(ProfileProject => {
-        return ProfileProject
+      .then(profileProject => {
+        return profileProject
           .update(attrs)
       })
   }

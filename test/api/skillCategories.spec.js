@@ -15,11 +15,11 @@ beforeAll(async done => {
 
   db.skillCategory1 = await createSkillCategory({
     title: 'Waving hands',
-    SkillGroupId: 1
+    skillGroupId: 1
   })
   db.skillCategory2 = await createSkillCategory({
     title: 'Coding',
-    SkillGroupId: 1
+    skillGroupId: 1
   })
   done()
 })
@@ -43,7 +43,7 @@ describe('Creating and updating skillcategories', () => {
   it('should persist skillcategory and return the created skillcategory', async () => {
     const skillCategory = {
       title: 'Advanced multiplication',
-      SkillGroupId: 1
+      skillGroupId: 1
     }
 
     const created = await request
@@ -63,7 +63,7 @@ describe('Creating and updating skillcategories', () => {
   it('should update skillcategory and return the updated skillcategory', async () => {
     const skillCategory = {
       title: 'Waving legs',
-      SkillGroupId: 1
+      skillGroupId: 1
     }
 
     const updated = await request
@@ -84,7 +84,7 @@ describe('Creating and updating skillcategories', () => {
     const skillCategory = {
       id: 9999999,
       title: 'Is this a category?',
-      SkillGroupId: 1
+      skillGroupId: 1
     }
 
     const created = await request
@@ -117,7 +117,7 @@ describe('Creating and updating skillcategories', () => {
   it('should not allow two skillcategories with the same title', async () => {
     const skillCategory = {
       title: 'Microshift stuff',
-      SkillGroupId: 1
+      skillGroupId: 1
     }
 
     const validationErrors = ['title must be unique']
@@ -149,8 +149,8 @@ describe('Testing data validation', () => {
 
   it('should include mandatory fields in validation errors', async () => {
     const validationErrors = [
-      'SkillCategory.title cannot be null',
-      'SkillCategory.SkillGroupId cannot be null'
+      'skillCategory.title cannot be null',
+      'skillCategory.skillGroupId cannot be null'
     ]
 
     const created = await request

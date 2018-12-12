@@ -11,12 +11,12 @@ function skillSeeder (skills) {
   return {
     up: (queryInterface, Sequelize) => {
       let skillObjects = Object.entries(skills).map((obj, index) => factory.build('skill', {name: obj[0], description: obj[1]}))
-      return queryInterface.bulkInsert('Skills', skillObjects)
+      return queryInterface.bulkInsert('skill', skillObjects)
     },
 
     down: (queryInterface, Sequelize) => {
       const Op = Sequelize.Op
-      return queryInterface.bulkDelete('Skills', {
+      return queryInterface.bulkDelete('skill', {
         name: { [Op.in]: Object.keys(skills) }
       })
     }

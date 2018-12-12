@@ -21,12 +21,12 @@ const schemas = function () {
     }
   }
 
-  schemas['Profile']['example'] = profileExample
-  schemas['ProfileProject']['example'] = profileProjectExample
-  schemas['ProfileSkill']['example'] = profileSkillExample
-  schemas['Project']['example'] = projectExample
-  schemas['Skill']['example'] = skillExample
-  schemas['User']['example'] = userExample
+  schemas['profile']['example'] = profileExample
+  schemas['profileProject']['example'] = profileProjectExample
+  schemas['profileSkill']['example'] = profileSkillExample
+  schemas['project']['example'] = projectExample
+  schemas['skill']['example'] = skillExample
+  schemas['user']['example'] = userExample
 
   return schemas
 }

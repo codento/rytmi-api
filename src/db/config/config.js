@@ -8,7 +8,11 @@ module.exports = {
     database: process.env.DB_NAME,
     dialect: 'postgres',
     operatorsAliases: false,
-    seederStorage: 'sequelize'
+    seederStorage: 'sequelize',
+    logging: console.log,
+    define: {
+      freezeTableName: true
+    }
   },
   test: {
     host: process.env.DB_HOST,
@@ -17,8 +21,11 @@ module.exports = {
     database: process.env.DB_NAME + '_test',
     dialect: 'postgres',
     operatorsAliases: false,
-    logging: false,
-    seederStorage: 'sequelize'
+    seederStorage: 'sequelize',
+    logging: console.log,
+    define: {
+      freezeTableName: true
+    }
   },
   production: {
     host: process.env.DB_HOST,
@@ -27,6 +34,9 @@ module.exports = {
     database: process.env.DB_NAME,
     dialect: 'postgres',
     operatorsAliases: false,
-    seederStorage: 'sequelize'
+    seederStorage: 'sequelize',
+    define: {
+      freezeTableName: true
+    }
   }
 }
