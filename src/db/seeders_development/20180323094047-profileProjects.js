@@ -28,13 +28,13 @@ module.exports = {
               let randomProjects = []
               let noOfProjects = faker.random.number(5)
               while (randomProjects.length < noOfProjects) {
-                let project = projects[faker.random.number(projects.length -1)]
+                let project = projects[faker.random.number(projects.length - 1)]
                 if (randomProjects.indexOf(project) > -1) continue
                 else randomProjects.push(project)
               }
               let start = faker.date.recent(150)
               let finish = faker.date.future(1)
-              if(faker.random.number(1)){
+              if (faker.random.number(1)) {
                 start = faker.date.past(1, new Date(2017, 12, 31, 0, 0, 0, 0))
                 finish = faker.date.recent(50)
               }
@@ -56,4 +56,4 @@ module.exports = {
   down: (queryInterface, Sequelize) => {
     return queryInterface.bulkDelete('ProfileProjects')
   }
-};
+}
