@@ -80,7 +80,7 @@ describe('Logging in', () => {
     }
     require('google-auth-library').__setMockPayload(payload)
 
-    const response = await request
+    await request
       .post('/api/auth')
       .set('Accept', 'application/json')
       .send({id_token: 'fdasf.fads.fadsfad'})

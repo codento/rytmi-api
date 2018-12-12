@@ -49,3 +49,6 @@ dist
 
 # IDEA project config dir
 .idea
+
+# yarn's lock file
+yarn.lock
