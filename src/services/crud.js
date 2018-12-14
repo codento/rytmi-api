@@ -13,9 +13,9 @@ export default class CrudService {
       .findAll({attributes: { exclude: ['deletedAt'] }})
   }
 
-  getFiltered (criteria) {
+  getFiltered (criteria, isParanoid = true) {
     return this.model
-      .findAll({where: criteria})
+      .findAll({where: criteria, paranoid: isParanoid})
   }
 
   create (attrs) {

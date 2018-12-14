@@ -11,6 +11,16 @@ export default class ProfileSkillService extends CrudService {
       .findAll({where: {profileId: profileId}, attributes: { exclude: ['deletedAt'] }})
   }
 
+  removeDeletedAt (criteria) {
+    return this.model.findAll({where: criteria, paranoid: false}).then(result => {
+      const toBeSaved = result.map(model => {
+        model.setDataValue('deletedAt', null)
+        return model.save()
+      })
+      return Promise.all(toBeSaved)
+    })
+  }
+
   getByIds (profileId, profileSkillId) {
     return models.profileSkill
       .findOne({where: {
