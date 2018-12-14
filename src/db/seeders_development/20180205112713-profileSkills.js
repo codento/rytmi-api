@@ -19,9 +19,9 @@ factory.define('profileSkill')
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return models.Profile.all()
+    return models.profile.all()
       .then(profiles => {
-        return models.Skill.all()
+        return models.skill.all()
           .then(skills => {
             let profileSkills = []
             profiles.forEach(profile => {
@@ -39,12 +39,12 @@ module.exports = {
                 }))
               })
             })
-            return queryInterface.bulkInsert('ProfileSkills', profileSkills)
+            return queryInterface.bulkInsert('profileSkill', profileSkills)
           })
       })
   },
 
   down: (queryInterface, Sequelize) => {
-    return queryInterface.bulkDelete('ProfileSkills')
+    return queryInterface.bulkDelete('profileSkill')
   }
 }

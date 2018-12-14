@@ -3,7 +3,7 @@ import models from '../../db/models'
 
 export default class SkillService extends CrudService {
   constructor () {
-    super(models.Skill)
+    super(models.skill)
   }
 
   removedDeletedAt (id) {

@@ -24,12 +24,12 @@ beforeAll(async done => {
   db.skill1 = await createSkill({
     name: 'ArnoldC',
     description: 'blah blah',
-    SkillCategoryId: '1'
+    skillCategoryId: '1'
   })
   db.skill2 = await createSkill({
     name: 'Brainfuck',
     description: 'blah blah',
-    SkillCategoryId: '1'
+    skillCategoryId: '1'
   })
   db.user1 = await createUser({
     googleId: '8732157813573548',

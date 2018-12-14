@@ -23,12 +23,12 @@ beforeAll(async done => {
   db.skill1 = await createSkill({
     name: 'Symbian C++',
     description: 'blah blah',
-    SkillCategoryId: 1
+    skillCategoryId: 1
   })
   db.skill2 = await createSkill({
     name: 'ABAP',
     description: 'blah blah',
-    SkillCategoryId: 1
+    skillCategoryId: 1
   })
   db.user1 = await createUser({
     googleId: '489324891358',
@@ -417,7 +417,7 @@ describe('Creating, updating and deleting profileSkills', () => {
     const skill = await createSkill({
       name: 'Coldfusion',
       description: 'blah blah',
-      SkillCategoryId: 1
+      skillCategoryId: 1
     })
 
     const profileSkill = {
@@ -458,10 +458,10 @@ describe('Testing data validation', () => {
 
   it('should include mandatory fields in profile validation errors', async () => {
     const validationErrors = [
-      'Profile.lastName cannot be null',
-      'Profile.firstName cannot be null',
-      'Profile.email cannot be null',
-      'Profile.active cannot be null'
+      'profile.lastName cannot be null',
+      'profile.firstName cannot be null',
+      'profile.email cannot be null',
+      'profile.active cannot be null'
     ]
 
     const created = await request
@@ -473,10 +473,10 @@ describe('Testing data validation', () => {
 
   it('should include mandatory fields in profileskill validation errors', async () => {
     const validationErrors = [
-      'ProfileSkill.skillId cannot be null',
-      'ProfileSkill.knows cannot be null',
-      'ProfileSkill.wantsTo cannot be null',
-      'ProfileSkill.visibleInCV cannot be null'
+      'profileSkill.skillId cannot be null',
+      'profileSkill.knows cannot be null',
+      'profileSkill.wantsTo cannot be null',
+      'profileSkill.visibleInCV cannot be null'
     ]
 
     const created = await request

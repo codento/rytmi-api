@@ -15,10 +15,12 @@
     "docker-build": "docker-compose build",
     "test": "jest --forceExit",
     "testwatch": "jest --watch --forceExit",
+    "test:debug": "node --inspect-brk ./node_modules/jest/bin/jest.js --runInBand",
     "create-html-doc": "node node_modules/spectacle-docs/bin/spectacle.js -t doc/ doc/openapi-spec.json",
     "containers": "docker-compose up -d && echo Rytmi API is now up and running.",
     "stop": "docker-compose down",
-    "migrate": "sequelize db:migrate && sequelize db:seed:all"
+    "migrate": "sequelize db:migrate && sequelize db:seed:all",
+    "lint": "eslint **/*.js"
   },
   "jest": {
     "testEnvironment": "node",
@@ -42,8 +44,13 @@
       "!**/db/seeders_development/**"
     ]
   },
-  "author": "Antti Myyrä",
+  "author": "Codento Oy",
   "license": "MIT",
+  "husky": {
+    "hooks": {
+      "pre-push": "npm run lint && npm run test"
+    }
+  },
   "dependencies": {
     "babel-core": "^6.26.3",
     "babel-register": "^6.26.0",
@@ -64,7 +71,7 @@
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
-    "babel-eslint": "^8.2.1",
+    "babel-eslint": "^10.0.1",
     "babel-jest": "^22.4.1",
     "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.7.0",
@@ -75,6 +82,7 @@
     "eslint-plugin-promise": "^3.6.0",
     "eslint-plugin-standard": "^3.0.1",
     "faker": "^4.1.0",
+    "husky": "^1.2.0",
     "jest": "^22.1.4",
     "nodemon": "^1.17.5",
     "rosie": "^1.6.0",

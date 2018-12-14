@@ -3,11 +3,11 @@ import models from '../../db/models'
 
 export default class ProfileSkillService extends CrudService {
   constructor () {
-    super(models.ProfileSkill)
+    super(models.profileSkill)
   }
 
   getByProfileId (profileId) {
-    return models.ProfileSkill
+    return models.profileSkill
       .findAll({where: {profileId: profileId}, attributes: { exclude: ['deletedAt'] }})
   }
 
@@ -22,7 +22,7 @@ export default class ProfileSkillService extends CrudService {
   }
 
   getByIds (profileId, profileSkillId) {
-    return models.ProfileSkill
+    return models.profileSkill
       .findOne({where: {
         id: profileSkillId,
         profileId: profileId
@@ -37,7 +37,7 @@ export default class ProfileSkillService extends CrudService {
   update (profileId, profileSkillId, attrs) {
     attrs.id = parseInt(profileSkillId)
     attrs.profileId = parseInt(profileId)
-    return models.ProfileSkill
+    return models.profileSkill
       .findOne({where: {
         id: profileSkillId,
         profileId: profileId
@@ -49,7 +49,7 @@ export default class ProfileSkillService extends CrudService {
   }
 
   delete (profileId, profileSkillId) {
-    return models.ProfileSkill
+    return models.profileSkill
       .findOne({where: {
         id: profileSkillId,
         profileId: profileId

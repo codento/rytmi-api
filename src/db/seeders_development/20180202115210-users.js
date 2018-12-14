@@ -19,10 +19,10 @@ module.exports = {
       let user = factory.build('user')
       users.push(user)
     }
-    return queryInterface.bulkInsert('Users', users)
+    return queryInterface.bulkInsert('user', users)
   },
 
   down: (queryInterface, Sequelize) => {
-    return queryInterface.bulkDelete('Users')
+    return queryInterface.bulkDelete('user')
   }
 }

@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  const SkillGroup = sequelize.define('SkillGroup', {
+  const SkillGroup = sequelize.define('skillGroup', {
     title: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -8,7 +8,7 @@ module.exports = (sequelize, DataTypes) => {
   })
 
   SkillGroup.associate = function (models) {
-    models.SkillGroup.hasMany(models.SkillCategory)
+    models.skillGroup.hasMany(models.skillCategory, { foreignKey: 'skillGroupId' })
   }
 
   return SkillGroup
