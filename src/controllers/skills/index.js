@@ -37,8 +37,7 @@ const hasSkillExistedBefore = (softDeletedSkill, error) =>
 const reCreateDeletedSkill = async (softDeletedSkill, newSkill) => {
   await profileSkillService.removeDeletedAt({ skillId: softDeletedSkill.id })
   await skillService.removedDeletedAt(softDeletedSkill.id)
-  const updatedSkill = skillService.update(softDeletedSkill.id, newSkill)
-  return updatedSkill
+  return skillService.update(softDeletedSkill.id, newSkill)
 }
 
 module.exports = {
