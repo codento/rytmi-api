@@ -1,7 +1,7 @@
 
-import {wrapAsync} from './utils'
+import { wrapAsync } from './utils'
 
-export default function (objName, service) {
+export default function (objName, service, validator = null) {
   return {
     getAll: wrapAsync(async (req, res) => {
       const collection = await service.getAll()
@@ -16,6 +16,9 @@ export default function (objName, service) {
       res.status(201).json(obj)
     }),
     update: wrapAsync(async (req, res) => {
+      if (validator) {
+        validator.validate(req.body)
+      }
       const obj = await service.update(req[objName].id, req.body)
       res.json(obj)
     })
