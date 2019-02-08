@@ -2,8 +2,10 @@ import { Router } from 'express'
 import skills from './skills'
 import projects from './projects'
 import {profileController, findProfileOr404} from '../../controllers/profiles'
+import { createPermissionHandler } from '../utils'
 
 const router = Router()
+const permissionHandler = createPermissionHandler('profile', 'id')
 
 export default () => {
   router.param('id', findProfileOr404)
@@ -143,7 +145,7 @@ export default () => {
   *           schema:
   *             $ref: "#/components/schemas/Profile"
   */
-  router.put('/:id', profileController.update)
+  router.put('/:id', permissionHandler, profileController.update)
 
   router.use('/:id/projects', projects())
   router.use('/:id/skills', skills())

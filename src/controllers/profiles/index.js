@@ -40,6 +40,12 @@ profileController.getList = wrapAsync(async (req, res) => {
   res.json(profiles)
 })
 
+profileController.update = wrapAsync(async (req, res) => {
+  profileValidator.validate(req.body)
+  const obj = await profileService.update(req['profile'].id, req.body)
+  res.json(obj)
+})
+
 module.exports = {
   profileController: profileController,
   findProfileOr404: findObjectOr404('profile', profileService)
