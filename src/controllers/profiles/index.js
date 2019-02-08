@@ -2,10 +2,11 @@ import ProfileService from '../../services/profiles'
 import baseController from '../index'
 import { findObjectOr404, wrapAsync } from '../utils'
 import { errorTemplate } from '../../api/utils'
+import profileValidator from '../../validators/profile'
 
 const profileService = new ProfileService()
 
-let profileController = baseController('profile', profileService)
+let profileController = baseController('profile', profileService, profileValidator)
 
 profileController.getAllDeprecated = wrapAsync(async (req, res) => {
   const profiles = await profileService.getAll()

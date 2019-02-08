@@ -4,6 +4,7 @@ import jwt, { UnauthorizedError } from 'express-jwt'
 
 import bodyParser from 'body-parser'
 import { ValidationError } from 'sequelize'
+import CustomValidationError from '../validators/customValidationError'
 import users from './users'
 import profiles from './profiles'
 import skills from './skills'
@@ -22,8 +23,9 @@ require('dotenv').config()
 function validateErrorHandler (err, req, res, next) {
   if (err instanceof ValidationError) {
     let messages = err.errors.map((error) => error.message)
-
     res.status(400).json(utils.errorTemplate(400, 'Validation error', messages))
+  } else if (err instanceof CustomValidationError) {
+    res.status(400).json(utils.errorTemplate(400, 'Validation error', [err.message]))
   } else {
     next(err)
   }
@@ -62,7 +64,7 @@ export default () => {
   api.use('/swagger', swagger())
 
   api.use('/auth', auth())
-  api.use(jwt({secret: process.env.JWT_SECRET}).unless({path: ['/auth']})) // TODO: Study where this should actually be placed. Now unless don't work, just the order matters.
+  api.use(jwt({ secret: process.env.JWT_SECRET }).unless({ path: ['/auth'] })) // TODO: Study where this should actually be placed. Now unless don't work, just the order matters.
 
   api.use('/profiles', profiles())
   api.use('/skills', skills())
