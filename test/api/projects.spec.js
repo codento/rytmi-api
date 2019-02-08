@@ -2,7 +2,7 @@ import supertest from 'supertest'
 import defaults from 'superagent-defaults'
 import { generatePost, endpointAuthorizationTest } from '../utils'
 import app from '../../src/api/app'
-import { testUserToken, invalidToken } from './tokens'
+import { testAdminToken, invalidToken } from './tokens'
 
 const request = defaults(supertest(app))
 
@@ -20,7 +20,7 @@ const db = {}
 // TODO: Remaining consts
 
 beforeAll(async done => {
-  request.set('Authorization', `Bearer ${testUserToken}`)
+  request.set('Authorization', `Bearer ${testAdminToken}`)
   request.set('Accept', 'application/json')
 
   db.user1 = await createUser({

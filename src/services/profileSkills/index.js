@@ -8,11 +8,11 @@ export default class ProfileSkillService extends CrudService {
 
   getByProfileId (profileId) {
     return models.profileSkill
-      .findAll({where: {profileId: profileId}, attributes: { exclude: ['deletedAt'] }})
+      .findAll({ where: { profileId: profileId }, attributes: { exclude: ['deletedAt'] } })
   }
 
   removeDeletedAt (criteria) {
-    return this.model.findAll({where: criteria, paranoid: false}).then(result => {
+    return this.model.findAll({ where: criteria, paranoid: false }).then(result => {
       const toBeSaved = result.map(model => {
         model.setDataValue('deletedAt', null)
         return model.save()
@@ -23,25 +23,42 @@ export default class ProfileSkillService extends CrudService {
 
   getByIds (profileId, profileSkillId) {
     return models.profileSkill
-      .findOne({where: {
-        id: profileSkillId,
-        profileId: profileId
-      }})
+      .findOne({
+        where: {
+          id: profileSkillId,
+          profileId: profileId
+        }
+      })
   }
 
   create (profileId, attrs) {
-    attrs.profileId = parseInt(profileId)
-    return super.create(attrs)
+    return models.profileSkill.findOne({ where: { profileId, skillId: attrs.skillId }, paranoid: false })
+      .then((profileSkill) => {
+        if (profileSkill && profileSkill.deletedAt !== null) {
+          return this.removeDeletedAtAndUpdate(profileSkill, attrs)
+        }
+        attrs.profileId = parseInt(profileId)
+        return super.create(attrs)
+      })
+  }
+
+  removeDeletedAtAndUpdate (profileSkill, attrs) {
+    profileSkill.setDataValue('deletedAt', null)
+    return profileSkill.update(attrs).then(profileSkill => {
+      return profileSkill.save()
+    })
   }
 
   update (profileId, profileSkillId, attrs) {
     attrs.id = parseInt(profileSkillId)
     attrs.profileId = parseInt(profileId)
     return models.profileSkill
-      .findOne({where: {
-        id: profileSkillId,
-        profileId: profileId
-      }})
+      .findOne({
+        where: {
+          id: profileSkillId,
+          profileId: profileId
+        }
+      })
       .then(profileSkill => {
         return profileSkill
           .update(attrs)
@@ -50,10 +67,12 @@ export default class ProfileSkillService extends CrudService {
 
   delete (profileId, profileSkillId) {
     return models.profileSkill
-      .findOne({where: {
-        id: profileSkillId,
-        profileId: profileId
-      }})
+      .findOne({
+        where: {
+          id: profileSkillId,
+          profileId: profileId
+        }
+      })
       .then(profileSkill => {
         return profileSkill
           .destroy()
