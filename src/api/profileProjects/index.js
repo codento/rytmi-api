@@ -1,11 +1,12 @@
 import { Router } from 'express'
 import { profileProjectController, findProfileProjectOr404 } from '../../controllers/profileProjects'
+import { createPermissionHandler } from '../utils'
 
 const router = Router()
+const permissionHandler = createPermissionHandler('profileProject', 'profileId')
 
 export default () => {
   router.param('id', findProfileProjectOr404)
-
   /**
   * @swagger
   * /profileprojects:
@@ -94,7 +95,7 @@ export default () => {
   *           schema:
   *             $ref: "#/components/schemas/ProfileProject"
   */
-  router.put('/:id', profileProjectController.update)
+  router.put('/:id', permissionHandler, profileProjectController.update)
 
   /**
   * @swagger
@@ -119,7 +120,7 @@ export default () => {
   *           type: integer
   *           format: int64
   */
-  router.delete('/:id', profileProjectController.delete)
+  router.delete('/:id', permissionHandler, profileProjectController.delete)
 
   return router
 }

@@ -1,10 +1,13 @@
 import { Router } from 'express'
 import {profileSkillController, findProfileSkillFromProfileOr404} from '../../../controllers/profileSkills'
+import { createPermissionHandler } from '../../utils'
 
 const router = Router()
+const permissionHandler = createPermissionHandler('profile', 'id')
 
 export default () => {
   router.param('profileSkillId', findProfileSkillFromProfileOr404)
+  router.use(permissionHandler)
 
   /**
   * @swagger

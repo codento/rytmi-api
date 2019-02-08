@@ -3,7 +3,6 @@ import baseController from '../index'
 import { findObjectOr404, wrapAsync } from '../utils'
 import { errorTemplate } from '../../api/utils'
 import profileValidator from '../../validators/profile'
-import PermissionDeniedError from '../../validators/permissionDeniedError'
 
 const profileService = new ProfileService()
 
@@ -42,9 +41,6 @@ profileController.getList = wrapAsync(async (req, res) => {
 })
 
 profileController.update = wrapAsync(async (req, res) => {
-  if (!req.user.admin && req.user.userId !== req.body.id) {
-    throw new PermissionDeniedError('Permission denied')
-  }
   profileValidator.validate(req.body)
   const obj = await profileService.update(req['profile'].id, req.body)
   res.json(obj)
