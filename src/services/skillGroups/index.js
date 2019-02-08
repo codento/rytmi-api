@@ -3,6 +3,6 @@ import models from '../../db/models'
 
 export default class SkillGroupService extends CrudService {
   constructor () {
-    super(models.SkillGroup)
+    super(models.skillGroup)
   }
 }

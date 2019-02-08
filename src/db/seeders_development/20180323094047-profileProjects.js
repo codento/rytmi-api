@@ -15,11 +15,11 @@ factory.define('profileProject')
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.sequelize.query('SELECT * FROM "Profiles"', {
+    return queryInterface.sequelize.query('SELECT * FROM "profile"', {
       type: queryInterface.sequelize.QueryTypes.SELECT
     })
       .then(profiles => {
-        return queryInterface.sequelize.query('SELECT * FROM "Projects"', {
+        return queryInterface.sequelize.query('SELECT * FROM "project"', {
           type: queryInterface.sequelize.QueryTypes.SELECT
         })
           .then(projects => {
@@ -28,13 +28,13 @@ module.exports = {
               let randomProjects = []
               let noOfProjects = faker.random.number(5)
               while (randomProjects.length < noOfProjects) {
-                let project = projects[faker.random.number(projects.length -1)]
+                let project = projects[faker.random.number(projects.length - 1)]
                 if (randomProjects.indexOf(project) > -1) continue
                 else randomProjects.push(project)
               }
               let start = faker.date.recent(150)
               let finish = faker.date.future(1)
-              if(faker.random.number(1)){
+              if (faker.random.number(1)) {
                 start = faker.date.past(1, new Date(2017, 12, 31, 0, 0, 0, 0))
                 finish = faker.date.recent(50)
               }
@@ -48,12 +48,12 @@ module.exports = {
                 }))
               })
             })
-            return queryInterface.bulkInsert('ProfileProjects', profileProjects)
+            return queryInterface.bulkInsert('profileProject', profileProjects)
           })
       })
   },
 
   down: (queryInterface, Sequelize) => {
-    return queryInterface.bulkDelete('ProfileProjects')
+    return queryInterface.bulkDelete('profileProject')
   }
-};
+}

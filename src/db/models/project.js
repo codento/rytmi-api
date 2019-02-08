@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  let Project = sequelize.define('Project', {
+  let Project = sequelize.define('project', {
     name: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -43,7 +43,7 @@ module.exports = (sequelize, DataTypes) => {
   })
 
   Project.associate = (models) => {
-    models.Project.belongsToMany(models.Profile, {through: 'ProfileProject', foreignKey: 'projectId'})
+    models.project.belongsToMany(models.profile, {through: models.profileProject, foreignKey: 'projectId'})
   }
 
   return Project

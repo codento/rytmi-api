@@ -21,10 +21,10 @@ module.exports = {
       })
       projects.push(project)
     }
-    return queryInterface.bulkInsert('Projects', projects)
+    return queryInterface.bulkInsert('project', projects)
   },
 
   down: (queryInterface, Sequelize) => {
-    return queryInterface.bulkDelete('Projects')
+    return queryInterface.bulkDelete('project')
   }
-};
+}

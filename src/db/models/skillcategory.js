@@ -1,19 +1,19 @@
 module.exports = (sequelize, DataTypes) => {
-  let SkillCategory = sequelize.define('SkillCategory', {
+  let SkillCategory = sequelize.define('skillCategory', {
     title: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true
     },
-    SkillGroupId: {
+    skillGroupId: {
       type: DataTypes.INTEGER,
       allowNull: false
     }
   })
 
   SkillCategory.associate = function (models) {
-    models.SkillCategory.belongsTo(models.SkillGroup, { foreignKey: 'SkillGroupId' })
-    models.SkillCategory.hasMany(models.Skill)
+    models.skillCategory.belongsTo(models.skillGroup, { foreignKey: 'skillGroupId' })
+    models.skillCategory.hasMany(models.skill, { foreignKey: 'skillCategoryId' })
   }
 
   return SkillCategory

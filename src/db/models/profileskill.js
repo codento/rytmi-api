@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  let ProfileSkill = sequelize.define('ProfileSkill', {
+  let ProfileSkill = sequelize.define('profileSkill', {
     profileId: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -31,11 +31,14 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     },
     description: DataTypes.TEXT
+  },
+  {
+    paranoid: true
   })
 
   ProfileSkill.associate = (models) => {
-    models.ProfileSkill.belongsTo(models.Profile, {foreignKey: 'profileId'})
-    models.ProfileSkill.belongsTo(models.Skill, {foreignKey: 'skillId'})
+    models.profileSkill.belongsTo(models.profile, {foreignKey: 'profileId'})
+    models.profileSkill.belongsTo(models.skill, {foreignKey: 'skillId', hooks: true})
   }
 
   return ProfileSkill

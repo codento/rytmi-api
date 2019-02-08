@@ -18,7 +18,7 @@ describe('Seeding skills', () => {
 
       const seeder = require(migrations[0].path)
       const seederSkillNames = Object.keys(seeder.skills)
-      const imported = await models.Skill
+      const imported = await models.skill
         .findAll({where: {name: {[Op.in]: seederSkillNames}}})
 
       expect(imported.length).toBe(seederSkillNames.length)

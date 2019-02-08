@@ -3,16 +3,26 @@ import models from '../../db/models'
 
 export default class ProfileSkillService extends CrudService {
   constructor () {
-    super(models.ProfileSkill)
+    super(models.profileSkill)
   }
 
   getByProfileId (profileId) {
-    return models.ProfileSkill
-      .findAll({where: {profileId: profileId}})
+    return models.profileSkill
+      .findAll({where: {profileId: profileId}, attributes: { exclude: ['deletedAt'] }})
+  }
+
+  removeDeletedAt (criteria) {
+    return this.model.findAll({where: criteria, paranoid: false}).then(result => {
+      const toBeSaved = result.map(model => {
+        model.setDataValue('deletedAt', null)
+        return model.save()
+      })
+      return Promise.all(toBeSaved)
+    })
   }
 
   getByIds (profileId, profileSkillId) {
-    return models.ProfileSkill
+    return models.profileSkill
       .findOne({where: {
         id: profileSkillId,
         profileId: profileId
@@ -27,7 +37,7 @@ export default class ProfileSkillService extends CrudService {
   update (profileId, profileSkillId, attrs) {
     attrs.id = parseInt(profileSkillId)
     attrs.profileId = parseInt(profileId)
-    return models.ProfileSkill
+    return models.profileSkill
       .findOne({where: {
         id: profileSkillId,
         profileId: profileId
@@ -39,7 +49,7 @@ export default class ProfileSkillService extends CrudService {
   }
 
   delete (profileId, profileSkillId) {
-    return models.ProfileSkill
+    return models.profileSkill
       .findOne({where: {
         id: profileSkillId,
         profileId: profileId

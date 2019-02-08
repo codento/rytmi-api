@@ -24,16 +24,15 @@ async function getTicketPayload (idToken) {
       idToken: idToken,
       audience: process.env.GOOGLE_CLIENT_ID
     })
-    logger.debug('ticket: ' + ticket)
+    logger.debug('ticket: ', ticket)
     const ticketPayload = ticket.getPayload()
-    logger.debug('ticketPayload: ' + ticketPayload)
+    logger.debug('ticketPayload: ', ticketPayload)
     if (ticketPayload.hd !== process.env.GOOGLE_ORG_DOMAIN) {
       logger.error('Unauthorized login attempt from', ticketPayload.hd, 'with following info:', ticketPayload.sub)
       const e = new Error('Domain not authorized')
       e.rytmiErrorType = rytmiErrorType.NotAuthorizedError
       throw e
     }
-
     return ticketPayload
   } catch (err) {
     err.rytmiErrorType = rytmiErrorType.authenticationError
@@ -83,18 +82,17 @@ async function getOrCreateProfile (userId, ticketPayload) {
   return profile
 }
 
-function createToken (user) {
-  const expires = Math.floor(new Date() / 1000) + parseInt(process.env.JWT_VALID_TIME)
+function createToken (user, exp) {
   const payload = {
     googleId: user.googleId,
     userId: user.id,
     admin: user.admin,
-    exp: expires
+    exp: exp
   }
 
   return {
     token: jwt.sign(payload, process.env.JWT_SECRET),
-    expires: expires
+    expires: exp
   }
 }
 
@@ -109,12 +107,10 @@ async function verify (idToken) {
 
   const ticketPayload = await getTicketPayload(idToken)
   const googleId = ticketPayload['sub']
-
   logger.debug('googleID ' + googleId)
   const user = await getOrCreateUser(googleId, ticketPayload)
   const profile = await getOrCreateProfile(user.id, ticketPayload)
-
-  const tokenInfo = createToken(user)
+  const tokenInfo = createToken(user, ticketPayload.exp)
 
   return {
     message: 'Welcome to Rytmi app',
