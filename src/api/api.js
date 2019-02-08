@@ -5,7 +5,10 @@ import jwt, { UnauthorizedError } from 'express-jwt'
 import bodyParser from 'body-parser'
 import { ValidationError } from 'sequelize'
 import CustomValidationError from '../validators/customValidationError'
+<<<<<<< HEAD
 import PermissionDeniedError from '../validators/permissionDeniedError'
+=======
+>>>>>>> dev
 import users from './users'
 import profiles from './profiles'
 import skills from './skills'
