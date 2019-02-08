@@ -1,8 +1,10 @@
 import { Router } from 'express'
 import { profileProjectController, findProfileFromProjectOr404 } from '../../../controllers/profileProjects'
 import { findProfileOr404 } from '../../../controllers/profiles'
+import { createPermissionHandler } from '../../utils'
 
 const router = Router()
+const permissionHandler = createPermissionHandler('profile', 'id')
 
 export default () => {
   router.param('profileId', findProfileFromProjectOr404)
@@ -110,7 +112,7 @@ export default () => {
   *           schema:
   *             $ref: "#/components/schemas/ProfileProject"
   */
-  router.post('/:anyProjectId', profileProjectController.create)
+  router.post('/:anyProjectId', permissionHandler, profileProjectController.create)
 
   return router
 }

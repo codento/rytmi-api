@@ -5,6 +5,7 @@ import jwt, { UnauthorizedError } from 'express-jwt'
 import bodyParser from 'body-parser'
 import { ValidationError } from 'sequelize'
 import CustomValidationError from '../validators/customValidationError'
+import PermissionDeniedError from '../validators/permissionDeniedError'
 import users from './users'
 import profiles from './profiles'
 import skills from './skills'
@@ -26,6 +27,8 @@ function validateErrorHandler (err, req, res, next) {
     res.status(400).json(utils.errorTemplate(400, 'Validation error', messages))
   } else if (err instanceof CustomValidationError) {
     res.status(400).json(utils.errorTemplate(400, 'Validation error', [err.message]))
+  } else if (err instanceof PermissionDeniedError) {
+    res.status(403).json(utils.errorTemplate(403, 'Permission denied', [err.message]))
   } else {
     next(err)
   }

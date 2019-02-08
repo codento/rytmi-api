@@ -2,7 +2,7 @@ import { generatePost, endpointAuthorizationTest } from '../utils'
 import app from '../../src/api/app'
 import supertest from 'supertest'
 import defaults from 'superagent-defaults'
-import { testUserToken, invalidToken } from './tokens'
+import { createUserToken, testAdminToken, invalidToken } from './tokens'
 
 const request = defaults(supertest(app))
 
@@ -17,9 +17,8 @@ const createProfileSkill =
 const db = {}
 
 beforeAll(async done => {
-  request.set('Authorization', `Bearer ${testUserToken}`)
   request.set('Accept', 'application/json')
-
+  request.set('Authorization', `Bearer ${testAdminToken}`)
   db.skill1 = await createSkill({
     name: 'Symbian C++',
     description: 'blah blah',
@@ -99,6 +98,10 @@ beforeAll(async done => {
 })
 
 describe('Fetching profiles', () => {
+  beforeEach(() => {
+    request.set('Authorization', `Bearer ${createUserToken()}`)
+  })
+
   it('should redirect to right path', async () => {
     await request
       .get(profileEndpoint)
@@ -156,8 +159,18 @@ describe('Creating and updating profiles', () => {
       firstName: 'tupu',
       lastName: 'ankka',
       active: true,
-      admin: true
+      admin: false
     })
+
+    const userTokenDetails = {
+      googleId: '87637432435428',
+      userId: user.id,
+      profileId: user.id,
+      admin: false,
+      email: 'test@user.com'
+    }
+
+    request.set('Authorization', `Bearer ${createUserToken(userTokenDetails)}`)
 
     const attrs = {
       userId: user.id,
@@ -215,6 +228,16 @@ describe('Creating and updating profiles', () => {
       admin: true
     })
 
+    const userTokenDetails = {
+      googleId: '87637432435428',
+      userId: user.id,
+      profileId: user.id,
+      admin: false,
+      email: 'test@user.com'
+    }
+
+    request.set('Authorization', `Bearer ${createUserToken(userTokenDetails)}`)
+
     const attrs = {
       id: 999999999,
       userId: user.id,
@@ -247,6 +270,57 @@ describe('Creating and updating profiles', () => {
       .expect('Content-Type', /json/)
       .expect(200)
     expect(fetchedAgain.body.id).not.toBe(attrs.id)
+  })
+
+  it('should only allow user to edit their own profile', async () => {
+    const userTokenDetails = {
+      googleId: '87637432435428',
+      userId: 1,
+      profileId: 1,
+      admin: false,
+      email: 'test@user.com'
+    }
+
+    request.set('Authorization', `Bearer ${createUserToken(userTokenDetails)}`)
+
+    const attrs = {
+      userId: 3,
+      lastName: 'Name',
+      firstName: 'Updated',
+      email: 'updated@example.com',
+      active: false
+    }
+
+    await request
+      .put(profileEndpoint + '3')
+      .send(attrs)
+      .expect(403)
+  })
+
+  it('should allow admin to edit any profile', async () => {
+    const userTokenDetails = {
+      googleId: '87637432435428',
+      userId: 1,
+      profileId: 1,
+      admin: true,
+      email: 'test@user.com'
+    }
+
+    request.set('Authorization', `Bearer ${createUserToken(userTokenDetails)}`)
+
+    const attrs = {
+      userId: 3,
+      lastName: 'Name',
+      firstName: 'Updated',
+      email: 'updated@example.com',
+      active: false
+    }
+
+    const updated = await request
+      .put(profileEndpoint + '3')
+      .send(attrs)
+      .expect(200)
+    expect(updated.body).toMatchObject(attrs)
   })
 
   it('should not allow two profiles with the same email', async () => {

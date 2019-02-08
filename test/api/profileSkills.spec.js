@@ -2,7 +2,7 @@ import { generatePost, endpointAuthorizationTest } from '../utils'
 import app from '../../src/api/app'
 import supertest from 'supertest'
 import defaults from 'superagent-defaults'
-import { testUserToken, invalidToken } from './tokens'
+import { testAdminToken, invalidToken } from './tokens'
 
 const request = defaults(supertest(app))
 
@@ -18,7 +18,7 @@ const createProfileSkill =
 const db = {}
 
 beforeAll(async done => {
-  request.set('Authorization', `Bearer ${testUserToken}`)
+  request.set('Authorization', `Bearer ${testAdminToken}`)
   request.set('Accept', 'application/json')
 
   db.skill1 = await createSkill({
