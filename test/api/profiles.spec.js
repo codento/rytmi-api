@@ -102,13 +102,6 @@ describe('Fetching profiles', () => {
     request.set('Authorization', `Bearer ${createUserToken()}`)
   })
 
-  it('should redirect to right path', async () => {
-    await request
-      .get(profileEndpoint)
-      .expect(301)
-      .expect('Location', '?active=true')
-  })
-
   it('should return active profiles using qs', async () => {
     const active = await request
       .get(`${profileEndpoint}?active=true`)
@@ -118,25 +111,18 @@ describe('Fetching profiles', () => {
     expect(active.body).not.toContainEqual(db.user2Profile)
   })
 
-  it('should return 404 with wrong active value', async () => {
-    await request
-      .get(`${profileEndpoint}?active=foo`)
-      .expect(404)
-  })
-
-  it('should return all profiles with deprecation warning', async () => {
-    const all = await request
-      .get(profileEndpoint + '/all')
-      .expect(299)
+  it('should return inactive profiles using qs', async () => {
+    const active = await request
+      .get(`${profileEndpoint}?active=false`)
       .expect('Content-Type', /json/)
-    expect(all.headers).toHaveProperty('warning')
-    expect(all.body).toEqual(
-      expect.arrayContaining([db.user1Profile, db.user2Profile]))
+      .expect(200)
+    expect(active.body).toContainEqual(db.user2Profile)
+    expect(active.body).not.toContainEqual(db.user1Profile)
   })
 
   it('should return all profiles', async () => {
     const all = await request
-      .get(profileEndpoint + '?active=*')
+      .get(profileEndpoint)
       .expect(200)
       .expect('Content-Type', /json/)
     expect(all.body).toEqual(
@@ -298,29 +284,21 @@ describe('Creating and updating profiles', () => {
   })
 
   it('should allow admin to edit any profile', async () => {
-    const userTokenDetails = {
-      googleId: '87637432435428',
-      userId: 1,
-      profileId: 1,
-      admin: true,
-      email: 'test@user.com'
-    }
+    request.set('Authorization', `Bearer ${testAdminToken}`)
 
-    request.set('Authorization', `Bearer ${createUserToken(userTokenDetails)}`)
-
-    const attrs = {
-      userId: 3,
-      lastName: 'Name',
-      firstName: 'Updated',
-      email: 'updated@example.com',
+    const updatedAttrs = {
+      userId: 4,
+      lastName: 'IS',
+      firstName: 'UNIQ',
+      email: 'somemailandstuffcan@example.com',
       active: false
     }
 
     const updated = await request
-      .put(profileEndpoint + '3')
-      .send(attrs)
+      .put(profileEndpoint + '4')
+      .send(updatedAttrs)
       .expect(200)
-    expect(updated.body).toMatchObject(attrs)
+    expect(updated.body).toMatchObject(updatedAttrs)
   })
 
   it('should not allow two profiles with the same email', async () => {
