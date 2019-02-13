@@ -24,8 +24,7 @@ describe('API Users endpoint', () => {
   })
 
   describe('Fetching users', () => {
-    // Temporary as this will b
-    xit('should allow authorized user to fetch all users', async () => {
+    it('should allow authorized user to fetch all users', async () => {
       const expectedUsers = users
       const response = await request
         .get(endpoint)
