@@ -63,29 +63,6 @@ export default () => {
 
   /**
   * @swagger
-  * /profiles/all:
-  *   get:
-  *     description: List of all profiles, including inactive profiles
-  *     tags:
-  *       - profiles
-  *     produces:
-  *       - application/json
-  *     responses:
-  *       200:
-  *         content:
-  *           application/json:
-  *             schema:
-  *               type: array
-  *               items:
-  *                 $ref: "#/components/schemas/Profile"
-  *         description: An array of JSON objects containing profiles
-  *       401:
-  *         description: Unauthorized
-  */
-  router.get('/all', profileController.getAllDeprecated)
-
-  /**
-  * @swagger
   * /profiles/{id}/:
   *   get:
   *     description: Show single profile

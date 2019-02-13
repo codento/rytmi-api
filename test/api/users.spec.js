@@ -1,174 +1,149 @@
-import { generatePost, endpointAuthorizationTest } from '../utils'
+import { endpointAuthorizationTest } from '../utils'
 import app from '../../src/api/app'
 import supertest from 'supertest'
 import defaults from 'superagent-defaults'
 import { testUserToken, invalidToken } from './tokens'
+import { users } from '../mockData/mockUsers'
+import { user } from '../../src/db/models'
 
 const request = defaults(supertest(app))
 const endpoint = '/api/users/'
 
-const createUser = generatePost(request, endpoint)
-
-const db = {}
-
-beforeAll(async done => {
-  request.set('Authorization', `Bearer ${testUserToken}`)
-  request.set('Accept', 'application/json')
-
-  db.user1 = await createUser({
-    googleId: '123456',
-    firstName: 'tupu',
-    lastName: 'ankka',
-    active: true,
-    admin: true
-  })
-  db.user2 = await createUser({
-    googleId: '234567',
-    firstName: 'hupu',
-    lastName: 'ankka',
-    active: false,
-    admin: false
-  })
-  db.user3 = await createUser({
-    googleId: '345678',
-    firstName: 'lupu',
-    lastName: 'ankka',
-    active: false,
-    admin: false
+describe('API Users endpoint', () => {
+  beforeAll(() => {
+    request.set('Authorization', `Bearer ${testUserToken}`)
+    request.set('Accept', 'application/json')
   })
 
-  done()
-})
-
-describe('Fetching Users', () => {
-  it('should return all users', async () => {
-    const all = await request
-      .get(endpoint)
-      .expect('Content-Type', /json/)
-      .expect(200)
-    expect(all.body).toEqual(
-      expect.arrayContaining([db.user1, db.user2, db.user3]))
+  afterAll(() => {
+    return user.destroy({
+      where: {
+        firstName: 'Changed again'
+      }
+    })
   })
 
-  it('should return user by id', async () => {
-    const fetched = await request.get(endpoint + db.user1.id)
-      .expect('Content-Type', /json/)
-      .expect(200)
-    expect(fetched.body).toMatchObject(db.user1)
+  describe('Fetching users', () => {
+    // Temporary as this will b
+    xit('should allow authorized user to fetch all users', async () => {
+      const expectedUsers = users
+      const response = await request
+        .get(endpoint)
+        .expect('Content-Type', /json/)
+        .expect(200)
+      expect(response.body.length).toEqual(expectedUsers.length)
+      response.body.forEach((user, idx) => {
+        expect(user).toMatchObject(expectedUsers[idx])
+      })
+    })
+
+    it('should allow authorized user to fetch user with id', async () => {
+      const expectedUser = users[0]
+      const response = await request.get(endpoint + 1)
+        .expect('Content-Type', /json/)
+        .expect(200)
+      expect(response.body).toMatchObject(expectedUser)
+    })
+
+    it('should return 404 for authorized user when user does not exist', async () => {
+      await request.get(endpoint + 123).expect(404)
+    })
   })
 
-  it('should return 404 for invalid user id', () => {
-    return request.get('/api/users/1000')
-      .expect(404)
+  describe('Creating and updating users', () => {
+    let userId = null
+
+    it('should allow authorized user to create user', async () => {
+      const user = {
+        googleId: '112233',
+        firstName: 'Created',
+        lastName: 'User',
+        active: true,
+        admin: false
+      }
+
+      const response = await request.post(endpoint)
+        .send(user)
+        .expect('Content-Type', /json/)
+        .expect(201)
+      expect(response.body).toMatchObject(user)
+
+      const { body } = await request.get(endpoint + response.body.id)
+        .expect('Content-Type', /json/)
+        .expect(200)
+      expect(body).toMatchObject(user)
+      userId = body.id
+    })
+
+    it('should allow authorized user to update user', async () => {
+      const user = {
+        id: userId,
+        googleId: '112233',
+        firstName: 'Changed',
+        lastName: 'User',
+        active: true,
+        admin: false
+      }
+
+      const response = await request.put(endpoint + userId)
+        .send({ firstName: 'Changed' })
+        .expect('Content-Type', /json/)
+        .expect(200)
+      expect(response.body).toMatchObject(user)
+    })
+
+    it('id attribute sent should be ignored when updating user', async () => {
+      const user = {
+        id: userId,
+        googleId: '112233',
+        firstName: 'Changed again',
+        lastName: 'User',
+        active: true,
+        admin: false
+      }
+
+      const response = await request.put(endpoint + userId)
+        .send({ id: 10, firstName: 'Changed again' })
+        .expect('Content-Type', /json/)
+        .expect(200)
+      expect(response.body).toMatchObject(user)
+
+      const { body } = await request.get(endpoint + response.body.id)
+        .expect('Content-Type', /json/)
+        .expect(200)
+      expect(body).toMatchObject(user)
+    })
+
+    it('should return 404 when updating invalid user id', () => {
+      return request
+        .put('/api/users/1000')
+        .expect(404)
+    })
+
+    it('should not be able to insert two users with same google id', async () => {
+      const user = {
+        googleId: '112233',
+        firstName: 'Failing insert',
+        lastName: 'User',
+        active: true,
+        admin: false
+      }
+
+      const validationErrors = ['googleId must be unique']
+
+      const response = await request.post(endpoint)
+        .send(user)
+        .expect('Content-Type', /json/)
+        .expect(400)
+      expect(response.body.error.details).toEqual(validationErrors)
+    })
   })
-})
 
-describe('Creating and updating users', () => {
-  it('should persist and return new user', async () => {
-    const user = {
-      'googleId': '456789',
-      'firstName': 'new',
-      'lastName': 'user',
-      'active': true,
-      'admin': false
-    }
-
-    const saved = await request
-      .post(endpoint)
-      .send(user)
-      .expect(201)
-    expect(saved.body).toMatchObject(user)
-
-    const fetched = await request.get(endpoint + saved.body.id)
-      .expect('Content-Type', /json/)
-      .expect(200)
-    expect(fetched.body).toMatchObject(user)
+  describe('Testing authorization of endpoints', () => {
+    request.set('Authorization', `Bearer ${invalidToken}`)
+    endpointAuthorizationTest(request.request.get, '/api/users')
+    endpointAuthorizationTest(request.request.post, '/api/users')
+    endpointAuthorizationTest(request.request.get, '/api/users/1')
+    endpointAuthorizationTest(request.request.put, '/api/users/1')
   })
-
-  it('should update user and return the updated user', async () => {
-    const current = await request.get(endpoint + db.user1.id)
-    const user = {
-      'googleId': '123456',
-      'firstName': 'Dewey',
-      'lastName': 'updated',
-      'active': true,
-      'admin': false
-    }
-    const new_ = await request
-      .put(endpoint + db.user1.id)
-      .send(user)
-      .expect(200)
-    expect(new_.body).toMatchObject(user)
-    expect(new_.body).not.toMatchObject(current)
-  })
-
-  it('should ignore passed id attribute', async () => {
-    const user = {
-      id: 999999999,
-      'googleId': '45616234456',
-      'firstName': 'ignoremyid',
-      'lastName': 'fadsf',
-      'active': true,
-      'admin': false
-    }
-
-    const created = await request
-      .post(endpoint)
-      .send(user)
-      .expect(201)
-    expect(created.body.id).not.toBe(user.id)
-
-    const fetched = await request
-      .get(endpoint + created.body.id)
-      .expect('Content-Type', /json/)
-      .expect(200)
-    expect(fetched.body.id).not.toBe(user.id)
-
-    const updated = await request
-      .put(endpoint + created.body.id)
-      .send(user)
-      .expect(200)
-    expect(updated.body.id).not.toBe(user.id)
-
-    const fetchedAgain = await request
-      .get(endpoint + created.body.id)
-      .expect('Content-Type', /json/)
-      .expect(200)
-    expect(fetchedAgain.body.id).not.toBe(user.id)
-  })
-
-  it('should return 404 when updating invalid user id', () => {
-    return request
-      .put('/api/users/1000')
-      .expect(404)
-  })
-
-  it('should not allow two users with the same username', async () => {
-    const user = {
-      'googleId': 'mustbeunique',
-      'firstName': 'MrUnique',
-      'lastName': 'adfasd',
-      'active': true,
-      'admin': false
-    }
-
-    const validationErrors = ['googleId must be unique']
-
-    await createUser(user)
-
-    const failed = await request
-      .post(endpoint)
-      .send(user)
-      .expect(400)
-    expect(failed.body.error.details).toEqual(validationErrors)
-  })
-})
-
-describe('Endpoint authorization', () => {
-  request.set('Authorization', `Bearer ${invalidToken}`)
-
-  endpointAuthorizationTest(request.request.get, '/api/users')
-  endpointAuthorizationTest(request.request.post, '/api/users')
-  endpointAuthorizationTest(request.request.get, '/api/users/1')
-  endpointAuthorizationTest(request.request.put, '/api/users/1')
 })
