@@ -13,7 +13,7 @@
     "build": "babel src -d dist",
     "serve": "sequelize db:migrate && sequelize db:seed:all && node dist/api",
     "docker-build": "docker-compose build",
-    "test": "jest --forceExit",
+    "test": "jest --forceExit --runInBand",
     "testwatch": "jest --watch --forceExit",
     "test:debug": "node --inspect-brk ./node_modules/jest/bin/jest.js --runInBand",
     "create-html-doc": "node node_modules/spectacle-docs/bin/spectacle.js -t doc/ doc/openapi-spec.json",
