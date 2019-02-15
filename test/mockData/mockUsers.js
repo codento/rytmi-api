@@ -11,7 +11,7 @@ const adminUser = {
   firstName: 'Admin',
   lastName: 'User',
   active: true,
-  admin: false
+  admin: true
 }
 
 const users = [basicUser, adminUser]
