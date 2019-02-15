@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import skills from './skills'
 import projects from './projects'
-import {profileController, findProfileOr404} from '../../controllers/profiles'
+import { profileController, findProfileOr404 } from '../../controllers/profiles'
 import { createPermissionHandler } from '../utils'
 
 const router = Router()
