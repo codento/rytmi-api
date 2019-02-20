@@ -89,6 +89,15 @@ describe('API skillcategories endpoint', () => {
       const response = await request.post(skillCategoriesEndpoint).send(sameName).expect(400)
       expect(response.body.error.details).not.toBe(null)
     })
+
+    it('should not allow to insert skill category without skill group id', async () => {
+      const noSkillGroupId = {
+        title: 'System administration',
+        skillGroupId: null
+      }
+      const response = await request.post(skillCategoriesEndpoint).send(noSkillGroupId).expect(400)
+      expect(response.body.error.details).not.toBe(null)
+    })
   })
 
   describe('Endpoint authorization', () => {
