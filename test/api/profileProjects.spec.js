@@ -9,7 +9,6 @@ import {
   project as projectModel,
   profileProject as ppModel
 } from '../../src/db/models'
-import { projects } from '../mockData/mockProjects'
 
 const request = defaults(supertest(app))
 
@@ -49,7 +48,7 @@ describe('API profileprojects endpoint', () => {
     await ppModel.bulkCreate([firstProfileProject, secondProfileProject])
   })
   afterAll(async () => {
-    await ppModel.destroy({ where: {}, truncate: true })
+    await ppModel.destroy({ where: {}, truncate: false })
   })
 
   describe('Fetching profile projects', () => {
