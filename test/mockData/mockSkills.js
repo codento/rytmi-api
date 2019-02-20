@@ -3,13 +3,18 @@ const softwareDevelopment = {
   title: 'Software development'
 }
 
+const uncategorized = {
+  title: 'Uncategorized',
+  skillGroupId: 1
+}
+
 const frontEndDevelopment = {
   title: 'Front-End development',
-  skillGroupId: 1
+  skillGroupId: 2
 }
 const backEndDevelopment = {
   title: 'Back-End development',
-  skillGroupId: 1
+  skillGroupId: 2
 }
 
 const react = {
@@ -24,6 +29,6 @@ const nodeJs = {
 
 module.exports = {
   skills: [nodeJs, react],
-  skillCategories: [frontEndDevelopment, backEndDevelopment],
+  skillCategories: [uncategorized, frontEndDevelopment, backEndDevelopment],
   skillGroups: [softwareDevelopment]
 }

@@ -39,7 +39,8 @@ const insertProjects = async () => {
 const createSkills = async () => {
   await skillGroup.bulkCreate(skillGroups)
   const createdSkillGroup = await skillGroup.findAll({ where: { title: skillGroups[0].title } })
-  const skillCategoriesToInsert = skillCategories.map(skillCategory => {
+  // Slicing first from skillCategories as it is inserted with migrations to db
+  const skillCategoriesToInsert = skillCategories.slice(1).map(skillCategory => {
     skillCategory.skillGroupId = createdSkillGroup[0].id
     return skillCategory
   })
