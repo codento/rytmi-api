@@ -29,7 +29,7 @@ describe('API Projects endpoint', () => {
     request.set('Authorization', `Bearer ${jwtToken}`)
   })
   afterAll(async () => {
-    await ppModel.destroy({ where: {}, truncate: false })
+    await ppModel.destroy({ where: {}, truncate: true, force: true })
   })
 
   describe('Fetching projects', () => {

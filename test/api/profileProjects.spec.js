@@ -48,7 +48,7 @@ describe('API profileprojects endpoint', () => {
     await ppModel.bulkCreate([firstProfileProject, secondProfileProject])
   })
   afterAll(async () => {
-    await ppModel.destroy({ where: {}, truncate: false })
+    await ppModel.destroy({ where: {}, truncate: true, force: true })
   })
 
   describe('Fetching profile projects', () => {

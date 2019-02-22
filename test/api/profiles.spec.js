@@ -32,6 +32,10 @@ describe('API profile endpoint', () => {
     request.set('Authorization', `Bearer ${jwtToken}`)
   })
 
+  afterAll(async () => {
+    await profileSkillModel.destroy({ where: {}, truncate: true, force: true })
+  })
+
   describe('Fetching profiles', () => {
     it('should allow authorized users to fetch profiles', async () => {
       const expectedProfiles = profiles
