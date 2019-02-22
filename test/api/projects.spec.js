@@ -15,7 +15,7 @@ const request = defaults(supertest(app))
 const projectEndpoint = '/api/projects/'
 
 describe('API Projects endpoint', () => {
-  let normalUser
+  let normalUser, refactoringProjectId
   beforeAll(async () => {
     const users = await userModel.findAll()
     normalUser = users.filter((user) => user.admin === false).pop()
@@ -71,6 +71,15 @@ describe('API Projects endpoint', () => {
       }
       const response = await request.post(projectEndpoint).send(refactoringCode).expect(201)
       expect(response.body).toMatchObject(refactoringCode)
+      refactoringProjectId = response.body.id
+    })
+  })
+
+  describe('Deleting projects', () => {
+    it('should allow authorized user to delete a project', async () => {
+      await request.delete(projectEndpoint + refactoringProjectId).expect(204)
+      const projects = await projectModel.findAll({ where: { id: refactoringProjectId } })
+      expect(projects.length).toBe(0)
     })
   })
 
