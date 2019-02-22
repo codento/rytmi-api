@@ -65,8 +65,8 @@ describe('API auth endpoint', () => {
         .expect('Content-Type', /json/)
         .expect(200)
       expect(response.body.message).toBe('Welcome to Rytmi app')
-      const usersAfterLogin = await userModel.findAll()
-      const [createdUser] = usersAfterLogin.filter(user => user.googleId === googleAuthPayload.sub)
+      const usersAfterLogin = await userModel.findAll();
+      ([createdUser] = usersAfterLogin.filter(user => user.googleId === googleAuthPayload.sub))
       expect(usersAfterLogin.length).toBe(expectedLength)
       expect(createdUser.firstName).toBe(googleAuthPayload.given_name)
       expect(createdUser.lastName).toBe(googleAuthPayload.family_name)
@@ -88,6 +88,27 @@ describe('API auth endpoint', () => {
         .send({ id_token: 'mocks.jwt.token' })
         .expect('Content-Type', /json/)
         .expect(401)
+    })
+
+    it('should throw error when missing id token', async () => {
+      const googleAuthPayload = {
+        sub: existingUser.googleId,
+        hd: process.env.GOOGLE_ORG_DOMAIN,
+        given_name: existingUser.firstName,
+        family_name: existingUser.lastName,
+        email: `${existingUser.firstName}.${existingUser.lastName}@codento.com`,
+        exp: Math.round(Date.now()) + 3600
+      }
+
+      gAuth.__setMockPayload(googleAuthPayload)
+
+      const response = await request
+        .post(authEndpoint)
+        .set('Accept', 'application/json')
+        .send({})
+        .expect('Content-Type', /json/)
+        .expect(401)
+      expect(response.body.error.details).toBe('Missing client id')
     })
   })
 })
