@@ -6,7 +6,7 @@ import { createUserToken, invalidToken, testAdminToken } from './tokens'
 import {
   user as userModel,
   project as projectModel,
-  projectProfile as ppModel
+  profileProject as ppModel
 } from '../../src/db/models'
 import { projects } from '../mockData/mockProjects'
 
