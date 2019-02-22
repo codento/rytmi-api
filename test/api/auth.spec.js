@@ -1,92 +1,93 @@
 import supertest from 'supertest'
-import jwt from 'jsonwebtoken'
 import app from '../../src/api/app'
-import logger from './../../src/api/logging'
-import UserService from './../../src/services/users/index'
+import { user as userModel, profile as profileModel } from '../../src/db/models'
+// Mocked google auth lib and user service
+import * as gAuth from 'google-auth-library'
 
 const request = supertest(app)
+const authEndpoint = '/api/auth'
 
 require('dotenv').config()
 
-const userService = new UserService()
-
-describe('Logging in', () => {
-  it('should return a jwt for existing user', async () => {
-    logger.debug('Creating user')
-    const user = await userService.create({
-      googleId: '456165135781687432435471',
-      firstName: 'tupu',
-      lastName: 'ankka',
-      active: true,
-      admin: true
+describe('API auth endpoint', () => {
+  describe('Logging in', () => {
+    let existingUser, createdUser
+    beforeAll(async () => {
+      ([existingUser] = await userModel.findAll({ where: { admin: false } }))
     })
-    logger.debug('User: ' + user)
+    afterAll(async () => {
+      await profileModel.destroy({ where: { userId: createdUser.id } })
+      await userModel.destroy({ where: { googleId: createdUser.googleId } })
+    })
+    it('should return valid jwt for existing user', async () => {
+      const users = await userModel.findAll()
+      const expectedLength = users.length
+      const googleAuthPayload = {
+        sub: existingUser.googleId,
+        hd: process.env.GOOGLE_ORG_DOMAIN,
+        given_name: existingUser.firstName,
+        family_name: existingUser.lastName,
+        email: `${existingUser.firstName}.${existingUser.lastName}@codento.com`,
+        exp: Math.round(Date.now()) + 3600
+      }
 
-    const googleAuthPayload = {
-      sub: user.googleId,
-      hd: process.env.GOOGLE_ORG_DOMAIN,
-      given_name: 'Matt',
-      family_name: 'Damon',
-      email: 'matt@damon.com',
-      exp: Math.round(Date.now())
-    }
-    require('google-auth-library').__setMockPayload(googleAuthPayload)
+      gAuth.__setMockPayload(googleAuthPayload)
 
-    const response = await request
-      .post('/api/auth')
-      .set('Accept', 'application/json')
-      .send({id_token: 'fdasf.fads.fadsfad'})
-      .expect('Content-Type', /json/)
-      .expect(200)
-    expect(response.body.message).toBe('Welcome to Rytmi app')
+      const response = await request
+        .post(authEndpoint)
+        .set('Accept', 'application/json')
+        .send({ id_token: 'mocks.jwt.token' })
+        .expect('Content-Type', /json/)
+        .expect(200)
+      expect(response.body.message).toBe('Welcome to Rytmi app')
+      const usersAfterLogin = await userModel.findAll()
+      expect(usersAfterLogin.length).toBe(expectedLength)
+    })
 
-    const token = response.body.jwt.token
-    logger.debug('jwt token: ' + token)
-    const decoded = jwt.verify(token, process.env.JWT_SECRET)
-    logger.debug('decoded: ' + decoded)
-    expect(decoded.googleId).toBe(user.googleId)
-  })
+    it('should create new user if google id is not found', async () => {
+      const users = await userModel.findAll()
+      const expectedLength = users.length + 1
+      const googleAuthPayload = {
+        sub: '55556666',
+        hd: process.env.GOOGLE_ORG_DOMAIN,
+        given_name: 'Jorma',
+        family_name: 'Nyberg',
+        email: `jorma.nyberg@codento.com`,
+        exp: Math.round(Date.now()) + 3600
+      }
 
-  it('should create a new user if googleid not found', async () => {
-    const payload = {
-      sub: '1432178643217',
-      hd: process.env.GOOGLE_ORG_DOMAIN,
-      given_name: 'Al',
-      family_name: 'Pacino',
-      email: 'al@pacino.com',
-      exp: Math.round(Date.now())
-    }
-    require('google-auth-library').__setMockPayload(payload)
+      gAuth.__setMockPayload(googleAuthPayload)
 
-    const response = await request
-      .post('/api/auth')
-      .set('Accept', 'application/json')
-      .send({id_token: 'fdasf.fads.fadsfad'})
-      .expect('Content-Type', /json/)
-      .expect(200)
-    logger.debug('auth response: ' + JSON.stringify(response.body))
+      const response = await request
+        .post(authEndpoint)
+        .set('Accept', 'application/json')
+        .send({ id_token: 'mocks.jwt.token' })
+        .expect('Content-Type', /json/)
+        .expect(200)
+      expect(response.body.message).toBe('Welcome to Rytmi app')
+      const usersAfterLogin = await userModel.findAll()
+      const [createdUser] = usersAfterLogin.filter(user => user.googleId === googleAuthPayload.sub)
+      expect(usersAfterLogin.length).toBe(expectedLength)
+      expect(createdUser.firstName).toBe(googleAuthPayload.given_name)
+      expect(createdUser.lastName).toBe(googleAuthPayload.family_name)
+    })
 
-    expect(response.body.message).toBe('Welcome to Rytmi app')
-    const decoded = jwt.verify(response.body.jwt.token, process.env.JWT_SECRET)
-    const user = await userService.getByGoogleId(decoded.googleId)
-    expect(user).not.toBe(null)
-  })
+    it('should return 401 for foreign google domain', async () => {
+      const googleAuthPayload = {
+        sub: '4864318943578891',
+        hd: 'foreign.com',
+        given_name: 'Some',
+        family_name: 'Foreigner',
+        email: 'some@foreign.com'
+      }
+      gAuth.__setMockPayload(googleAuthPayload)
 
-  it('should return 401 for foreign google domain', async () => {
-    const payload = {
-      sub: '4864318943578891',
-      hd: 'foreign.com',
-      given_name: 'Some',
-      family_name: 'Foreigner',
-      email: 'some@foreign.com'
-    }
-    require('google-auth-library').__setMockPayload(payload)
-
-    await request
-      .post('/api/auth')
-      .set('Accept', 'application/json')
-      .send({id_token: 'fdasf.fads.fadsfad'})
-      .expect('Content-Type', /json/)
-      .expect(401)
+      await request
+        .post('/api/auth')
+        .set('Accept', 'application/json')
+        .send({ id_token: 'mocks.jwt.token' })
+        .expect('Content-Type', /json/)
+        .expect(401)
+    })
   })
 })
