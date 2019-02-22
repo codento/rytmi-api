@@ -281,6 +281,21 @@ describe('API profile endpoint', () => {
     })
   })
 
+  it('should recreate the profile skill if user is trying to add once deleted skill', async () => {
+    const [react] = await profileSkillModel.findAll({ where: { profileId: normalUser.id }, paranoid: false })
+    const profileSkill = {
+      description: 'some skill',
+      knows: 2,
+      profileId: normalUser.id,
+      skillId: react.id,
+      visibleInCV: true,
+      wantsTo: 2
+    }
+    const response = await request.post(profileEndpoint + normalUser.id + '/skills')
+      .send(profileSkill).expect(201)
+    expect(response.body).toMatchObject(profileSkill)
+  })
+
   describe('Deleting profiles', () => {
     it('should not allow deleting profiles', () => {
       request.delete(profileEndpoint + normalUser.id).expect(404)
