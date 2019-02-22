@@ -97,7 +97,7 @@ function createToken (user, exp) {
 }
 
 async function verify (idToken) {
-  if (idToken === 'undefined') {
+  if (idToken === undefined) {
     const e = new Error('Missing client id')
     e.rytmiErrorType = rytmiErrorType.authenticationError
     throw e
