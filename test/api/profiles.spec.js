@@ -7,7 +7,8 @@ import {
   profile as profileModel,
   user as userModel,
   skill as skillModel,
-  profileSkill as profileSkillModel
+  profileSkill as profileSkillModel,
+  profileProject as ppModel
 } from '../../src/db/models'
 import { profiles } from '../mockData/mockUsers'
 
@@ -18,6 +19,7 @@ const profileEndpoint = '/api/profiles/'
 let normalUser, adminUser
 
 describe('API profile endpoint', () => {
+  let profileProject
   beforeAll(async () => {
     const users = await userModel.findAll()
     normalUser = users.filter((user) => user.admin === false).pop()
@@ -29,6 +31,14 @@ describe('API profile endpoint', () => {
       admin: normalUser.admin,
       exp: Date.now() + 3600
     })
+    const firstProfileProject = {
+      profileId: normalUser.id,
+      projectId: 1,
+      workPercentage: 100,
+      startDate: new Date('2019-10-01').toISOString(),
+      endDate: new Date('2019-10-31').toISOString()
+    }
+    profileProject = await ppModel.create(firstProfileProject)
     request.set('Authorization', `Bearer ${jwtToken}`)
   })
 
@@ -294,6 +304,21 @@ describe('API profile endpoint', () => {
     const response = await request.post(profileEndpoint + normalUser.id + '/skills')
       .send(profileSkill).expect(201)
     expect(response.body).toMatchObject(profileSkill)
+  })
+
+  it('should allow authorized users to fetch project profiles', async () => {
+    const response = await request.get(profileEndpoint + normalUser.id + '/projects').expect(200)
+    expect(response.body.length).toBe(1)
+  })
+
+  it('should allow authorized users to fetch specific project profile', async () => {
+    const response = await request.get(profileEndpoint + normalUser.id + '/projects/' + profileProject.id).expect(200)
+    expect(response.body.projectId).toEqual(profileProject.projectId)
+    expect(response.body.profileId).toEqual(profileProject.profileId)
+  })
+
+  it('should return 404 for missing project profile', async () => {
+    await request.get(profileEndpoint + normalUser.id + '/projects/123123').expect(404)
   })
 
   describe('Deleting profiles', () => {
