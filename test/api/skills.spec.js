@@ -48,8 +48,8 @@ describe('API Skills endpoint', () => {
 
     it('should allow authorized user to create new skill', async () => {
       const skill = {
-        name: 'Java',
-        description: 'Good \'ol java',
+        name: 'Java Spring Boot',
+        description: 'Good \'ol java spring boot',
         skillCategoryId: 3
       }
       const response = await request.post(skillEndpoint).send(skill).expect(201)
@@ -59,7 +59,7 @@ describe('API Skills endpoint', () => {
     })
 
     it('should allow authorized user to edit existing skill', async () => {
-      const [java] = await skillModel.findAll({ where: { name: 'Java' } })
+      const [java] = await skillModel.findAll({ where: { name: 'Java Spring Boot' } })
       java.skillCategoryId = 1
       const attributes = { skillCategoryId: 1 }
       const response = await request.put(skillEndpoint + java.id).send(attributes).expect(200)
@@ -67,7 +67,7 @@ describe('API Skills endpoint', () => {
     })
 
     it('should allow authorized user to delete existing skill', async () => {
-      const [java] = await skillModel.findAll({ where: { name: 'Java' } })
+      const [java] = await skillModel.findAll({ where: { name: 'Java Spring Boot' } })
       await request.delete(skillEndpoint + java.id).expect(204)
       const skillsInDb = await skillModel.findAll()
       skillsInDb.forEach(skill => {
@@ -77,11 +77,11 @@ describe('API Skills endpoint', () => {
     })
 
     it('should recreate old soft deleted skill when created again', async () => {
-      const [java] = await skillModel.findAll({ where: { name: 'Java' }, paranoid: false })
+      const [java] = await skillModel.findAll({ where: { name: 'Java Spring Boot' }, paranoid: false })
       expect(java.deletedAt).not.toEqual(null)
       const skill = {
-        name: 'Java',
-        description: 'Good \'ol java again',
+        name: 'Java Spring Boot',
+        description: 'Good \'ol java spring boot again',
         skillCategoryId: 3
       }
       const response = await request.post(skillEndpoint).send(skill).expect(201)
