@@ -11,6 +11,14 @@ describe('Seeding skills', () => {
     '20180423085257-add-more-skills'
   ]
 
+  afterAll(async () => {
+    const seedsDown = []
+    skillSeeders.forEach(seederId => {
+      seedsDown.push(seederUmzug.down(seederId))
+    })
+    await Promise.all(seedsDown)
+  })
+
   skillSeeders.forEach(seederId => {
     it(`should import all skills from ${seederId}`, async () => {
       const migrations = await seederUmzug.up(seederId)
@@ -19,7 +27,7 @@ describe('Seeding skills', () => {
       const seeder = require(migrations[0].path)
       const seederSkillNames = Object.keys(seeder.skills)
       const imported = await models.skill
-        .findAll({where: {name: {[Op.in]: seederSkillNames}}})
+        .findAll({ where: { name: { [Op.in]: seederSkillNames } } })
 
       expect(imported.length).toBe(seederSkillNames.length)
       imported.forEach(importedSkill => {

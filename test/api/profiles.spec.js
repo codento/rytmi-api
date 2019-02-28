@@ -1,557 +1,346 @@
-import { generatePost, endpointAuthorizationTest } from '../utils'
+import { endpointAuthorizationTest } from '../utils'
 import app from '../../src/api/app'
 import supertest from 'supertest'
 import defaults from 'superagent-defaults'
-import { createUserToken, testAdminToken, invalidToken } from './tokens'
+import { invalidToken, createUserToken } from './tokens'
+import {
+  profile as profileModel,
+  user as userModel,
+  skill as skillModel,
+  profileSkill as profileSkillModel,
+  profileProject as ppModel
+} from '../../src/db/models'
+import { profiles } from '../mockData/mockUsers'
 
 const request = defaults(supertest(app))
 
 const profileEndpoint = '/api/profiles/'
-const skillEndpointFor =
-  profile => profileEndpoint + profile.id + '/skills/'
-const createProfile = generatePost(request, profileEndpoint)
-const createSkill = generatePost(request, '/api/skills/')
-const createUser = generatePost(request, '/api/users/')
-const createProfileSkill =
-  (profile, attrs) => generatePost(request, skillEndpointFor(profile))(attrs)
-const db = {}
 
-beforeAll(async done => {
-  request.set('Accept', 'application/json')
-  request.set('Authorization', `Bearer ${testAdminToken}`)
-  db.skill1 = await createSkill({
-    name: 'Symbian C++',
-    description: 'blah blah',
-    skillCategoryId: 1
-  })
-  db.skill2 = await createSkill({
-    name: 'ABAP',
-    description: 'blah blah',
-    skillCategoryId: 1
-  })
-  db.user1 = await createUser({
-    googleId: '489324891358',
-    firstName: 'tupu',
-    lastName: 'ankka',
-    active: true,
-    admin: true
-  })
-  db.user2 = await createUser({
-    googleId: '478135781687',
-    firstName: 'hupu',
-    lastName: 'ankka',
-    active: false,
-    admin: false
-  })
-  db.user1Profile = await createProfile({
-    userId: db.user1.id,
-    lastName: 'ankka',
-    firstName: 'tupu',
-    birthday: new Date('1970-01-01').toISOString(),
-    email: 'batman@example.com',
-    phone: '+358 40 41561',
-    title: 'Hero',
-    description: 'Lorem',
-    links: ['http://example.com'],
-    photoPath: 'http://example.com/batman.png',
-    active: true
-  })
-  db.user2Profile = await createProfile({
-    userId: db.user2.id,
-    lastName: 'ankka',
-    firstName: 'hupu',
-    birthday: new Date('1970-01-01').toISOString(),
-    email: 'robin@example.com',
-    phone: '09 4561 4561',
-    title: 'Sidekick',
-    description: 'Lorem',
-    links: ['http://example.com'],
-    photoPath: 'http://example.com/robin.png',
-    active: false
-  })
-  db.user1ProfileSkill1 = await createProfileSkill(db.user1Profile, {
-    profileId: db.user1Profile.id,
-    skillId: db.skill1.id,
-    knows: 5,
-    wantsTo: 1,
-    visibleInCV: true,
-    description: 'blah'
-  })
-  db.user1ProfileSkill2 = await createProfileSkill(db.user1Profile, {
-    profileId: db.user1Profile.id,
-    skillId: db.skill2.id,
-    knows: 3,
-    wantsTo: 0,
-    visibleInCV: true,
-    description: 'blah'
-  })
-  db.user2ProfileSkill = await createProfileSkill(db.user2Profile, {
-    profileId: db.user2Profile.id,
-    skillId: db.skill1.id,
-    knows: 0,
-    wantsTo: 5,
-    visibleInCV: true,
-    description: 'blah'
+let normalUser, adminUser
+
+describe('API profile endpoint', () => {
+  let profileProject
+  beforeAll(async () => {
+    const users = await userModel.findAll()
+    normalUser = users.filter((user) => user.admin === false).pop()
+    adminUser = users.filter((user) => user.admin === true).pop()
+    request.set('Accept', 'application/json')
+    const jwtToken = createUserToken({
+      googleId: normalUser.googleId,
+      userId: normalUser.id,
+      admin: normalUser.admin,
+      exp: Date.now() + 3600
+    })
+    const firstProfileProject = {
+      profileId: normalUser.id,
+      projectId: 1,
+      workPercentage: 100,
+      startDate: new Date('2019-10-01').toISOString(),
+      endDate: new Date('2019-10-31').toISOString()
+    }
+    profileProject = await ppModel.create(firstProfileProject)
+    request.set('Authorization', `Bearer ${jwtToken}`)
   })
 
-  done()
-})
-
-describe('Fetching profiles', () => {
-  beforeEach(() => {
-    request.set('Authorization', `Bearer ${createUserToken()}`)
+  afterAll(async () => {
+    await profileSkillModel.destroy({ where: {}, truncate: true, force: true })
   })
 
-  it('should return active profiles using qs', async () => {
-    const active = await request
-      .get(`${profileEndpoint}?active=true`)
-      .expect('Content-Type', /json/)
-      .expect(200)
-    expect(active.body).toContainEqual(db.user1Profile)
-    expect(active.body).not.toContainEqual(db.user2Profile)
-  })
-
-  it('should return inactive profiles using qs', async () => {
-    const active = await request
-      .get(`${profileEndpoint}?active=false`)
-      .expect('Content-Type', /json/)
-      .expect(200)
-    expect(active.body).toContainEqual(db.user2Profile)
-    expect(active.body).not.toContainEqual(db.user1Profile)
-  })
-
-  it('should return all profiles', async () => {
-    const all = await request
-      .get(profileEndpoint)
-      .expect(200)
-      .expect('Content-Type', /json/)
-    expect(all.body).toEqual(
-      expect.arrayContaining([db.user1Profile, db.user2Profile]))
-  })
-
-  it('should fetch profile by id', async () => {
-    const fetched = await request
-      .get(profileEndpoint + db.user1Profile.id)
-      .expect('Content-Type', /json/)
-      .expect(200)
-    expect(fetched.body).toMatchObject(db.user1Profile)
-  })
-})
-
-describe('Creating and updating profiles', () => {
-  it('should persist/update profile and return the created/updated profile', async () => {
-    const user = await createUser({
-      googleId: '87637432435428',
-      firstName: 'tupu',
-      lastName: 'ankka',
-      active: true,
-      admin: false
+  describe('Fetching profiles', () => {
+    it('should allow authorized users to fetch profiles', async () => {
+      const expectedProfiles = profiles
+      const response = await request.get(profileEndpoint).expect(200)
+      expect(response.body.length).toEqual(expectedProfiles.length)
+      response.body.forEach((profile, idx) => {
+        expect(profile).toMatchObject(expectedProfiles[idx])
+      })
     })
 
-    const userTokenDetails = {
-      googleId: '87637432435428',
-      userId: user.id,
-      profileId: user.id,
-      admin: false,
-      email: 'test@user.com'
-    }
-
-    request.set('Authorization', `Bearer ${createUserToken(userTokenDetails)}`)
-
-    const attrs = {
-      userId: user.id,
-      lastName: 'ankka',
-      firstName: 'tupu',
-      birthday: new Date('1970-01-01').toISOString(),
-      email: 'mrfreeze@example.com',
-      phone: '09 4616 1651 156',
-      title: 'Bad guy',
-      description: 'Lorem',
-      links: ['http://example.com'],
-      photoPath: 'http://example.com/mrfreeze.png',
-      active: false
-    }
-
-    const created = await request
-      .post(profileEndpoint)
-      .send(attrs)
-      .expect(201)
-    expect(created.body).toMatchObject(attrs)
-
-    const fetched = await request
-      .get(profileEndpoint + created.body.id)
-      .expect('Content-Type', /json/)
-      .expect(200)
-    expect(fetched.body).toMatchObject(created.body)
-
-    const updatedAttrs = {
-      userId: user.id,
-      lastName: 'Name',
-      firstName: 'Updated',
-      email: 'updated@example.com',
-      active: false
-    }
-
-    const updated = await request
-      .put(profileEndpoint + created.body.id)
-      .send(updatedAttrs)
-      .expect(200)
-    expect(updated.body).toMatchObject(updatedAttrs)
-
-    const fetchedAgain = await request
-      .get(profileEndpoint + created.body.id)
-      .expect('Content-Type', /json/)
-      .expect(200)
-    expect(fetchedAgain.body).toMatchObject(updatedAttrs)
-  })
-
-  it('should ignore passed id attribute', async () => {
-    const user = await createUser({
-      googleId: '18973217912375',
-      firstName: 'Joker',
-      lastName: 'Coolguy',
-      active: true,
-      admin: true
+    it('should allow authorized users to filter active profiles', async () => {
+      const expectedProfiles = profiles
+      const response = await request.get(profileEndpoint).query({ active: true }).expect(200)
+      expect(response.body.length).toEqual(expectedProfiles.length)
+      response.body.forEach((profile, idx) => {
+        expect(profile).toMatchObject(expectedProfiles[idx])
+      })
     })
 
-    const userTokenDetails = {
-      googleId: '87637432435428',
-      userId: user.id,
-      profileId: user.id,
-      admin: false,
-      email: 'test@user.com'
-    }
-
-    request.set('Authorization', `Bearer ${createUserToken(userTokenDetails)}`)
-
-    const attrs = {
-      id: 999999999,
-      userId: user.id,
-      lastName: 'Joker',
-      firstName: 'Mr',
-      email: 'joker@example.com',
-      active: false
-    }
-
-    const created = await request
-      .post(profileEndpoint)
-      .send(attrs)
-      .expect(201)
-    expect(created.body.id).not.toBe(attrs.id)
-
-    const fetched = await request
-      .get(profileEndpoint + created.body.id)
-      .expect('Content-Type', /json/)
-      .expect(200)
-    expect(fetched.body.id).not.toBe(attrs.id)
-
-    const updated = await request
-      .put(profileEndpoint + created.body.id)
-      .send(attrs)
-      .expect(200)
-    expect(updated.body.id).not.toBe(attrs.id)
-
-    const fetchedAgain = await request
-      .get(profileEndpoint + created.body.id)
-      .expect('Content-Type', /json/)
-      .expect(200)
-    expect(fetchedAgain.body.id).not.toBe(attrs.id)
-  })
-
-  it('should only allow user to edit their own profile', async () => {
-    const userTokenDetails = {
-      googleId: '87637432435428',
-      userId: 1,
-      profileId: 1,
-      admin: false,
-      email: 'test@user.com'
-    }
-
-    request.set('Authorization', `Bearer ${createUserToken(userTokenDetails)}`)
-
-    const attrs = {
-      userId: 3,
-      lastName: 'Name',
-      firstName: 'Updated',
-      email: 'updated@example.com',
-      active: false
-    }
-
-    await request
-      .put(profileEndpoint + '3')
-      .send(attrs)
-      .expect(403)
-  })
-
-  it('should allow admin to edit any profile', async () => {
-    request.set('Authorization', `Bearer ${testAdminToken}`)
-
-    const updatedAttrs = {
-      userId: 4,
-      lastName: 'IS',
-      firstName: 'UNIQ',
-      email: 'somemailandstuffcan@example.com',
-      active: false
-    }
-
-    const updated = await request
-      .put(profileEndpoint + '4')
-      .send(updatedAttrs)
-      .expect(200)
-    expect(updated.body).toMatchObject(updatedAttrs)
-  })
-
-  it('should not allow two profiles with the same email', async () => {
-    const user = await createUser({
-      googleId: '984324891222327',
-      firstName: 'tupu',
-      lastName: 'ankka',
-      active: true,
-      admin: true
+    it('should allow authorized users to filter inactive profiles', async () => {
+      const expectedProfiles = []
+      const response = await request.get(profileEndpoint).query({ active: false }).expect(200)
+      expect(response.body.length).toEqual(expectedProfiles.length)
+      response.body.forEach((profile, idx) => {
+        expect(profile).toMatchObject(expectedProfiles[idx])
+      })
     })
 
-    const profile = {
-      userId: user.id,
-      lastName: 'Scarecrow',
-      firstName: 'Mr',
-      email: db.user1Profile.email,
-      active: false
-    }
-
-    const validationErrors = ['email must be unique']
-
-    const failed = await request
-      .post(profileEndpoint)
-      .send(profile)
-      .expect(400)
-    expect(failed.body.error.details).toEqual(validationErrors)
-  })
-})
-
-describe('Fetching profileSkills', () => {
-  it('should return profileSkills for the user', async () => {
-    const profileSkills = await request
-      .get(skillEndpointFor(db.user1Profile))
-      .expect('Content-Type', /json/)
-      .expect(200)
-    expect(profileSkills.body).toEqual(
-      expect.arrayContaining([db.user1ProfileSkill1, db.user1ProfileSkill2]))
+    it('should allow authorized users to fetch specific user', async () => {
+      const expectedProfile = profiles[0]
+      const response = await request.get(profileEndpoint + normalUser.id).expect(200)
+      expect(response.body).toMatchObject(expectedProfile)
+    })
   })
 
-  it('should return profileSkill by id', async () => {
-    const profileSkill = await request
-      .get(skillEndpointFor(db.user1Profile) + db.user1ProfileSkill1.id)
-      .expect('Content-Type', /json/)
-      .expect(200)
-    expect(profileSkill.body).toMatchObject(db.user1ProfileSkill1)
+  describe('Creating profiles', () => {
+    it('should allow authorized user to create profile', async () => {
+      // Create new user to db
+      const user = {
+        googleId: '1122334455',
+        firstName: 'Some',
+        lastName: 'User',
+        active: true,
+        admin: false
+      }
+      const userResponse = await request.post('/api/users').send(user)
+      const userId = userResponse.body.id
+      const newProfile = {
+        userId: userId,
+        firstName: 'Some',
+        lastName: 'User',
+        birthday: new Date('1985-10-20').toISOString(),
+        email: 'some.user@codento.com',
+        phone: '0401231234',
+        title: 'Consultant',
+        description: 'Just consulting about everything',
+        links: [],
+        photoPath: 'from/somewhere',
+        active: true
+      }
+      const profileResponse = await request.post(profileEndpoint).send(newProfile).expect(201)
+      expect(profileResponse.body).toMatchObject(newProfile)
+      // Clean created user and profile
+      await profileModel.destroy({ where: { userId } })
+      await userModel.destroy({ where: { id: userId } })
+    })
   })
 
-  it('should return 404 for invalid profileskill', () => {
-    return request
-      .get(profileEndpoint + db.user1Profile.id + '/skills/1000')
-      .expect(404)
-  })
-  it('should return 404 if requesting other users profileskill', () => {
-    return request
-      .get(profileEndpoint + db.user2Profile.id + '/skills/' + db.user1ProfileSkill1.id)
-      .expect(404)
-  })
-})
-
-describe('Creating, updating and deleting profileSkills', () => {
-  it('should persist profileSkill and return the created profileSkill', async () => {
-    const user = await createUser({
-      googleId: '897321324798324',
-      firstName: 'tupu',
-      lastName: 'ankka',
-      active: true,
-      admin: true
+  describe('Updating profiles', () => {
+    it('should allow authorized user to edit him/her own profile', async () => {
+      const expectedProfile = profiles[0]
+      expectedProfile.firstName = 'Hessu'
+      const attributes = {
+        id: normalUser.id,
+        userId: normalUser.id,
+        firstName: 'Hessu'
+      }
+      const response = await request.put(profileEndpoint + normalUser.id).send(attributes).expect(200)
+      expect(response.body).toMatchObject(expectedProfile)
     })
 
-    const profile = await createProfile({
-      userId: user.id,
-      lastName: 'Pinquin',
-      firstName: 'Mr',
-      email: 'pinquin@example.com',
-      active: true
+    it('should allow authorized user to add skill to their own profile', async () => {
+      const [nodeJs] = await skillModel.findAll()
+      const profileSkill = {
+        description: 'so node',
+        knows: 0,
+        profileId: normalUser.id,
+        skillId: nodeJs.id,
+        visibleInCV: true,
+        wantsTo: 0
+      }
+      const response = await request.post(profileEndpoint + normalUser.id + '/skills/')
+        .send(profileSkill).expect(201)
+      expect(response.body).toMatchObject(profileSkill)
     })
 
-    const attrs = {
-      skillId: db.skill1.id,
-      profileId: profile.id,
-      knows: 0,
-      wantsTo: 5,
-      visibleInCV: true,
-      description: 'blah'
-    }
+    it('should allow authorized user to fetch profile skills', async () => {
+      const expectedProfileSkills = await profileSkillModel.findAll({ where: { profileId: normalUser.id } })
+      const response = await request.get(profileEndpoint + normalUser.id + '/skills')
+      expect(response.body.length).toEqual(expectedProfileSkills.length)
+      expectedProfileSkills.forEach((profileSkill, idx) => {
+        expect(profileSkill.id).toEqual(response.body[idx].id)
+        expect(profileSkill.knows).toEqual(response.body[idx].knows)
+        expect(profileSkill.wantsTo).toEqual(response.body[idx].wantsTo)
+      })
+    })
 
-    const created = await request
-      .post(skillEndpointFor(profile))
-      .send(attrs)
-      .expect(201)
-    expect(created.body).toMatchObject(attrs)
+    it('should allow authorized user to edit skills of their own profile', async () => {
+      const profileSkills = await profileSkillModel.findAll({ where: { profileId: normalUser.id } })
+      const profileSkillToUpdate = {
+        id: profileSkills[0].id,
+        wantsTo: 3,
+        knows: 5
+      }
+      const response = await request.put(profileEndpoint + normalUser.id + '/skills/' + profileSkillToUpdate.id)
+        .send(profileSkillToUpdate)
+        .expect(200)
+      expect(response.body).toMatchObject(profileSkillToUpdate)
+    })
+    describe('Validating input', () => {
+      it('should not allow two profiles with the same email', async () => {
+        const attributes = {
+          id: normalUser.id,
+          userId: normalUser.id,
+          email: profiles[1].email
+        }
+        await request.put(profileEndpoint + normalUser.id).send(attributes).expect(400)
+        const unchangedProfile = await profileModel.findOne({ where: { userId: normalUser.id } })
+        expect(unchangedProfile.email).toEqual(profiles[0].email)
+      })
 
-    const fetched = await request
-      .get(skillEndpointFor(profile) + created.body.id)
-      .expect('Content-Type', /json/)
-      .expect(200)
-    expect(fetched.body).toMatchObject(created.body)
+      it('should not allow two skill profiles for same skill', async () => {
+        const [nodeJs] = await skillModel.findAll()
+        const profileSkill = {
+          description: 'so node',
+          knows: 0,
+          profileId: normalUser.id,
+          skillId: nodeJs.id,
+          visibleInCV: true,
+          wantsTo: 0
+        }
+        await request.post(profileEndpoint + normalUser.id + '/skills/')
+          .send(profileSkill).expect(400)
+      })
 
-    const updatedAttrs = {
-      skillId: db.skill2.id,
-      profileId: profile.id,
-      knows: 3,
-      wantsTo: 3,
-      visibleInCV: true,
-      description: 'blah'
-    }
+      it('should not allow to enter skill without mandatory fields missing', async () => {
+        const validationErrors = [
+          'profileSkill.skillId cannot be null',
+          'profileSkill.knows cannot be null',
+          'profileSkill.wantsTo cannot be null',
+          'profileSkill.visibleInCV cannot be null'
+        ]
 
-    const updated = await request
-      .put(skillEndpointFor(profile) + created.body.id)
-      .send(updatedAttrs)
-      .expect(200)
-    expect(updated.body).toMatchObject(updatedAttrs)
+        const created = await request
+          .post(profileEndpoint + normalUser.id + '/skills')
+          .send({})
+          .expect(400)
+        expect(created.body.error.details).toMatchObject(validationErrors)
+      })
+    })
 
-    const fetchedAgain = await request
-      .get(skillEndpointFor(profile) + updated.body.id)
-      .expect('Content-Type', /json/)
-      .expect(200)
-    expect(fetchedAgain.body).toMatchObject(updated.body)
+    describe('Updating as admin', () => {
+      beforeAll(() => {
+        const jwtToken = createUserToken({
+          googleId: adminUser.googleId,
+          userId: adminUser.id,
+          admin: adminUser.admin,
+          exp: Date.now() + 3600
+        })
+        request.set('Authorization', `Bearer ${jwtToken}`)
+      })
+      afterAll(() => {
+        const jwtToken = createUserToken({
+          googleId: normalUser.googleId,
+          userId: normalUser.id,
+          admin: normalUser.admin,
+          exp: Date.now() + 3600
+        })
+        request.set('Authorization', `Bearer ${jwtToken}`)
+      })
+
+      it('should allow admin to edit any profile', async () => {
+        const expectedProfile = profiles[0]
+        expectedProfile.firstName = 'Mikki'
+        const attributes = {
+          id: normalUser.id,
+          userId: normalUser.id,
+          firstName: 'Mikki'
+        }
+        const response = await request.put(profileEndpoint + normalUser.id).send(attributes).expect(200)
+        expect(response.body).toMatchObject(expectedProfile)
+      })
+
+      it('should allow admin to add skill to any profile', async () => {
+        const [, react] = await skillModel.findAll()
+        const profileSkill = {
+          description: 'so node',
+          knows: 2,
+          profileId: normalUser.id,
+          skillId: react.id,
+          visibleInCV: true,
+          wantsTo: 2
+        }
+        const response = await request.post(profileEndpoint + normalUser.id + '/skills/')
+          .send(profileSkill).expect(201)
+        expect(response.body).toMatchObject(profileSkill)
+      })
+
+      it('should allow admin to edit skills of any profile', async () => {
+        const profileSkills = await profileSkillModel.findAll({ where: { profileId: normalUser.id } })
+        const profileSkillToUpdate = {
+          id: profileSkills[0].id,
+          wantsTo: 4,
+          knows: 5
+        }
+        const response = await request.put(profileEndpoint + normalUser.id + '/skills/' + profileSkillToUpdate.id)
+          .send(profileSkillToUpdate)
+          .expect(200)
+        expect(response.body).toMatchObject(profileSkillToUpdate)
+      })
+
+      it('should allow admin user to delete skill from any profile', async () => {
+        const profileSkills = await profileSkillModel.findAll({ where: { profileId: normalUser.id } })
+        await request.delete(profileEndpoint + normalUser.id + '/skills/' + profileSkills[0].id)
+          .expect(204)
+        const profileSkillsAfterDelete = await profileSkillModel.findAll({ where: { profileId: normalUser.id }, paranoid: true })
+        expect(profileSkillsAfterDelete.length).toEqual(1)
+        profileSkillsAfterDelete.forEach((profileSkill) => {
+          expect(profileSkill.id).not.toEqual(profileSkills[0].id)
+        })
+      })
+    })
   })
 
-  it('should ignore profileId in body', async () => {
-    const user = await createUser({
-      googleId: '35723871489',
-      firstName: 'tupu',
-      lastName: 'ankka',
-      active: true,
-      admin: true
-    })
-
-    const profile = await createProfile({
-      userId: user.id,
-      lastName: 'Riddler',
-      firstName: 'Mr',
-      email: 'riddler@example.com',
-      active: true
-    })
-
-    const profileSkill = {
-      skillId: db.skill1.id,
-      profileId: db.user1Profile.id,
-      knows: 0,
-      wantsTo: 5,
-      visibleInCV: true,
-      description: 'blah'
-    }
-
-    const created = await request
-      .post(profileEndpoint + profile.id + '/skills/')
-      .send(profileSkill)
-      .expect(201)
-    expect(created.body.profileId).toEqual(profile.id)
-  })
-
-  it('should delete profileSkill', async () => {
-    await request
-      .delete(profileEndpoint + db.user1Profile.id + '/skills/' + db.user1ProfileSkill1.id)
+  it('should allow authorized user to delete skill from their profile', async () => {
+    const profileSkills = await profileSkillModel.findAll({ where: { profileId: normalUser.id } })
+    await request.delete(profileEndpoint + normalUser.id + '/skills/' + profileSkills[0].id)
       .expect(204)
-
-    return request
-      .get(profileEndpoint + db.user1Profile.id + '/skills/' + db.user1ProfileSkill1.id)
-      .expect('Content-Type', /json/)
-      .expect(404)
-    // TODO: decide what 404 body should contain
-    // expect(fetched.body).toBeNull()
-  })
-
-  it('should not allow multiple profileskills with the same profile/skill-combination', async () => {
-    const skill = await createSkill({
-      name: 'Coldfusion',
-      description: 'blah blah',
-      skillCategoryId: 1
+    const profileSkillsAfterDelete = await profileSkillModel.findAll({ where: { profileId: normalUser.id }, paranoid: true })
+    expect(profileSkillsAfterDelete.length).toEqual(0)
+    profileSkillsAfterDelete.forEach((profileSkill) => {
+      expect(profileSkill.id).not.toEqual(profileSkills[0].id)
     })
+  })
 
+  it('should recreate the profile skill if user is trying to add once deleted skill', async () => {
+    const [react] = await profileSkillModel.findAll({ where: { profileId: normalUser.id }, paranoid: false })
     const profileSkill = {
-      skillId: skill.id,
-      profileId: db.user1Profile.id,
-      knows: 3,
-      wantsTo: 3,
-      visibleInCV: true
+      description: 'some skill',
+      knows: 2,
+      profileId: normalUser.id,
+      skillId: react.id,
+      visibleInCV: true,
+      wantsTo: 2
     }
-
-    // TODO: does not tell that the *combination* of these should be unique
-    const validationErrors = ['profileId must be unique', 'skillId must be unique']
-
-    await request
-      .post(profileEndpoint + db.user1Profile.id + '/skills/')
-      .send(profileSkill)
-      .expect(201)
-
-    const failed = await request
-      .post(profileEndpoint + db.user1Profile.id + '/skills/')
-      .send(profileSkill)
-      .expect(400)
-    expect(failed.body.error.details).toMatchObject(validationErrors)
-  })
-})
-
-describe('Testing data validation', () => {
-  it('should return 400 with invalid data', async () => {
-    const profile = {
-      lastName: 'LastName'
-    }
-
-    const created = await request
-      .post(profileEndpoint)
-      .send(profile)
-    expect(created.status).toBe(400)
+    const response = await request.post(profileEndpoint + normalUser.id + '/skills')
+      .send(profileSkill).expect(201)
+    expect(response.body).toMatchObject(profileSkill)
   })
 
-  it('should include mandatory fields in profile validation errors', async () => {
-    const validationErrors = [
-      'profile.lastName cannot be null',
-      'profile.firstName cannot be null',
-      'profile.email cannot be null',
-      'profile.active cannot be null'
-    ]
-
-    const created = await request
-      .post(profileEndpoint)
-      .send({})
-    expect(created.status).toBe(400)
-    expect(created.body.error.details).toMatchObject(validationErrors)
+  it('should allow authorized users to fetch project profiles', async () => {
+    const response = await request.get(profileEndpoint + normalUser.id + '/projects').expect(200)
+    expect(response.body.length).toBe(1)
   })
 
-  it('should include mandatory fields in profileskill validation errors', async () => {
-    const validationErrors = [
-      'profileSkill.skillId cannot be null',
-      'profileSkill.knows cannot be null',
-      'profileSkill.wantsTo cannot be null',
-      'profileSkill.visibleInCV cannot be null'
-    ]
-
-    const created = await request
-      .post(profileEndpoint + db.user1Profile.id + '/skills')
-      .send({})
-      .expect(400)
-    expect(created.body.error.details).toMatchObject(validationErrors)
+  it('should allow authorized users to fetch specific project profile', async () => {
+    const response = await request.get(profileEndpoint + normalUser.id + '/projects/' + profileProject.id).expect(200)
+    expect(response.body.projectId).toEqual(profileProject.projectId)
+    expect(response.body.profileId).toEqual(profileProject.profileId)
   })
-})
 
-describe('Endpoint authorization', () => {
-  request.set('Authorization', `Bearer ${invalidToken}`)
+  it('should return 404 for missing project profile', async () => {
+    await request.get(profileEndpoint + normalUser.id + '/projects/123123').expect(404)
+  })
 
-  endpointAuthorizationTest(request.request.get, '/api/profiles')
-  endpointAuthorizationTest(request.request.post, '/api/profiles')
+  describe('Deleting profiles', () => {
+    it('should not allow deleting profiles', () => {
+      request.delete(profileEndpoint + normalUser.id).expect(404)
+    })
+  })
 
-  endpointAuthorizationTest(request.request.get, '/api/profiles/all')
-  endpointAuthorizationTest(request.request.get, '/api/profiles/1')
-  endpointAuthorizationTest(request.request.put, '/api/profiles/1')
+  describe('Endpoint authorization', () => {
+    request.set('Authorization', `Bearer ${invalidToken}`)
 
-  endpointAuthorizationTest(request.request.get, '/api/profiles/1/skills')
-  endpointAuthorizationTest(request.request.post, '/api/profiles/1/skills')
+    endpointAuthorizationTest(request.request.get, '/api/profiles')
+    endpointAuthorizationTest(request.request.post, '/api/profiles')
 
-  endpointAuthorizationTest(request.request.get, '/api/profiles/1/skills/1')
-  endpointAuthorizationTest(request.request.put, '/api/profiles/1/skills/1')
+    endpointAuthorizationTest(request.request.get, '/api/profiles/all')
+    endpointAuthorizationTest(request.request.get, '/api/profiles/1')
+    endpointAuthorizationTest(request.request.put, '/api/profiles/1')
+
+    endpointAuthorizationTest(request.request.get, '/api/profiles/1/skills')
+    endpointAuthorizationTest(request.request.post, '/api/profiles/1/skills')
+
+    endpointAuthorizationTest(request.request.get, '/api/profiles/1/skills/1')
+    endpointAuthorizationTest(request.request.put, '/api/profiles/1/skills/1')
+  })
 })
