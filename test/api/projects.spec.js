@@ -24,7 +24,7 @@ describe('API Projects endpoint', () => {
       googleId: normalUser.googleId,
       userId: normalUser.id,
       admin: normalUser.admin,
-      exp: Date.now() + 3600
+      exp: Date.now() + 36000
     })
     request.set('Authorization', `Bearer ${jwtToken}`)
   })

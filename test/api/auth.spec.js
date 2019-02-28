@@ -28,7 +28,7 @@ describe('API auth endpoint', () => {
         given_name: existingUser.firstName,
         family_name: existingUser.lastName,
         email: `${existingUser.firstName}.${existingUser.lastName}@codento.com`,
-        exp: Math.round(Date.now()) + 3600
+        exp: Math.round(Date.now()) + 36000
       }
 
       gAuth.__setMockPayload(googleAuthPayload)
@@ -53,7 +53,7 @@ describe('API auth endpoint', () => {
         given_name: 'Jorma',
         family_name: 'Nyberg',
         email: `jorma.nyberg@codento.com`,
-        exp: Math.round(Date.now()) + 3600
+        exp: Math.round(Date.now()) + 36000
       }
 
       gAuth.__setMockPayload(googleAuthPayload)
@@ -97,7 +97,7 @@ describe('API auth endpoint', () => {
         given_name: existingUser.firstName,
         family_name: existingUser.lastName,
         email: `${existingUser.firstName}.${existingUser.lastName}@codento.com`,
-        exp: Math.round(Date.now()) + 3600
+        exp: Math.round(Date.now()) + 36000
       }
 
       gAuth.__setMockPayload(googleAuthPayload)
