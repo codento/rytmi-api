@@ -2,7 +2,7 @@ import { endpointAuthorizationTest } from '../utils'
 import app from '../../src/api/app'
 import supertest from 'supertest'
 import defaults from 'superagent-defaults'
-import { testUserToken, invalidToken } from './tokens'
+import { createUserToken, testUserToken, invalidToken } from './tokens'
 import { users } from '../mockData/mockUsers'
 import { user } from '../../src/db/models'
 
@@ -10,9 +10,11 @@ const request = defaults(supertest(app))
 const endpoint = '/api/users/'
 
 describe('API Users endpoint', () => {
-  beforeAll(() => {
+  let userId, adminUser
+  beforeAll(async () => {
     request.set('Authorization', `Bearer ${testUserToken}`)
     request.set('Accept', 'application/json')
+    adminUser = await user.findOne({ where: { admin: true } })
   })
 
   afterAll(() => {
@@ -50,8 +52,6 @@ describe('API Users endpoint', () => {
   })
 
   describe('Creating and updating users', () => {
-    let userId = null
-
     it('should allow authorized user to create user', async () => {
       const user = {
         googleId: '112233',
@@ -138,11 +138,36 @@ describe('API Users endpoint', () => {
     })
   })
 
+  describe('Deleting users', () => {
+    it('should be allowed only for admins to delete users', async () => {
+      await request.delete(endpoint + userId)
+        .expect('Content-Type', /json/)
+        .expect(403)
+    })
+
+    it('should allow admins to delete users', async () => {
+      const jwtToken = createUserToken({
+        googleId: adminUser.googleId,
+        userId: adminUser.id,
+        admin: adminUser.admin,
+        exp: Date.now() + 3600
+      })
+      request.set('Authorization', `Bearer ${jwtToken}`)
+      await request.delete(endpoint + userId)
+        .expect(204)
+    })
+
+    afterAll(() => {
+      request.set('Authorization', `Bearer ${testUserToken}`)
+    })
+  })
+
   describe('Testing authorization of endpoints', () => {
     request.set('Authorization', `Bearer ${invalidToken}`)
     endpointAuthorizationTest(request.request.get, '/api/users')
     endpointAuthorizationTest(request.request.post, '/api/users')
     endpointAuthorizationTest(request.request.get, '/api/users/1')
     endpointAuthorizationTest(request.request.put, '/api/users/1')
+    endpointAuthorizationTest(request.request.delete, '/api/users/1')
   })
 })
