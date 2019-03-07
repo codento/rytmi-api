@@ -23,7 +23,7 @@ export default () => {
   *             schema:
   *               type: array
   *               items:
-  *                 $ref: "#/components/schemas/ProfileSkill"
+  *                 $ref: "#/components/schemas/profileSkill"
   *       401:
   *         description: Unauthorized
   */
@@ -44,7 +44,7 @@ export default () => {
   *         content:
   *           application/json:
   *             schema:
-  *               $ref: "#/components/schemas/ProfileSkill"
+  *               $ref: "#/components/schemas/profileSkill"
   *       401:
   *         description: Unauthorized
   *       404:

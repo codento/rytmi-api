@@ -22,7 +22,7 @@ export default () => {
    *             schema:
    *               type: array
    *               items:
-   *                 $ref: "#/components/schemas/SkillGroup"
+   *                 $ref: "#/components/schemas/skillGroup"
    *         description: An array of JSON objects containing skillgroups
    *       401:
    *         description: Unauthorized
@@ -44,14 +44,14 @@ export default () => {
    *         content:
    *           application/json:
    *             schema:
-   *               $ref: "#/components/schemas/SkillGroup"
+   *               $ref: "#/components/schemas/skillGroup"
    *       401:
    *         description: Unauthorized
    *     requestBody:
    *       content:
    *         application/json:
    *           schema:
-   *             $ref: "#/components/schemas/SkillGroup"
+   *             $ref: "#/components/schemas/skillGroup"
    */
   router.post('/', skillGroupController.create)
 
@@ -70,7 +70,7 @@ export default () => {
    *         content:
    *           application/json:
    *             schema:
-   *               $ref: "#/components/schemas/SkillGroup"
+   *               $ref: "#/components/schemas/skillGroup"
    *       401:
    *         description: Unauthorized
    *       404:
@@ -99,7 +99,7 @@ export default () => {
    *         content:
    *           application/json:
    *             schema:
-   *               $ref: "#/components/schemas/SkillGroup"
+   *               $ref: "#/components/schemas/skillGroup"
    *       401:
    *         description: Unauthorized
    *     parameters:
@@ -112,7 +112,7 @@ export default () => {
    *       content:
    *         application/json:
    *           schema:
-   *             $ref: "#/components/schemas/SkillGroup"
+   *             $ref: "#/components/schemas/skillGroup"
    */
   router.put('/:id', skillGroupController.update)
 
