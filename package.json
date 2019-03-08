@@ -20,7 +20,8 @@
     "containers": "docker-compose up -d && echo Rytmi API is now up and running.",
     "stop": "docker-compose down",
     "migrate": "sequelize db:migrate && sequelize db:seed:all",
-    "lint": "eslint **/*.js"
+    "lint": "eslint **/*.js",
+    "reset-dev-db": "docker-compose down -v && docker-compose up -d postgres"
   },
   "jest": {
     "testEnvironment": "node",
@@ -63,7 +64,7 @@
     "google-auth-library": "^1.6.1",
     "jsonwebtoken": "^8.1.1",
     "pg": "^7.4.1",
-    "sequelize": "^4.32.2",
+    "sequelize": "^4.42.1",
     "sequelize-json-schema": "^1.3.0",
     "swagger-jsdoc": "^3.2.3",
     "swagger-ui-express": "^4.0.1",
@@ -87,7 +88,7 @@
     "jest": "^22.1.4",
     "nodemon": "^1.17.5",
     "rosie": "^1.6.0",
-    "sequelize-cli": "^3.2.0",
+    "sequelize-cli": "^4.1.1",
     "spectacle-docs": "^1.0.7",
     "superagent": "^3.8.2",
     "superagent-defaults": "^0.1.14",
