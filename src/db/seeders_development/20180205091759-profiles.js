@@ -19,31 +19,33 @@ factory.define('profile')
   .attr('updatedAt', () => new Date())
 
 module.exports = {
-  up: (queryInterface, Sequelize) => {
-    let profiles = []
-    return queryInterface.sequelize.query('SELECT * FROM public."user"', {
-      type: queryInterface.sequelize.QueryTypes.SELECT
-    })
-      .then(users => {
-        users.forEach(user => {
-          let links = []
-          let noOfLinks = faker.random.number(5)
-          for (let j = 0; j < noOfLinks; j++) {
-            links.push(faker.internet.url())
-          }
-          let profile = factory.build('profile', {
-            userId: user.id,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            links: JSON.stringify(links)
-          })
-          profiles.push(profile)
-        })
-        return queryInterface.bulkInsert('profile', profiles)
+  up: async (queryInterface, Sequelize) => {
+    try {
+      const profiles = []
+      const userIds = await queryInterface.sequelize.query('SELECT * FROM public."user"', {
+        type: queryInterface.sequelize.QueryTypes.SELECT
       })
+      userIds.forEach(user => {
+        let links = []
+        let noOfLinks = faker.random.number(5)
+        for (let j = 0; j < noOfLinks; j++) {
+          links.push(faker.internet.url())
+        }
+        let profile = factory.build('profile', {
+          userId: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          links: JSON.stringify(links)
+        })
+        profiles.push(profile)
+      })
+      return queryInterface.bulkInsert('profile', profiles)
+    } catch (e) {}
   },
 
   down: (queryInterface, Sequelize) => {
-    return queryInterface.bulkDelete('profile')
+    try {
+      return queryInterface.bulkDelete('profile')
+    } catch (e) {}
   }
 }
