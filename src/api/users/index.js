@@ -129,7 +129,7 @@ export default () => {
   /**
   * @swagger
   * /users/{id}:
-  *   put:
+  *   delete:
   *     description: Delete a user
   *     tags:
   *       - users
