@@ -8,10 +8,13 @@ export default class UserService extends CrudService {
 
   getByGoogleId (googleId) {
     return models.user
-      .findOne({where: {googleId: googleId}})
+      .findOne({ where: { googleId: googleId } })
   }
 
-  delete () {
-    throw new Error('Not implemented')
+  async delete (userId) {
+    return models.sequelize.transaction((t) => {
+      return models.profile.destroy({ where: { userId } }, { transaction: t })
+        .then(() => models.user.destroy({ where: { id: userId } }, { transaction: t }))
+    })
   }
 }
