@@ -1,15 +1,16 @@
 'use strict'
 
 module.exports = {
-  up: (queryInterface, Sequelize) => {
-    return Promise.all([
+  up: async (queryInterface, Sequelize) => {
+    await Promise.all([
       queryInterface.removeConstraint(
         'profileSkill',
         'ProfileSkills_profileId_fkey'),
       queryInterface.removeConstraint(
         'profileProject',
         'ProfileProjects_profileId_fkey')
-    ]).then(() => Promise.all([
+    ])
+    return Promise.all([
       queryInterface.addConstraint(
         'profileSkill', ['profileId'],
         {
@@ -31,17 +32,18 @@ module.exports = {
           onDelete: 'cascade'
         }
       )
-    ]))
+    ])
   },
-  down: (queryInterface) => {
-    return Promise.all([
+  down: async (queryInterface) => {
+    await Promise.all([
       queryInterface.removeConstraint(
         'profileSkill',
         'profileSkill_profileId_profile_fk'),
       queryInterface.removeConstraint(
         'profileProject',
         'profileProject_profileId_profile_fk')
-    ]).then(() => Promise.all([
+    ])
+    return Promise.all([
       queryInterface.addConstraint(
         'profileSkill', ['profileId'],
         {
@@ -63,10 +65,6 @@ module.exports = {
           }
         }
       )
-    ]))
-      .catch(error => {
-        console.log(error, error.parent)
-        throw error
-      })
+    ])
   }
 }
