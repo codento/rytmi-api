@@ -1,14 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
   let Project = sequelize.define('project', {
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true
-    },
-    description: {
-      type: DataTypes.TEXT,
-      allowNull: true
-    },
     code: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -21,6 +12,10 @@ module.exports = (sequelize, DataTypes) => {
     endDate: {
       type: DataTypes.DATE,
       allowNull: true
+    },
+    isSecret: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false
     }
   }, {
     validate: {
@@ -44,6 +39,8 @@ module.exports = (sequelize, DataTypes) => {
 
   Project.associate = (models) => {
     models.project.belongsToMany(models.profile, {through: models.profileProject, foreignKey: 'projectId'})
+    models.project.hasMany(models.projectDescription, {foreignKey: 'projectId'})
+    models.project.hasMany(models.profileProjectDescription, {foreignKey: 'projectId'})
   }
 
   return Project

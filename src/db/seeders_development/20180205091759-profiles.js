@@ -11,7 +11,7 @@ factory.define('profile')
   .attr('phone', () => { return faker.phone.phoneNumber() })
   .attr('birthday', () => { return faker.date.past(20, '1997-12-31') })
   .attr('title', () => { return faker.name.jobTitle() })
-  .attr('description', () => { return faker.lorem.paragraphs() })
+
   .attr('links')
   .attr('photoPath', () => { return faker.internet.avatar() })
   .attr('active', () => { return faker.random.boolean() })
