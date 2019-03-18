@@ -24,7 +24,7 @@ export default () => {
   *             schema:
   *               type: array
   *               items:
-  *                 $ref: "#/components/schemas/Project"
+  *                 $ref: "#/components/schemas/project"
   *       401:
   *         description: Unauthorized
   */
@@ -45,14 +45,14 @@ export default () => {
   *         content:
   *           application/json:
   *             schema:
-  *               $ref: "#/components/schemas/Project"
+  *               $ref: "#/components/schemas/project"
   *       401:
   *         description: Unauthorized
   *     requestBody:
   *       content:
   *         application/json:
   *           schema:
-  *             $ref: "#/components/schemas/Project"
+  *             $ref: "#/components/schemas/project"
   */
   router.post('/', projectController.create)
 
@@ -71,7 +71,7 @@ export default () => {
   *         content:
   *           application/json:
   *             schema:
-  *               $ref: "#/components/schemas/Project"
+  *               $ref: "#/components/schemas/project"
   *       401:
   *         description: Unauthorized
   *       404:
@@ -100,7 +100,7 @@ export default () => {
   *         content:
   *           application/json:
   *             schema:
-  *               $ref: "#/components/schemas/Project"
+  *               $ref: "#/components/schemas/project"
   *       401:
   *         description: Unauthorized
   *       404:
@@ -115,7 +115,7 @@ export default () => {
   *       content:
   *         application/json:
   *           schema:
-  *             $ref: "#/components/schemas/Project"
+  *             $ref: "#/components/schemas/project"
   */
   router.put('/:id', projectController.update)
 

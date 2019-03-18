@@ -1,7 +1,6 @@
 require('babel-register')
 require('babel-polyfill')
 
-const models = require('../models')
 const rosie = require('rosie')
 const factory = rosie.Factory
 const faker = require('faker')
@@ -18,33 +17,34 @@ factory.define('profileSkill')
   .attr('updatedAt', () => new Date())
 
 module.exports = {
-  up: (queryInterface, Sequelize) => {
-    return models.profile.all()
-      .then(profiles => {
-        return models.skill.all()
-          .then(skills => {
-            let profileSkills = []
-            profiles.forEach(profile => {
-              let randomSkills = []
-              let noOfSkills = faker.random.number(5)
-              while (randomSkills.length < noOfSkills) {
-                let skill = skills[faker.random.number(skills.length - 1)]
-                if (randomSkills.indexOf(skill) > -1) continue
-                else randomSkills.push(skill)
-              }
-              randomSkills.forEach(skill => {
-                profileSkills.push(factory.build('profileSkill', {
-                  profileId: profile.id,
-                  skillId: skill.id
-                }))
-              })
-            })
-            return queryInterface.bulkInsert('profileSkill', profileSkills)
-          })
+  up: async (queryInterface, Sequelize) => {
+    try {
+      const profileIds = await queryInterface.sequelize.query('SELECT "id" FROM "profile"', { type: Sequelize.QueryTypes.SELECT })
+      const skillIds = await queryInterface.sequelize.query('SELECT "id" FROM "skill"', { type: Sequelize.QueryTypes.SELECT })
+      const profileSkills = []
+      profileIds.forEach(profile => {
+        const randomSkills = []
+        const noOfSkills = faker.random.number(5)
+        while (randomSkills.length < noOfSkills) {
+          let skill = skillIds[faker.random.number(skillIds.length - 1)]
+          if (!(randomSkills.indexOf(skill) > -1)) {
+            randomSkills.push(skill)
+          }
+        }
+        randomSkills.forEach(skill => {
+          profileSkills.push(factory.build('profileSkill', {
+            profileId: profile.id,
+            skillId: skill.id
+          }))
+        })
       })
+      return queryInterface.bulkInsert('profileSkill', profileSkills)
+    } catch (e) {}
   },
 
   down: (queryInterface, Sequelize) => {
-    return queryInterface.bulkDelete('profileSkill')
+    try {
+      return queryInterface.bulkDelete('profileSkill')
+    } catch (e) {}
   }
 }

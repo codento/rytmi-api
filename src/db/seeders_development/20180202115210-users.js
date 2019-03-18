@@ -14,15 +14,19 @@ factory.define('user')
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    let users = []
-    for (let i = 0; i < 50; i++) {
-      let user = factory.build('user')
-      users.push(user)
-    }
-    return queryInterface.bulkInsert('user', users)
+    try {
+      let users = []
+      for (let i = 0; i < 50; i++) {
+        let user = factory.build('user')
+        users.push(user)
+      }
+      return queryInterface.bulkInsert('user', users)
+    } catch (e) {}
   },
 
   down: (queryInterface, Sequelize) => {
-    return queryInterface.bulkDelete('user')
+    try {
+      return queryInterface.bulkDelete('user')
+    } catch (e) {}
   }
 }

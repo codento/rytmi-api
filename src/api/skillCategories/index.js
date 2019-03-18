@@ -22,7 +22,7 @@ export default () => {
    *             schema:
    *               type: array
    *               items:
-   *                 $ref: "#/components/schemas/SkillCategory"
+   *                 $ref: "#/components/schemas/skillCategory"
    *         description: An array of JSON objects containing skillcategories
    *       401:
    *         description: Unauthorized
@@ -44,14 +44,14 @@ export default () => {
    *         content:
    *           application/json:
    *             schema:
-   *               $ref: "#/components/schemas/SkillCategory"
+   *               $ref: "#/components/schemas/skillCategory"
    *       401:
    *         description: Unauthorized
    *     requestBody:
    *       content:
    *         application/json:
    *           schema:
-   *             $ref: "#/components/schemas/SkillCategory"
+   *             $ref: "#/components/schemas/skillCategory"
    */
   router.post('/', skillCategoryController.create)
 
@@ -70,7 +70,7 @@ export default () => {
    *         content:
    *           application/json:
    *             schema:
-   *               $ref: "#/components/schemas/SkillCategory"
+   *               $ref: "#/components/schemas/skillCategory"
    *       401:
    *         description: Unauthorized
    *       404:
@@ -99,7 +99,7 @@ export default () => {
    *         content:
    *           application/json:
    *             schema:
-   *               $ref: "#/components/schemas/SkillCategory"
+   *               $ref: "#/components/schemas/skillCategory"
    *       401:
    *         description: Unauthorized
    *     parameters:
@@ -112,7 +112,7 @@ export default () => {
    *       content:
    *         application/json:
    *           schema:
-   *             $ref: "#/components/schemas/SkillCategory"
+   *             $ref: "#/components/schemas/skillCategory"
    */
   router.put('/:id', skillCategoryController.update)
 
@@ -127,7 +127,7 @@ export default () => {
    *       - applicatios/json
    *     responses:
    *       204:
-   *         description: SkillCategory deleted
+   *         description: skillCategory deleted
    *       401:
    *         description: Unauthorized
    *       404:

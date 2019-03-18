@@ -23,7 +23,7 @@ export default () => {
   *             schema:
   *               type: array
   *               items:
-  *                 $ref: "#/components/schemas/Skill"
+  *                 $ref: "#/components/schemas/skill"
   *       401:
   *         description: Unauthorized
   */
@@ -44,14 +44,14 @@ export default () => {
   *         content:
   *           application/json:
   *             schema:
-  *               $ref: "#/components/schemas/Skill"
+  *               $ref: "#/components/schemas/skill"
   *       401:
   *         description: Unauthorized
   *     requestBody:
   *       content:
   *         application/json:
   *           schema:
-  *             $ref: "#/components/schemas/Skill"
+  *             $ref: "#/components/schemas/skill"
   */
   router.post('/', skillController.create)
 
@@ -70,7 +70,7 @@ export default () => {
   *         content:
   *           application/json:
   *             schema:
-  *               $ref: "#/components/schemas/Skill"
+  *               $ref: "#/components/schemas/skill"
   *       401:
   *         description: Unauthorized
   *       404:
@@ -99,7 +99,7 @@ export default () => {
   *         content:
   *           application/json:
   *             schema:
-  *               $ref: "#/components/schemas/Skill"
+  *               $ref: "#/components/schemas/skill"
   *       401:
   *         description: Unauthorized
   *     parameters:
@@ -112,7 +112,7 @@ export default () => {
   *       content:
   *         application/json:
   *           schema:
-  *             $ref: "#/components/schemas/Skill"
+  *             $ref: "#/components/schemas/skill"
   */
   router.put('/:id', skillController.update)
 
