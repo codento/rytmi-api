@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  let EmployeeRole = sequelize.define('employeeRole', {
+  return sequelize.define('employeeRole', {
     id: {
       allowNull: false,
       autoIncrement: true,
@@ -20,10 +20,4 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE
     }
   })
-
-  EmployeeRole.associate = (models) => {
-    models.employeeRole.hasMany(models.profile)
-  }
-
-  return EmployeeRole
 }

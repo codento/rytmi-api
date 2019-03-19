@@ -24,13 +24,9 @@ module.exports = {
           type: Sequelize.DATE
         }
       })
-      return queryInterface.addColumn('profile', 'employeeRoleId', {
-        type: Sequelize.INTEGER,
-        references: {
-          model: 'employeeRole',
-          key: 'id'
-        },
-        onDelete: 'SET NULL'
+      return queryInterface.addColumn('profile', 'employeeRoles', {
+        type: Sequelize.ARRAY(Sequelize.INTEGER),
+        defaultValue: []
       })
     } catch (error) {
       throw error
@@ -39,7 +35,7 @@ module.exports = {
 
   down: async (queryInterface, Sequelize) => {
     try {
-      await queryInterface.removeColumn('profile', 'employeeRoleId')
+      await queryInterface.removeColumn('profile', 'employeeRoles')
       return queryInterface.dropTable('employeeRole')
     } catch (error) {
       throw error
