@@ -40,10 +40,18 @@ module.exports = (sequelize, DataTypes) => {
     active: {
       type: DataTypes.BOOLEAN,
       allowNull: false
+    },
+    employeeRoleId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: 'employeeRole',
+        key: 'id'
+      }
     }
   })
 
   Profile.associate = (models) => {
+    models.profile.belongsTo(models.employeeRole, {foreignKey: 'employeeRoleId'})
     models.profile.belongsTo(models.user, {foreignKey: 'userId'})
     models.profile.hasMany(models.profileSkill, {foreignKey: 'profileId'})
     models.profile.belongsToMany(models.project, {through: models.profileProject, foreignKey: 'profileId'})

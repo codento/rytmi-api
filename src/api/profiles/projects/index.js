@@ -31,7 +31,7 @@ export default () => {
   *             schema:
   *               type: array
   *               items:
-  *                 $ref: "#/components/schemas/ProfileProject"
+  *                 $ref: "#/components/schemas/profileProject"
   *       401:
   *         description: Unauthorized
   *       404:
@@ -54,7 +54,7 @@ export default () => {
   *         content:
   *           application/json:
   *             schema:
-  *               $ref: "#/components/schemas/ProfileProject"
+  *               $ref: "#/components/schemas/profileProject"
   *       401:
   *         description: Unauthorized
   *       404:
@@ -89,7 +89,7 @@ export default () => {
   *         content:
   *           application/json:
   *             schema:
-  *               $ref: "#/components/schemas/ProfileProject"
+  *               $ref: "#/components/schemas/profileProject"
   *       400:
   *         description: Bad request
   *       404:
@@ -110,7 +110,7 @@ export default () => {
   *       content:
   *         application/json:
   *           schema:
-  *             $ref: "#/components/schemas/ProfileProject"
+  *             $ref: "#/components/schemas/profileProject"
   */
   router.post('/:anyProjectId', profileProjectController.create)
 

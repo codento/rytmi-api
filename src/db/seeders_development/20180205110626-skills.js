@@ -13,11 +13,15 @@ factory.define('skill')
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    let skills = skillNames.map(name => factory.build('skill', {name}))
-    return queryInterface.bulkInsert('skill', skills)
+    try {
+      let skills = skillNames.map(name => factory.build('skill', {name}))
+      return queryInterface.bulkInsert('skill', skills)
+    } catch (e) {}
   },
 
-  down: (queryInterface, Sequelize) => {
-    return queryInterface.bulkDelete('skill')
+  down: async (queryInterface, Sequelize) => {
+    try {
+      return queryInterface.bulkDelete('skill')
+    } catch (e) {}
   }
 }

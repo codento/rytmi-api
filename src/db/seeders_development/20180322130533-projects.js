@@ -13,17 +13,21 @@ factory.define('project')
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    let projects = []
-    for (var i = 0; i < 50; i++) {
-      let project = factory.build('project', {
-        code: 5000 + i
-      })
-      projects.push(project)
-    }
-    return queryInterface.bulkInsert('project', projects)
+    try {
+      let projects = []
+      for (var i = 0; i < 50; i++) {
+        let project = factory.build('project', {
+          code: 5000 + i
+        })
+        projects.push(project)
+      }
+      return queryInterface.bulkInsert('project', projects)
+    } catch (e) {}
   },
 
   down: (queryInterface, Sequelize) => {
-    return queryInterface.bulkDelete('project')
+    try {
+      return queryInterface.bulkDelete('project')
+    } catch (e) {}
   }
 }
