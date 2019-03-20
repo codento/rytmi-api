@@ -20,7 +20,7 @@ module.exports = {
       const rowUpdates = []
       profileIds.forEach(profile => {
         const role = faker.random.number({ min: savedRoles[0].id, max: savedRoles[savedRoles.length - 1].id })
-        rowUpdates.push(queryInterface.sequelize.query(`UPDATE "profile" SET "employeeRoleId" = ${role} WHERE "id" = ${profile.id}`))
+        rowUpdates.push(queryInterface.sequelize.query(`UPDATE "profile" SET "employeeRoles" = ARRAY[${role}] WHERE "id" = ${profile.id}`))
       })
       await Promise.all(rowUpdates)
     } catch (e) {}
@@ -28,7 +28,7 @@ module.exports = {
 
   down: async (queryInterface, Sequelize) => {
     try {
-      await queryInterface.sequelize.query(`UPDATE "profile" SET "employeeRoleId" = NULL`)
+      await queryInterface.sequelize.query(`UPDATE "profile" SET "employeeRoles" = NULL`)
       return queryInterface.bulkDelete('employeeRole')
     } catch (e) {}
   }
