@@ -1,7 +1,10 @@
 import { Router } from 'express'
-import {userController, findUserOr404} from '../../controllers/users'
+import { userController, findUserOr404 } from '../../controllers/users'
+import { createPermissionHandler } from '../utils'
 
 const router = Router()
+const adminOnly = true
+const adminOnlyPermissionHandler = createPermissionHandler('userObj', 'id', adminOnly)
 
 export default () => {
   router.param('id', findUserOr404)
@@ -122,6 +125,35 @@ export default () => {
   *                   - name
   */
   router.put('/:id', userController.update)
+
+  /**
+  * @swagger
+  * /users/{id}:
+  *   delete:
+  *     description: Delete a user
+  *     tags:
+  *       - users
+  *     produces:
+  *       - application/json
+  *     responses:
+  *       204:
+  *         description: No content
+  *         content:
+  *           application/json:
+  *             schema:
+  *               $ref: "#/components/schemas/User"
+  *       401:
+  *         description: Unauthorized
+  *       404:
+  *         description: Not found
+  *     parameters:
+  *       - name: id
+  *         in: path
+  *         schema:
+  *           type: integer
+  *           format: int64
+  */
+  router.delete('/:id', adminOnlyPermissionHandler, userController.delete)
 
   return router
 }

@@ -41,6 +41,9 @@ module.exports = (sequelize, DataTypes) => {
     active: {
       type: DataTypes.BOOLEAN,
       allowNull: false
+    },
+    employeeRoles: {
+      type: DataTypes.ARRAY(DataTypes.INTEGER)
     }
   })
 

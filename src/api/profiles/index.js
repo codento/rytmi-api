@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import skills from './skills'
 import projects from './projects'
-import {profileController, findProfileOr404} from '../../controllers/profiles'
+import { profileController, findProfileOr404 } from '../../controllers/profiles'
 import { createPermissionHandler } from '../utils'
 
 const router = Router()
@@ -26,7 +26,7 @@ export default () => {
   *             schema:
   *               type: array
   *               items:
-  *                 $ref: "#/components/schemas/Profile"
+  *                 $ref: "#/components/schemas/profile"
   *         description: An array of JSON objects containing profiles
   *       401:
   *         description: Unauthorized
@@ -50,39 +50,16 @@ export default () => {
   *         content:
   *           application/json:
   *             schema:
-  *               $ref: "#/components/schemas/Profile"
+  *               $ref: "#/components/schemas/profile"
   *       401:
   *         description: Unauthorized
   *     requestBody:
   *       content:
   *         application/json:
   *           schema:
-  *             $ref: "#/components/schemas/Profile"
+  *             $ref: "#/components/schemas/profile"
   */
   router.post('/', profileController.create)
-
-  /**
-  * @swagger
-  * /profiles/all:
-  *   get:
-  *     description: List of all profiles, including inactive profiles
-  *     tags:
-  *       - profiles
-  *     produces:
-  *       - application/json
-  *     responses:
-  *       200:
-  *         content:
-  *           application/json:
-  *             schema:
-  *               type: array
-  *               items:
-  *                 $ref: "#/components/schemas/Profile"
-  *         description: An array of JSON objects containing profiles
-  *       401:
-  *         description: Unauthorized
-  */
-  router.get('/all', profileController.getAllDeprecated)
 
   /**
   * @swagger
@@ -99,7 +76,7 @@ export default () => {
   *         content:
   *           application/json:
   *             schema:
-  *               $ref: "#/components/schemas/Profile"
+  *               $ref: "#/components/schemas/profile"
   *       401:
   *         description: Unauthorized
   *       404:
@@ -128,7 +105,7 @@ export default () => {
   *         content:
   *           application/json:
   *             schema:
-  *               $ref: "#/components/schemas/Profile"
+  *               $ref: "#/components/schemas/profile"
   *       401:
   *         description: Unauthorized
   *       404:
@@ -143,7 +120,7 @@ export default () => {
   *       content:
   *         application/json:
   *           schema:
-  *             $ref: "#/components/schemas/Profile"
+  *             $ref: "#/components/schemas/profile"
   */
   router.put('/:id', permissionHandler, profileController.update)
 

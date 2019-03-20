@@ -1,171 +1,112 @@
-import { generatePost, endpointAuthorizationTest } from '../utils'
-import app from '../../src/api/app'
 import supertest from 'supertest'
 import defaults from 'superagent-defaults'
-import { testUserToken, invalidToken } from './tokens'
+import { endpointAuthorizationTest } from '../utils'
+import app from '../../src/api/app'
+import { user as userModel, skillCategory as skillCategoriesModel } from '../../src/db/models'
+import { createUserToken, invalidToken } from './tokens'
+import { skillCategories } from '../mockData/mockSkills'
 
 const request = defaults(supertest(app))
-const endpoint = '/api/skillcategories/'
-const createSkillCategory = generatePost(request, endpoint)
-const db = {}
+const skillCategoriesEndpoint = '/api/skillcategories/'
 
-beforeAll(async done => {
-  request.set('Authorization', `Bearer ${testUserToken}`)
-  request.set('Accept', 'application/json')
-
-  db.skillCategory1 = await createSkillCategory({
-    title: 'Waving hands',
-    skillGroupId: 1
+describe('API skillcategories endpoint', () => {
+  let devOps
+  beforeAll(async () => {
+    const users = await userModel.findAll()
+    const normalUser = users.filter((user) => user.admin === false).pop()
+    request.set('Accept', 'application/json')
+    const jwtToken = createUserToken({
+      googleId: normalUser.googleId,
+      userId: normalUser.id,
+      admin: normalUser.admin,
+      exp: Date.now() + 3600
+    })
+    request.set('Authorization', `Bearer ${jwtToken}`)
   })
-  db.skillCategory2 = await createSkillCategory({
-    title: 'Coding',
-    skillGroupId: 1
-  })
-  done()
-})
+  describe('Fetching skill categories', () => {
+    it('should allow authorized user to fetch skill categories', async () => {
+      const expectedSkillCategories = skillCategories
+      const response = await request.get(skillCategoriesEndpoint).expect(200)
+      expect(response.body.length).toBe(expectedSkillCategories.length)
+      response.body.forEach((skillCategory, idx) => {
+        expect(skillCategory).toMatchObject(expectedSkillCategories[idx])
+      })
+    })
 
-describe('Test skillcategories', () => {
-  test('It should response 200 the GET method', () => {
-    return request
-      .get(endpoint)
-      .expect(200)
-  })
-  test('respond with json', () => {
-    return request
-      .get(endpoint)
-      .set('Accept', 'application/json')
-      .expect('Content-Type', /json/)
-      .expect(200)
-  })
-})
-
-describe('Creating and updating skillcategories', () => {
-  it('should persist skillcategory and return the created skillcategory', async () => {
-    const skillCategory = {
-      title: 'Advanced multiplication',
-      skillGroupId: 1
-    }
-
-    const created = await request
-      .post(endpoint)
-      .send(skillCategory)
-      .expect(201)
-    expect(created.body).toMatchObject(skillCategory)
-
-    const fetched = await request
-      .get(endpoint + created.body.id)
-      .set('Accept', 'application/json')
-      .expect('Content-Type', /json/)
-      .expect(200)
-    expect(fetched.body).toMatchObject(created.body)
+    it('should allow authorized user to fetch specific skill category', async () => {
+      const [, frontEndDev] = skillCategories
+      const response = await request.get(skillCategoriesEndpoint + '2').expect(200)
+      expect(response.body).toMatchObject(frontEndDev)
+    })
   })
 
-  it('should update skillcategory and return the updated skillcategory', async () => {
-    const skillCategory = {
-      title: 'Waving legs',
-      skillGroupId: 1
-    }
-
-    const updated = await request
-      .put(endpoint + db.skillCategory1.id)
-      .send(skillCategory)
-      .expect(200)
-    expect(updated.body).toMatchObject(skillCategory)
-
-    const fetched = await request
-      .get(endpoint + db.skillCategory1.id)
-      .set('Accept', 'application/json')
-      .expect('Content-Type', /json/)
-      .expect(200)
-    expect(fetched.body).toMatchObject(updated.body)
+  describe('Creating skill categories', () => {
+    it('should allow authorized user to create new skill categories', async () => {
+      devOps = {
+        title: 'DevOps',
+        skillGroupId: 1
+      }
+      const response = await request.post(skillCategoriesEndpoint).send(devOps).expect(201)
+      expect(response.body).toMatchObject(devOps)
+      devOps.id = response.body.id
+    })
   })
 
-  it('should ignore passed id attribute', async () => {
-    const skillCategory = {
-      id: 9999999,
-      title: 'Is this a category?',
-      skillGroupId: 1
-    }
-
-    const created = await request
-      .post(endpoint)
-      .send(skillCategory)
-      .expect(201)
-    expect(created.body.id).not.toBe(skillCategory.id)
-
-    const fetched = await request
-      .get(endpoint + created.body.id)
-      .set('Accept', 'application/json')
-      .expect('Content-Type', /json/)
-      .expect(200)
-    expect(fetched.body.id).not.toBe(skillCategory.id)
-
-    const updated = await request
-      .put(endpoint + created.body.id)
-      .send(skillCategory)
-      .expect(200)
-    expect(updated.body.id).not.toBe(skillCategory.id)
-
-    const fetchedAgain = await request
-      .get(endpoint + created.body.id)
-      .set('Accept', 'application/json')
-      .expect('Content-Type', /json/)
-      .expect(200)
-    expect(fetchedAgain.body.id).not.toBe(skillCategory.id)
+  describe('Updating skill categories', () => {
+    it('should allow authorized user to update skill category', async () => {
+      devOps.title = 'Development & Operations'
+      const response = await request.put(skillCategoriesEndpoint + devOps.id)
+        .send({ title: devOps.title }).expect(200)
+      expect(response.body).toMatchObject(devOps)
+    })
   })
 
-  it('should not allow two skillcategories with the same title', async () => {
-    const skillCategory = {
-      title: 'Microshift stuff',
-      skillGroupId: 1
-    }
-
-    const validationErrors = ['title must be unique']
-
-    await request
-      .post(endpoint)
-      .send(skillCategory)
-      .expect(201)
-
-    const failed = await request
-      .post(endpoint)
-      .send(skillCategory)
-      .expect(400)
-    expect(failed.body.error.details).toEqual(validationErrors)
-  })
-})
-
-describe('Testing data validation', () => {
-  it('should return 400 with invalid data', async () => {
-    const skillCategory = {
-      titel: 'Title'
-    }
-
-    const created = await request
-      .post(endpoint)
-      .send(skillCategory)
-    expect(created.status).toBe(400)
+  describe('Deleting skill categories', () => {
+    it('should allow authorized user to delete skill category', async () => {
+      await request.delete(skillCategoriesEndpoint + devOps.id).expect(204)
+      const skillCategoriesInDb = await skillCategoriesModel.findAll()
+      skillCategoriesInDb.forEach(skilLCategory => {
+        expect(skilLCategory.title).not.toMatch(devOps.title)
+      })
+    })
   })
 
-  it('should include mandatory fields in validation errors', async () => {
-    const validationErrors = [
-      'skillCategory.title cannot be null',
-      'skillCategory.skillGroupId cannot be null'
-    ]
+  describe('Validations', () => {
+    it('should not allow to insert skill category without a name', async () => {
+      const withOutName = {
+        title: null,
+        skillGroupId: 1
+      }
+      const response = await request.post(skillCategoriesEndpoint).send(withOutName).expect(400)
+      expect(response.body.error.details).not.toBe(null)
+    })
 
-    const created = await request
-      .post(endpoint)
-      .send({})
-    expect(created.status).toBe(400)
-    expect(created.body.error.details).toMatchObject(validationErrors)
+    it('should not allow to insert skill category with same name', async () => {
+      const sameName = {
+        title: skillCategories[0].title,
+        skillGroupId: 1
+      }
+      const response = await request.post(skillCategoriesEndpoint).send(sameName).expect(400)
+      expect(response.body.error.details).not.toBe(null)
+    })
+
+    it('should not allow to insert skill category without skill group id', async () => {
+      const noSkillGroupId = {
+        title: 'System administration',
+        skillGroupId: null
+      }
+      const response = await request.post(skillCategoriesEndpoint).send(noSkillGroupId).expect(400)
+      expect(response.body.error.details).not.toBe(null)
+    })
   })
-})
 
-describe('Endpoint authorization', () => {
-  request.set('Authorization', `Bearer ${invalidToken}`)
+  describe('Endpoint authorization', () => {
+    request.set('Authorization', `Bearer ${invalidToken}`)
 
-  endpointAuthorizationTest(request.request.get, '/api/skillcategories')
-  endpointAuthorizationTest(request.request.post, '/api/skillcategories')
-  endpointAuthorizationTest(request.request.get, '/api/skillscategories/1')
-  endpointAuthorizationTest(request.request.put, '/api/skillscategories/1')
+    endpointAuthorizationTest(request.request.get, '/api/skillcategories')
+    endpointAuthorizationTest(request.request.post, '/api/skillcategories')
+    endpointAuthorizationTest(request.request.get, '/api/skillcategories/1')
+    endpointAuthorizationTest(request.request.put, '/api/skillcategories/1')
+    endpointAuthorizationTest(request.request.delete, '/api/skillcategories/1')
+  })
 })

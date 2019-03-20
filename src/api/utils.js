@@ -1,5 +1,18 @@
 import PermissionDeniedError from '../validators/permissionDeniedError'
 
+const userIsSelf = (user, id) => {
+  return user.userId === id
+}
+
+const checkUserPermissions = (adminOnly, user, idToCompareWith) => {
+  if (adminOnly && !user.admin) {
+    throw new PermissionDeniedError('Permission denied')
+  }
+  if (!user.admin && !userIsSelf(user, idToCompareWith)) {
+    throw new PermissionDeniedError('Permission denied')
+  }
+}
+
 module.exports = {
   errorTemplate: (statusCode, message, details = null) => {
     let errorResponse = {
@@ -11,16 +24,13 @@ module.exports = {
     if (details) {
       errorResponse.error.details = details
     }
-
     return errorResponse
   },
-  createPermissionHandler: (objName, key) => {
+  createPermissionHandler: (objName, key, adminOnly = false) => {
     return (req, res, next) => {
       const methods = ['POST', 'PUT', 'DELETE']
       if (methods.includes(req.method)) {
-        if (!req.user.admin && req.user.userId !== req[objName][key]) {
-          throw new PermissionDeniedError('Permission denied')
-        }
+        checkUserPermissions(adminOnly, req.user, req[objName][key])
       }
       next()
     }
