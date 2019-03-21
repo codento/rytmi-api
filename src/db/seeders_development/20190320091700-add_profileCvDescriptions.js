@@ -7,6 +7,7 @@ factory.define('profileCvDescription')
   .attr('profileId')
   .attr('description')
   .attr('language')
+  .attr('type')
   .attr('createdAt', () => new Date())
   .attr('updatedAt', () => new Date())
 
@@ -21,13 +22,27 @@ module.exports = {
         if (faker.random.number(5) < 5) { // Not everyone has a cvDescription
           profileCvDescriptions.push(factory.build('profileCvDescription', {
             profileId: profile.id,
-            description: `(suomeksi) ${faker.lorem.sentences(2, 4)}`,
-            language: 'fi'
+            description: `(Esittelyteksti suomeksi) ${faker.lorem.sentences(2, 4)}`,
+            language: 'fi',
+            type: 'introduction'
           }))
           profileCvDescriptions.push(factory.build('profileCvDescription', {
             profileId: profile.id,
-            description: `(in English) ${faker.lorem.sentences(2, 4)}`,
-            language: 'en'
+            description: `(Introductory text in English) ${faker.lorem.sentences(2, 4)}`,
+            language: 'en',
+            type: 'introduction'
+          }))
+          profileCvDescriptions.push(factory.build('profileCvDescription', {
+            profileId: profile.id,
+            description: `(Koulutus ja harrastukset suomeksi) ${faker.lorem.sentences(2, 4)}`,
+            language: 'fi',
+            type: 'other'
+          }))
+          profileCvDescriptions.push(factory.build('profileCvDescription', {
+            profileId: profile.id,
+            description: `(Education and hobbies in English) ${faker.lorem.sentences(2, 4)}`,
+            language: 'en',
+            type: 'other'
           }))
         }
       })

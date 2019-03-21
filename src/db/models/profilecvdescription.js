@@ -16,6 +16,10 @@ module.exports = (sequelize, DataTypes) => {
     language: {
       type: DataTypes.STRING,
       allowNull: true
+    },
+    type: {
+      type: DataTypes.STRING,
+      allowNull: false
     }
   }, {
     validate: {
@@ -25,7 +29,7 @@ module.exports = (sequelize, DataTypes) => {
     indexes: [
       {
         name: 'projectId-language-index',
-        fields: ['projectId', 'language'],
+        fields: ['projectId', 'language', 'type'],
         unique: true,
         type: 'UNIQUE'
       }
