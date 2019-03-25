@@ -4,11 +4,11 @@ import { wrapAsync } from './utils'
 export default function (objName, service, validator = null) {
   return {
     getAll: wrapAsync(async (req, res) => {
-      const collection = await service.getAll()
+      const collection = await service.getAll(req.query.language)
       res.json(collection)
     }),
     get: wrapAsync(async (req, res) => {
-      const obj = req[objName]
+      const obj = await service.get(req.params.id, req.query.language)
       res.json(obj)
     }),
     create: wrapAsync(async (req, res) => {
