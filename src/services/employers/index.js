@@ -1,28 +1,35 @@
 import CrudService from '../crud'
 import models from '../../db/models'
-import { DEFAULT_LANGUAGE, genericGetAll, genericGet } from '../utils'
+import { genericGetAll, genericGet } from '../utils'
 
-const mapModelToModelDescription = (employer, employerDescription) => ({
-  id: employer.id,
-  name: employer.name,
-  startDate: employer.startDate,
-  endDate: employer.endDate,
-  isSecret: employer.isSecret,
-  title: employerDescription ? employerDescription.title : '',
-  description: employerDescription ? employerDescription.description : '',
-  language: employerDescription ? employerDescription.language : ''
-})
+const mapDescriptionsToModel = (employer, employerDescription) => {
+  const descriptions = []
+  employerDescription.forEach(description => descriptions.push({
+    title: description ? description.title : '',
+    description: description ? description.description : '',
+    language: description ? description.language : ''
+  }))
+
+  return {
+    id: employer.id,
+    name: employer.name,
+    startDate: employer.startDate,
+    endDate: employer.endDate,
+    isSecret: employer.isSecret,
+    descriptions: descriptions
+  }
+}
 
 export default class EmployerService extends CrudService {
   constructor () {
     super(models.employer)
   }
 
-  async getAll (language = DEFAULT_LANGUAGE) {
-    return genericGetAll(models.employer, models.employerDescription, mapModelToModelDescription, language)
+  async getAll () {
+    return genericGetAll(models.employer, models.employerDescription, mapDescriptionsToModel)
   }
 
-  async get (id, language = DEFAULT_LANGUAGE) {
-    return genericGet(models.employer, models.employerDescription, mapModelToModelDescription, language, id, 'employerId')
+  async get (id) {
+    return genericGet(models.employer, models.employerDescription, mapDescriptionsToModel, id, 'employerId')
   }
 }

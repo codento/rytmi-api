@@ -1,11 +1,9 @@
-export const DEFAULT_LANGUAGE = 'fi'
-
-export const genericGetAll = async (model, modelDescription, mapModelToModelDescriptionFunction, language) => {
+export const genericGetAll = async (model, modelDescription, mapDescriptionsToModelFunction) => {
   const modelInstances = await model.findAll()
-  const modelDescriptionsInCorrectLanguage = await modelDescription.findAll({ where: { 'language': language } })
+  const modelDescriptionInstances = await modelDescription.findAll()
   let mappedModels = modelInstances.map(modelInstance => {
-    const modelInstanceDescription = modelDescriptionsInCorrectLanguage.find(description => description.projectId === modelInstance.id)
-    return mapModelToModelDescriptionFunction(modelInstance, modelInstanceDescription)
+    const modelInstanceDescriptions = modelDescriptionInstances.filter(description => description.projectId === modelInstance.id)
+    return mapDescriptionsToModelFunction(modelInstance, modelInstanceDescriptions)
   })
 
   return new Promise(resolve => {
@@ -13,13 +11,13 @@ export const genericGetAll = async (model, modelDescription, mapModelToModelDesc
   })
 }
 
-export const genericGet = async (model, modelDescription, mapModelToModelDescriptionFunction, language, id, foreignKeyId) => {
+export const genericGet = async (model, modelDescription, mapDescriptionsToModelFunction, id, foreignKeyId) => {
   const modelInstance = await model.findById(id)
-  let whereParameters = { language: language }
+  let whereParameters = {}
   whereParameters[foreignKeyId] = id
-  const modelDescriptionsInCorrectLanguage = await modelDescription.findOne({ where: whereParameters })
+  const modelInstanceDescriptions = await modelDescription.findAll({ where: whereParameters })
 
   return new Promise(resolve => {
-    resolve(mapModelToModelDescriptionFunction(modelInstance, modelDescriptionsInCorrectLanguage))
+    resolve(mapDescriptionsToModelFunction(modelInstance, modelInstanceDescriptions))
   })
 }
