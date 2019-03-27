@@ -63,7 +63,7 @@ async function getOrCreateUser (googleId, ticketPayload) {
 async function getOrCreateProfile (userId, ticketPayload) {
   const profileService = new ProfileService()
 
-  let profile = await profileService.getByUserId(userId)
+  let profile = await profileService.get(userId)
   if (!profile) {
     try {
       profile = await profileService.create({
