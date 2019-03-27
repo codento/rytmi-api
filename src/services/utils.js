@@ -1,8 +1,8 @@
-export const genericGetAll = async (model, modelDescription, mapDescriptionsToModelFunction) => {
-  const modelInstances = await model.findAll()
+export const genericGetAll = async (model, modelDescription, mapDescriptionsToModelFunction, foreignKeyId, whereParameters, isParanoid) => {
+  const modelInstances = await model.findAll({where: whereParameters, paranoid: isParanoid})
   const modelDescriptionInstances = await modelDescription.findAll()
   let mappedModels = modelInstances.map(modelInstance => {
-    const modelInstanceDescriptions = modelDescriptionInstances.filter(description => description.projectId === modelInstance.id)
+    const modelInstanceDescriptions = modelDescriptionInstances.filter(description => description[foreignKeyId] === modelInstance.id)
     return mapDescriptionsToModelFunction(modelInstance, modelInstanceDescriptions)
   })
 

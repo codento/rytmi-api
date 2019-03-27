@@ -13,9 +13,7 @@ profileController.getList = wrapAsync(async (req, res) => {
   if (query.active) {
     criteria.active = query.active
   }
-  const profiles = Object.keys(criteria).length >= 0
-    ? await profileService.getFiltered(criteria)
-    : await profileService.getAll()
+  const profiles = await profileService.getFiltered(criteria)
   res.json(profiles)
 })
 

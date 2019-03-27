@@ -26,7 +26,7 @@ export default class ProjectService extends CrudService {
   }
 
   async getAll () {
-    return genericGetAll(models.project, models.projectDescription, mapDescriptionsToModel)
+    return genericGetAll(models.project, models.projectDescription, mapDescriptionsToModel, 'projectId')
   }
 
   async get (id) {
