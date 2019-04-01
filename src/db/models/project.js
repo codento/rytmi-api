@@ -24,11 +24,6 @@ module.exports = (sequelize, DataTypes) => {
           throw new Error('Start date must be before end date!')
         }
       },
-      nameNotEmpty: function () {
-        if (this.name.length === 0) {
-          throw new Error('Name can not be empty!')
-        }
-      },
       codeNotNegative: function () {
         if (this.code < 0) {
           throw new Error('Code can not be negative!')

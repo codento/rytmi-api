@@ -23,7 +23,11 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     validate: {
-
+      nameNotEmpty: function () {
+        if (this.name.length === 0) {
+          throw new Error('Name can not be empty!')
+        }
+      }
     }
   }, {
     indexes: [

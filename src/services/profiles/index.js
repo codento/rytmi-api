@@ -5,6 +5,7 @@ import { genericGetAll, genericGet } from '../utils'
 const mapCvDescriptionsToProfile = (profile, profileCvDescriptions) => {
   const cvDescriptions = []
   profileCvDescriptions.forEach(description => cvDescriptions.push({
+    id: description ? description.id : '',
     name: description ? description.name : '',
     description: description ? description.description : '',
     type: description ? description.type : '',
