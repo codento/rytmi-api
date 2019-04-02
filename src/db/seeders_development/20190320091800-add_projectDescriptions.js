@@ -31,15 +31,18 @@ module.exports = {
       projects.forEach(project => {
         let name = faker.commerce.productName()
         let nameEndingNumber = faker.random.number({min: 0, max: nameEndingsFi.length - 1})
+        let companyName = faker.company.companyName()
         projectDescriptions.push(factory.build('projectDescription', {
           projectId: project.id,
           name: `${name} -${nameEndingsFi[nameEndingNumber]}`,
+          customerName: companyName,
           description: `(suomeksi) ${faker.lorem.sentences(1, 3)}`,
           language: 'fi'
         }))
         projectDescriptions.push(factory.build('projectDescription', {
           projectId: project.id,
           name: `${name} -${nameEndingsEn[nameEndingNumber]}`,
+          customerName: companyName,
           description: `(in English) ${faker.lorem.sentences(1, 3)}`,
           language: 'en'
         }))

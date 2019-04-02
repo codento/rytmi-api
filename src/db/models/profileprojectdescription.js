@@ -5,19 +5,11 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       autoIncrement: true
     },
-    profileId: {
-      type: DataTypes.INTEGER,
-      allowNull: false
-    },
-    projectId: {
+    profileProjectId: {
       type: DataTypes.INTEGER,
       allowNull: false
     },
     title: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    description: {
       type: DataTypes.STRING,
       allowNull: true
     },
@@ -32,17 +24,16 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     indexes: [
       {
-        name: 'profileId-projectId-language-index',
-        fields: ['profileId', 'projectId', 'language'],
+        name: 'profileProjectId-language-index',
+        fields: ['profileProjectId', 'language'],
         unique: true,
         type: 'UNIQUE'
       }
     ]
   })
 
-  ProfileProjectDescription.associate = (models) => {
-    models.profileProjectDescription.belongsTo(models.profile, {foreignKey: 'profileId'})
-    models.profileProjectDescription.belongsTo(models.project, {foreignKey: 'projectId'})
+  ProfileProjectDescription.associate = models => {
+    models.profileProjectDescription.belongsTo(models.profileProject, {foreignKey: 'id'})
   }
 
   return ProfileProjectDescription

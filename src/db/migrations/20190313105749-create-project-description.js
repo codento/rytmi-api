@@ -19,6 +19,10 @@ module.exports = {
         allowNull: false,
         type: Sequelize.STRING
       },
+      customerName: {
+        allowNull: false,
+        type: Sequelize.STRING
+      },
       description: {
         type: Sequelize.STRING
       },

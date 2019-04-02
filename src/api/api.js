@@ -19,6 +19,7 @@ import skillGroups from './skillGroups'
 import employeeRoles from './employeeRoles'
 import employers from './employers'
 import profileProjectDescriptions from './profileProjectDescriptions'
+import projectSkills from './projectSkills'
 import logger, { httpLogger } from './logging'
 import swagger from './swagger'
 
@@ -83,6 +84,7 @@ export default () => {
   api.use('/employeeroles', employeeRoles())
   api.use('/employers', employers())
   api.use('/profileprojectdescriptions', profileProjectDescriptions())
+  api.use('/projectskills', projectSkills())
 
   api.use(validateErrorHandler)
   api.use(errorHandler)

@@ -8,6 +8,7 @@ const mapDescriptionsToModel = (project, projectDescriptions) => {
     id: description ? description.id : '',
     name: description ? description.name : '',
     description: description ? description.description : '',
+    customerName: description ? description.customerName : '',
     language: description ? description.language : ''
   }))
 

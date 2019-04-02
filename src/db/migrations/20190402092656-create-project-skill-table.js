@@ -1,26 +1,27 @@
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('profileProjectDescription', {
+    return queryInterface.createTable('projectSkill', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      profileProjectId: {
+      projectId: {
         allowNull: false,
         references: {
-          model: 'profileProject',
+          model: 'project',
           key: 'id'
         },
         type: Sequelize.INTEGER
       },
-      title: {
-        type: Sequelize.STRING
-      },
-      language: {
+      skillId: {
         allowNull: false,
-        type: Sequelize.STRING
+        references: {
+          model: 'skill',
+          key: 'id'
+        },
+        type: Sequelize.INTEGER
       },
       createdAt: {
         allowNull: false,
@@ -33,7 +34,7 @@ module.exports = {
     })
   },
 
-  down: (queryInterface) => {
-    return queryInterface.dropTable('profileProjectDescription')
+  down: queryInterface => {
+    return queryInterface.dropTable('projectSkill')
   }
 }
