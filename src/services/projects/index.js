@@ -28,11 +28,23 @@ export default class ProjectService extends CrudService {
   }
 
   async getAll () {
-    return genericGetAll(models.project, models.projectDescription, mapDescriptionsToModel, 'projectId')
+    const projectsWithoutSkills = await genericGetAll(models.project, models.projectDescription, mapDescriptionsToModel, 'projectId')
+    const projectsWithSkills = []
+    const projectSkills = await models.projectSkill.findAll()
+    projectsWithoutSkills.forEach(project => projectsWithSkills.push({
+      ...project,
+      projectSkills: projectSkills.filter(skill => skill.projectId === project.id).map(skill => ({ skillId: skill.skillId }))
+    }))
+    return projectsWithSkills
   }
 
   async get (id) {
-    return genericGet(models.project, models.projectDescription, mapDescriptionsToModel, id, 'projectId')
+    const project = await genericGet(models.project, models.projectDescription, mapDescriptionsToModel, id, 'projectId')
+    const projectSkills = await models.projectSkill.findAll({where: {projectId: project.id}})
+    return {
+      ...project,
+      projectSkills: projectSkills.map(skill => ({ skillId: skill.skillId }))
+    }
   }
 
   async update (id, attrs) {
