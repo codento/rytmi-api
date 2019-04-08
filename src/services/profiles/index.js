@@ -12,21 +12,24 @@ const mapCvDescriptionsToProfile = (profile, profileCvDescriptions) => {
     language: description ? description.language : ''
   }))
 
-  return {
-    id: profile.id,
-    userId: profile.userId,
-    lastName: profile.lastName,
-    firstName: profile.firstName,
-    birthday: profile.birthday,
-    email: profile.email,
-    phone: profile.phone,
-    title: profile.title,
-    links: profile.links,
-    photoPath: profile.photoPath,
-    active: profile.active,
-    employeeRoles: profile.employeeRoles,
-    cvDescriptions: cvDescriptions
+  if (profile) {
+    return {
+      id: profile.id,
+      userId: profile.userId,
+      lastName: profile.lastName,
+      firstName: profile.firstName,
+      birthday: profile.birthday,
+      email: profile.email,
+      phone: profile.phone,
+      title: profile.title,
+      links: profile.links,
+      photoPath: profile.photoPath,
+      active: profile.active,
+      employeeRoles: profile.employeeRoles,
+      cvDescriptions: cvDescriptions
+    }
   }
+  return null
 }
 
 export default class ProfileService extends CrudService {
