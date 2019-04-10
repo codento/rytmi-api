@@ -66,17 +66,14 @@ export default class ProfileService extends CrudService {
       }
     )
     for (const description of attrs.cvDescriptions) {
-      await models.profileCvDescription.update(
-        {
-          description: description.description
-        },
-        {
-          where:
-            {
-              id: description.id
-            }
-        }
-      )
+      if (description.id) {
+        await models.profileCvDescription.update({description: description.description}, {where: {id: description.id}})
+      } else {
+        await models.profileCvDescription.build({
+          ...description,
+          profileId: id
+        }).save()
+      }
     }
     return this.get(id)
   }
