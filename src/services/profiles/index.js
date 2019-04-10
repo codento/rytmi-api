@@ -44,10 +44,41 @@ export default class ProfileService extends CrudService {
   getFiltered (criteria, isParanoid = true) {
     return genericGetAll(models.profile, models.profileCvDescription, mapCvDescriptionsToProfile, 'profileId', criteria, isParanoid)
   }
-
-  update (id, attrs) {
-    delete attrs.userId
-    return super.update(id, attrs)
+  async update (id, attrs) {
+    await models.profile.update(
+      {
+        lastName: attrs.lastName,
+        firstName: attrs.firstName,
+        birthday: attrs.birthday,
+        email: attrs.email,
+        phone: attrs.phone,
+        title: attrs.title,
+        links: attrs.links,
+        photoPath: attrs.photoPath,
+        active: attrs.active,
+        employeeRoles: attrs.employeeRoles
+      },
+      {
+        where:
+          {
+            id: id
+          }
+      }
+    )
+    for (const description of attrs.cvDescriptions) {
+      await models.profileCvDescription.update(
+        {
+          description: description.description
+        },
+        {
+          where:
+            {
+              id: description.id
+            }
+        }
+      )
+    }
+    return this.get(id)
   }
 
   delete () {
