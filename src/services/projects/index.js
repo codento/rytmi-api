@@ -65,18 +65,14 @@ export default class ProjectService extends CrudService {
       }
     )
     for (const description of attrs.descriptions) {
-      await models.projectDescription.update(
-        {
-          name: description.name,
-          description: description.description
-        },
-        {
-          where:
-            {
-              id: description.id
-            }
-        }
-      )
+      if (description.id) {
+        await models.projectDescription.update({name: description.name, description: description.description}, {where: {id: description.id}})
+      } else {
+        await models.projectDescription.build({
+          ...description,
+          projectId: idInt
+        }).save()
+      }
     }
     return this.get(idInt)
   }
