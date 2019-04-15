@@ -12,7 +12,6 @@ employerController.update = wrapAsync(async (req, res) => {
 })
 
 employerController.delete = wrapAsync(async (req, res) => {
-  console.log(req)
   const action = await employerService.delete(req.params.id)
   res.json(action)
 })

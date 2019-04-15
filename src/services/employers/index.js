@@ -85,4 +85,10 @@ export default class EmployerService extends CrudService {
 
     return this.get(newEmployer.id)
   }
+
+  async delete (id) {
+    await models.employerDescription.destroy({where: { employerId: id }})
+    await models.employer.destroy({where: { id: id }})
+    return { id }
+  }
 }
