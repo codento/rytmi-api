@@ -33,7 +33,7 @@ export default class ProjectService extends CrudService {
     const projectSkills = await models.projectSkill.findAll()
     projectsWithoutSkills.forEach(project => projectsWithSkills.push({
       ...project,
-      projectSkills: projectSkills.filter(skill => skill.projectId === project.id).map(skill => ({ skillId: skill.skillId }))
+      projectSkills: projectSkills.filter(skill => skill.projectId === project.id).map(skill => ({ skillId: skill.skillId, projectSkillId: skill.id }))
     }))
     return projectsWithSkills
   }

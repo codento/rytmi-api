@@ -6,8 +6,9 @@ export default class ProjectSkillService extends CrudService {
     super(models.projectSkill)
   }
 
-  async getAll () {
-    return models.projectSkill.findAll()
+  async getAll (req, res) {
+    const options = req.query.projectId ? { where: { projectId: req.query.projectId } } : undefined
+    return models.projectSkill.findAll(options)
   }
 
   async get (id) {
