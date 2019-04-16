@@ -37,13 +37,17 @@ export default class ProfileService extends CrudService {
     super(models.profile)
   }
 
+  // Overrides CrudService's function
   get (id) {
     return genericGet(models.profile, models.profileCvDescription, mapCvDescriptionsToProfile, id, 'profileId')
   }
 
+  // Overrides CrudService's function
   getFiltered (criteria, isParanoid = true) {
     return genericGetAll(models.profile, models.profileCvDescription, mapCvDescriptionsToProfile, 'profileId', criteria, isParanoid)
   }
+
+  // Overrides CrudService's function
   async update (id, attrs) {
     await models.profile.update(
       {
@@ -78,6 +82,7 @@ export default class ProfileService extends CrudService {
     return this.get(id)
   }
 
+  // Overrides CrudService's function
   delete () {
     throw new Error('Not implemented')
   }

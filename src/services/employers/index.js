@@ -30,14 +30,17 @@ export default class EmployerService extends CrudService {
     super(models.employer)
   }
 
+  // Overrides CrudService's function
   async getAll () {
     return genericGetAll(models.employer, models.employerDescription, mapDescriptionsToModel, 'employerId')
   }
 
+  // Overrides CrudService's function
   async get (id) {
     return genericGet(models.employer, models.employerDescription, mapDescriptionsToModel, id, 'employerId')
   }
 
+  // Overrides CrudService's function
   async update (id, attrs) {
     const idInt = parseInt(id)
 
@@ -69,6 +72,7 @@ export default class EmployerService extends CrudService {
     return this.get(idInt)
   }
 
+  // Overrides CrudService's function
   async create (attrs) {
     delete attrs.id
     const newEmployer = await this.model
@@ -86,6 +90,7 @@ export default class EmployerService extends CrudService {
     return this.get(newEmployer.id)
   }
 
+  // Overrides CrudService's function
   async delete (id) {
     await models.employerDescription.destroy({where: { employerId: id }})
     await models.employer.destroy({where: { id: id }})

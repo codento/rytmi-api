@@ -1,6 +1,6 @@
 export const genericGetAll = async (model, modelDescription, mapDescriptionsToModelFunction, foreignKeyId, whereParameters, isParanoid) => {
   const modelInstances = await model.findAll({where: whereParameters, paranoid: isParanoid})
-  const modelDescriptionInstances = await modelDescription.findAll()
+  const modelDescriptionInstances = await modelDescription.findAll({attributes: { exclude: ['deletedAt'] }})
   let mappedModels = modelInstances.map(modelInstance => {
     const modelInstanceDescriptions = modelDescriptionInstances.filter(description => description[foreignKeyId] === modelInstance.id)
     return mapDescriptionsToModelFunction(modelInstance, modelInstanceDescriptions)
@@ -12,7 +12,7 @@ export const genericGetAll = async (model, modelDescription, mapDescriptionsToMo
 }
 
 export const genericGet = async (model, modelDescription, mapDescriptionsToModelFunction, id, foreignKeyId) => {
-  const modelInstance = await model.findById(id)
+  const modelInstance = await model.findById(id, {attributes: { exclude: ['deletedAt'] }})
   let whereParameters = {}
   whereParameters[foreignKeyId] = id
   const modelInstanceDescriptions = await modelDescription.findAll({ where: whereParameters })

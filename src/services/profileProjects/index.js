@@ -40,10 +40,12 @@ export default class ProfileProjectService extends CrudService {
     })
   }
 
+  // Overrides CrudService's function
   async getAll () {
     return genericGetAll(models.profileProject, models.profileProjectDescription, mapDescriptionsToModel, 'profileProjectId')
   }
 
+  // Overrides CrudService's function
   async get (id) {
     return genericGet(models.profileProject, models.profileProjectDescription, mapDescriptionsToModel, id, 'profileProjectId')
   }
@@ -64,13 +66,15 @@ export default class ProfileProjectService extends CrudService {
     return profileProjects ? profileProjects[0] : null
   }
 
+  // Overrides CrudService's function
   create (projectId, profileId, attrs) {
     attrs.projectId = parseInt(projectId)
     attrs.profileId = parseInt(profileId)
     return super.create(attrs)
   }
 
-  update (id, attrs) {
+  // Overrides CrudService's function
+  async update (id, attrs) {
     return models.profileProject
       .findOne({where: {
         id: id

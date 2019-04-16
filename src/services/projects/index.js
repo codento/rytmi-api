@@ -27,6 +27,7 @@ export default class ProjectService extends CrudService {
     super(models.project)
   }
 
+  // Overrides CrudService's function
   async getAll () {
     const projectsWithoutSkills = await genericGetAll(models.project, models.projectDescription, mapDescriptionsToModel, 'projectId')
     const projectsWithSkills = []
@@ -38,6 +39,7 @@ export default class ProjectService extends CrudService {
     return projectsWithSkills
   }
 
+  // Overrides CrudService's function
   async get (id) {
     const project = await genericGet(models.project, models.projectDescription, mapDescriptionsToModel, id, 'projectId')
     const projectSkills = await models.projectSkill.findAll({where: {projectId: project.id}})
@@ -47,6 +49,7 @@ export default class ProjectService extends CrudService {
     }
   }
 
+  // Overrides CrudService's function
   async update (id, attrs) {
     const idInt = parseInt(id)
 
