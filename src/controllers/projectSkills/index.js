@@ -16,6 +16,11 @@ projectSkillController.delete = wrapAsync(async (req, res) => {
   res.json(action)
 })
 
+projectSkillController.getAll = wrapAsync(async (req, res) => {
+  const data = await projectSkillService.getAll(req, res)
+  res.json(data)
+})
+
 module.exports = {
   projectSkillController: projectSkillController,
   findProjectSkillOr404: findObjectOr404('projectSkill', projectSkillService)
