@@ -1,6 +1,6 @@
 import CrudService from '../crud'
 import models from '../../db/models'
-import { genericGetAll, genericGet } from '../utils'
+import { genericGetAll, genericGet, genericDelete, genericUpdate, genericCreate } from '../utils'
 
 const mapDescriptionsToModel = (employer, employerDescriptions) => {
   const descriptions = []
@@ -42,43 +42,17 @@ export default class EmployerService extends CrudService {
 
   // Overrides CrudService's function
   async update (id, attrs) {
-    const idInt = parseInt(id)
-    await models.employer.update({ attrs }, { where: { id: idInt } })
-    for (const description of attrs.descriptions) {
-      if (description.id) {
-        await models.employerDescription.update({title: description.title, description: description.description}, {where: {id: description.id}})
-      } else {
-        await models.employerDescription.build({
-          ...description,
-          employerId: idInt
-        }).save()
-      }
-    }
-    return this.get(idInt)
+    return genericUpdate(models.employer, models.employerDescription, id, attrs, 'employerId', this.get)
   }
 
   // Overrides CrudService's function
   async create (attrs) {
     delete attrs.id
-    const newEmployer = await this.model
-      .build(attrs)
-      .save()
-      .then(created => this.get(created.id))
-
-    for (const description of attrs.descriptions) {
-      await models.employerDescription.build({
-        ...description,
-        employerId: newEmployer.id
-      }).save()
-    }
-
-    return this.get(newEmployer.id)
+    return genericCreate(models.employer, models.employerDescription, attrs, 'employerId', this.get)
   }
 
   // Overrides CrudService's function
   async delete (id) {
-    await models.employerDescription.destroy({where: { employerId: id }})
-    await models.employer.destroy({where: { id: id }})
-    return { id }
+    return genericDelete(models.employer, models.employerDescription, id, 'employerId')
   }
 }

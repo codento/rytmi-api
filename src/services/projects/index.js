@@ -1,6 +1,6 @@
 import CrudService from '../crud'
 import models from '../../db/models'
-import { genericGetAll, genericGet } from '../utils'
+import { genericGetAll, genericGet, genericDelete, genericUpdate } from '../utils'
 
 const mapDescriptionsToModel = (project, projectDescriptions) => {
   const descriptions = []
@@ -51,32 +51,11 @@ export default class ProjectService extends CrudService {
 
   // Overrides CrudService's function
   async update (id, attrs) {
-    const idInt = parseInt(id)
+    return genericUpdate(models.project, models.projectDescription, id, attrs, 'projectId', this.get)
+  }
 
-    await models.project.update(
-      {
-        code: attrs.code,
-        startDate: attrs.startDate,
-        endDate: attrs.endDate,
-        isSecret: attrs.isSecret
-      },
-      {
-        where:
-          {
-            id: idInt
-          }
-      }
-    )
-    for (const description of attrs.descriptions) {
-      if (description.id) {
-        await models.projectDescription.update({name: description.name, description: description.description}, {where: {id: description.id}})
-      } else {
-        await models.projectDescription.build({
-          ...description,
-          projectId: idInt
-        }).save()
-      }
-    }
-    return this.get(idInt)
+  // Overrides CrudService's function
+  async delete (id) {
+    return genericDelete(models.project, models.projectDescription, id, 'projectId')
   }
 }

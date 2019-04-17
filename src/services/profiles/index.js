@@ -1,6 +1,6 @@
 import CrudService from '../crud'
 import models from '../../db/models'
-import { genericGetAll, genericGet } from '../utils'
+import { genericGetAll, genericGet, genericUpdate } from '../utils'
 
 const mapCvDescriptionsToProfile = (profile, profileCvDescriptions) => {
   const cvDescriptions = []
@@ -49,37 +49,7 @@ export default class ProfileService extends CrudService {
 
   // Overrides CrudService's function
   async update (id, attrs) {
-    await models.profile.update(
-      {
-        lastName: attrs.lastName,
-        firstName: attrs.firstName,
-        birthday: attrs.birthday,
-        email: attrs.email,
-        phone: attrs.phone,
-        title: attrs.title,
-        links: attrs.links,
-        photoPath: attrs.photoPath,
-        active: attrs.active,
-        employeeRoles: attrs.employeeRoles
-      },
-      {
-        where:
-          {
-            id: id
-          }
-      }
-    )
-    for (const description of attrs.cvDescriptions) {
-      if (description.id) {
-        await models.profileCvDescription.update({description: description.description}, {where: {id: description.id}})
-      } else {
-        await models.profileCvDescription.build({
-          ...description,
-          profileId: id
-        }).save()
-      }
-    }
-    return this.get(id)
+    return genericUpdate(models.profile, models.profileCvDescription, id, attrs, 'profileId', this.get, 'cvDescriptions')
   }
 
   // Overrides CrudService's function

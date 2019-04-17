@@ -21,3 +21,38 @@ export const genericGet = async (model, modelDescription, mapDescriptionsToModel
     resolve(mapDescriptionsToModelFunction(modelInstance, modelInstanceDescriptions))
   })
 }
+
+export const genericDelete = async (model, modelDescription, id, foreignKeyId) => {
+  let whereParameters = {}
+  whereParameters[foreignKeyId] = id
+  await modelDescription.destroy({where: whereParameters})
+  await model.destroy({where: { id: id }})
+  return { id }
+}
+
+export const genericUpdate = async (model, modelDescription, id, attributes, foreignKeyId, getFunction, descriptionsPropertyName = 'descriptions') => {
+  await model.update(attributes, { where: { id } })
+  for (const description of attributes[descriptionsPropertyName]) {
+    if (description.id) {
+      await modelDescription.update(description, {where: {id: description.id}})
+    } else {
+      let newDesciption = { ...description }
+      newDesciption[foreignKeyId] = id
+      await modelDescription.build(newDesciption).save()
+    }
+  }
+  return getFunction(id)
+}
+
+export const genericCreate = async (model, modelDescription, attributes, foreignKeyId, getFunction, descriptionsPropertyName = 'descriptions') => {
+  const newModel = await model
+    .build(attributes)
+    .save()
+    .then(createdModel => getFunction(createdModel.id))
+  for (const description of attributes[descriptionsPropertyName]) {
+    let newDesciption = { ...description }
+    newDesciption[foreignKeyId] = newModel.id
+    await modelDescription.build(newDesciption).save()
+  }
+  return getFunction(newModel.id)
+}

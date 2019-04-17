@@ -1,6 +1,6 @@
 import CrudService from '../crud'
 import models from '../../db/models'
-import { genericGetAll, genericGet } from '../utils'
+import { genericGetAll, genericGet, genericDelete, genericUpdate, genericCreate } from '../utils'
 
 const Op = models.sequelize.Op
 
@@ -71,43 +71,16 @@ export default class ProfileProjectService extends CrudService {
   async create (projectId, profileId, attrs) {
     attrs.projectId = parseInt(projectId)
     attrs.profileId = parseInt(profileId)
-
-    const newProfileProject = await this.model
-      .build(attrs)
-      .save()
-      .then(created => this.get(created.id))
-
-    for (const description of attrs.descriptions) {
-      await models.profileProjectDescription.build({
-        ...description,
-        profileProjectId: newProfileProject.id
-      }).save()
-    }
-
-    return this.get(newProfileProject.id)
+    return genericCreate(models.profileProject, models.profileProjectDescription, attrs, 'profileProjectId', this.get)
   }
 
   // Overrides CrudService's function
   async update (id, attrs) {
-    const idInt = parseInt(id)
-    await models.profileProject.update(attrs, { where: { id: idInt } })
-    for (const description of attrs.descriptions) {
-      if (description.id) {
-        await models.profileProjectDescription.update({title: description.title}, {where: {id: description.id}})
-      } else {
-        await models.profileProjectDescription.build({
-          ...description,
-          profileProjectId: idInt
-        }).save()
-      }
-    }
-    return this.get(idInt)
+    return genericUpdate(models.profileProject, models.profileProjectDescription, id, attrs, 'profileProjectId', this.get)
   }
 
   // Overrides CrudService's function
   async delete (id) {
-    await models.profileProjectDescription.destroy({where: { profileProjectId: id }})
-    await models.profileProject.destroy({where: { id: id }})
-    return { id }
+    return genericDelete(models.profileProject, models.profileProjectDescription, id, 'profileProjectId')
   }
 }
