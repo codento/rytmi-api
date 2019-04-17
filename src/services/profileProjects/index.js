@@ -7,8 +7,9 @@ const Op = models.sequelize.Op
 const mapDescriptionsToModel = (profileProject, profileProjectDescriptions) => {
   const descriptions = []
   profileProjectDescriptions.forEach(description => descriptions.push({
-    title: description ? description.title : '',
-    language: description ? description.language : ''
+    title: description.title,
+    language: description.language,
+    id: description.id
   }))
   if (profileProject) {
     return {
@@ -67,21 +68,46 @@ export default class ProfileProjectService extends CrudService {
   }
 
   // Overrides CrudService's function
-  create (projectId, profileId, attrs) {
+  async create (projectId, profileId, attrs) {
     attrs.projectId = parseInt(projectId)
     attrs.profileId = parseInt(profileId)
-    return super.create(attrs)
+
+    const newProfileProject = await this.model
+      .build(attrs)
+      .save()
+      .then(created => this.get(created.id))
+
+    for (const description of attrs.descriptions) {
+      await models.profileProjectDescription.build({
+        ...description,
+        profileProjectId: newProfileProject.id
+      }).save()
+    }
+
+    return this.get(newProfileProject.id)
   }
 
   // Overrides CrudService's function
   async update (id, attrs) {
-    return models.profileProject
-      .findOne({where: {
-        id: id
-      }})
-      .then(profileProject => {
-        return profileProject
-          .update(attrs)
-      })
+    const idInt = parseInt(id)
+    await models.profileProject.update(attrs, { where: { id: idInt } })
+    for (const description of attrs.descriptions) {
+      if (description.id) {
+        await models.profileProjectDescription.update({title: description.title}, {where: {id: description.id}})
+      } else {
+        await models.profileProjectDescription.build({
+          ...description,
+          profileProjectId: idInt
+        }).save()
+      }
+    }
+    return this.get(idInt)
+  }
+
+  // Overrides CrudService's function
+  async delete (id) {
+    await models.profileProjectDescription.destroy({where: { profileProjectId: id }})
+    await models.profileProject.destroy({where: { id: id }})
+    return { id }
   }
 }

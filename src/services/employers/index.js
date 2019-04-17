@@ -43,22 +43,7 @@ export default class EmployerService extends CrudService {
   // Overrides CrudService's function
   async update (id, attrs) {
     const idInt = parseInt(id)
-
-    await models.employer.update(
-      {
-        profileId: attrs.profileId,
-        name: attrs.name,
-        startDate: attrs.startDate,
-        endDate: attrs.endDate,
-        isSecret: attrs.isSecret
-      },
-      {
-        where:
-          {
-            id: idInt
-          }
-      }
-    )
+    await models.employer.update({ attrs }, { where: { id: idInt } })
     for (const description of attrs.descriptions) {
       if (description.id) {
         await models.employerDescription.update({title: description.title, description: description.description}, {where: {id: description.id}})
