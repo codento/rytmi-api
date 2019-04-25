@@ -1,6 +1,6 @@
 import CrudService from '../crud'
 import models from '../../db/models'
-import { genericGetAll, genericGet, genericDelete, genericUpdate } from '../utils'
+import { genericGetAll, genericGet, genericDelete, genericUpdate, genericCreate } from '../utils'
 
 const mapDescriptionsToModel = (project, projectDescriptions) => {
   const descriptions = []
@@ -47,6 +47,12 @@ export default class ProjectService extends CrudService {
       ...project,
       projectSkills: projectSkills.map(skill => ({ skillId: skill.skillId }))
     }
+  }
+
+  // Overrides CrudService's function
+  async create (attrs) {
+    delete attrs.id
+    return genericCreate(models.project, models.projectDescription, attrs, 'projectId', this.get)
   }
 
   // Overrides CrudService's function
