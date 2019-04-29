@@ -62,6 +62,7 @@
     "express-jwt": "^5.3.1",
     "express-winston": "^2.5.0",
     "google-auth-library": "^1.6.1",
+    "googleapis": "^39.2.0",
     "jsonwebtoken": "^8.1.1",
     "pg": "^7.4.1",
     "sequelize": "^4.42.1",
