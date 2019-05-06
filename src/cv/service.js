@@ -1,48 +1,9 @@
 import { google } from 'googleapis'
+import { orderBy } from 'lodash'
 
-const mapData = (key, lists, template) => {
-  console.log('mapData: template')
-  console.log(template)
-  return lists
-    ? lists.map((item, i) => ({
-      insertText: {
-        text: `${item[0]}\t${item[1]}\n`,
-        location: {
-          index: getIndex(key, template.namedRanges, i)
-        }
-      }
-    }))
-    : []
-}
-
-const getIndex = (key, namedRange, index) => {
-  console.log('getIndex: key, namedRange, index')
-  console.log(key)
-  console.log(namedRange)
-  console.log(index)
-  return namedRange[key].namedRanges[index].ranges[0].startIndex
-}
-
-// TODO -> configuration file
-const createMap = employeeData => ({
-  staticValues: [
-    { key: '{{ employeeName }}', newValue: employeeData.employeeName },
-    { key: '{{ employeeDescription }}', newValue: employeeData.employeeName },
-    { key: '{{ jobTitle }}', newValue: employeeData.jobTitle }
-  ],
-  lists: [
-    { key: '{{ topSkills }}', newValues: employeeData.topSkills },
-    { key: '{{ topProjects }}', newValues: employeeData.topProjects },
-    { key: '{{ skills }}', newValues: employeeData.skills },
-    { key: '{{ projects }}', newValues: employeeData.projects },
-    { key: '{{ languages }}', newValues: employeeData.languages }
-  ]
-})
-
-const templateId = '1If6AFJi8ip_yvyvTgzm5LgxiIXl3TUhvuEMFkcmQKQU' // TODO -> .env
+const templateId = '1hRLbg3-1If6AFJi8ip_yvyvTgzm5LgxiIXl3TUhvuEMFkcmQKQU'
 
 const create = async () => {
-  console.log('create')
   const auth = await google.auth.getClient({
     scopes: [
       'https://www.googleapis.com/auth/drive'
@@ -58,8 +19,7 @@ const create = async () => {
     fileId: templateId,
     fields: ['id'],
     requestBody: {
-      name: 'Copied CV',
-      parents: [{id: '1yI3Tla4i7N138GEX_hzT4K9a8onF_C93'}] // Lisätty testimielessä
+      name: 'Copied CV'
     }
   })
 
@@ -71,15 +31,138 @@ const create = async () => {
       sendNotificationEmail: false,
       requestBody: {
         role: 'writer',
-        type: 'user',
-        emailAddress: 'etunimi.sukunimi@codento.com'
+        type: 'domain',
+        domain: 'codento.com'
       }
     })
-  }
-    , 4000)
+  }, 4000)
 
-  console.log(data)
   return data
+}
+
+// TODO: Rest of the static texts
+const createStaticTextReplacementRequests = (cv) => {
+  let requests = []
+  const replacementDefinitions = [
+    { text: '{{ jobTitle }}', newText: cv.jobTitle },
+    { text: '{{ employeeName }}', newText: cv.employeeName },
+    { text: '{{ employeeYearOfBirth }}', newText: '' + cv.born }
+  ]
+
+  replacementDefinitions.forEach(definition => {
+    requests.push({
+      'replaceAllText': {
+        'containsText': {
+          'text': definition.text
+        },
+        'replaceText': definition.newText
+      }
+    })
+  })
+
+  return requests
+}
+
+// TODO: Multipage skill lists
+const createSkillTableRequests = async (fileId, cv, slides) => {
+  const slidesData = await slides.presentations.get({presentationId: fileId})
+  const skillTable = slidesData.data.slides[1].pageElements.find(element => element.table)
+
+  // Get background colors from templates table rows
+  const firstColor = skillTable.table.tableRows[1].tableCells[0].tableCellProperties.tableCellBackgroundFill.solidFill.color.rgbColor
+  const secondColor = skillTable.table.tableRows[2].tableCells[0].tableCellProperties.tableCellBackgroundFill.solidFill.color.rgbColor
+
+  let requests = []
+  const orderedSkills = orderBy(cv.skills, ['skillCategory', 'skillLevel', 'skillName'], ['asc', 'desc', 'asc'])
+
+  // Delete the second row from the skill table (only used for its color)
+  requests.push({
+    'deleteTableRow': {
+      'tableObjectId': skillTable.objectId,
+      'cellLocation': {
+        'rowIndex': 2
+      }
+    }
+  })
+
+  // Add new rows for skills
+  requests.push({
+    'insertTableRows': {
+      'tableObjectId': skillTable.objectId,
+      'cellLocation': {
+        'rowIndex': 1
+      },
+      'insertBelow': true,
+      'number': cv.skills.length - 1
+    }
+  })
+
+  // Set row background color for each skill category
+  let colorToUse = firstColor
+  orderedSkills.forEach((skill, index) => {
+    let isLastRowsCategoryDifferent = orderedSkills[index - 1] && skill.skillCategory !== orderedSkills[index - 1].skillCategory
+    if (isLastRowsCategoryDifferent) {
+      colorToUse = colorToUse === firstColor ? secondColor : firstColor
+    }
+    requests.push({'updateTableCellProperties': {
+      'objectId': skillTable.objectId,
+      'tableRange': {
+        'location': {
+          'rowIndex': index + 1,
+          'columnIndex': 0
+        },
+        'rowSpan': 1,
+        'columnSpan': 3
+      },
+      'tableCellProperties': {
+        'tableCellBackgroundFill': {
+          'solidFill': {
+            'color': {
+              'rgbColor': colorToUse
+            }
+          }
+        }
+      },
+      'fields': 'tableCellBackgroundFill.solidFill.color'
+    }})
+  })
+
+  // Add skill names and skill levels
+  orderedSkills.forEach((skill, index) => {
+    let isLastRowsCategoryDifferent = orderedSkills[index - 1] && skill.skillCategory !== orderedSkills[index - 1].skillCategory
+    requests.push({
+      'insertText': {
+        'objectId': skillTable.objectId,
+        'cellLocation': {
+          'rowIndex': index + 1,
+          'columnIndex': 0
+        },
+        'text': index === 0 || isLastRowsCategoryDifferent ? skill.skillCategory : ''
+      }
+    })
+    requests.push({
+      'insertText': {
+        'objectId': skillTable.objectId,
+        'cellLocation': {
+          'rowIndex': index + 1,
+          'columnIndex': 1
+        },
+        'text': skill.skillName
+      }
+    })
+    requests.push({
+      'insertText': {
+        'objectId': skillTable.objectId,
+        'cellLocation': {
+          'rowIndex': index + 1,
+          'columnIndex': 2
+        },
+        'text': '' + skill.skillLevel
+      }
+    })
+  })
+
+  return requests
 }
 
 const update = async (fileId, cv) => {
@@ -94,48 +177,15 @@ const update = async (fileId, cv) => {
     auth
   })
 
-  // const newValues = createMap(cv)
-
-  // const staticRequests = newValues.staticValues.map(item =>
-  //   ({
-  //     replaceAllText: {
-  //       containsText: {
-  //         text: item.key,
-  //         matchCase: true
-  //       },
-  //       replaceText: item.newValue
-  //     }
-  //   })
-  // )
-
-  // const template = await slides.presentations.get({
-  //   presentationId: templateId
-  // })
-
-  // const listRequests = newValues.lists.map(item =>
-  //   mapData(item.key, item.newValues, template)).flat()
-
-  // const requests = listRequests.concat(staticRequests)
-
-  // await slides.presentations.batchUpdate({
-  //   presentationId: fileId,
-  //   requestBody: { requests }
-  // })
-
   let topSkills = ''
   cv.topSkills.forEach(skill => {
     topSkills += skill.skillName + '\r\n'
   })
+
   const resource = {
     'requests': [
-      {
-        'replaceAllText': {
-          'containsText': {
-            'text': '{{ jobTitle }}'
-          },
-          'replaceText': cv.jobTitle
-        }
-      },
+      ...createStaticTextReplacementRequests(cv),
+      ...await createSkillTableRequests(fileId, cv, slides),
       {
         'replaceAllText': {
           'containsText': {
@@ -143,42 +193,26 @@ const update = async (fileId, cv) => {
           },
           'replaceText': topSkills
         }
-      },
-      {
-        'replaceAllText': {
-          'containsText': {
-            'text': '{{ skillLevel11 }}'
-          },
-          'replaceText': (cv.skills[3] ? '' + cv.skills[3].skillLevel : '')
-        }
-      },
-      {
-        'replaceAllText': {
-          'containsText': {
-            'text': '{{ skillLevel10 }}'
-          },
-          'replaceText': (cv.skills[2] ? '' + cv.skills[2].skillLevel : '')
-        }
-      },
-      {
-        'replaceAllText': {
-          'containsText': {
-            'text': '{{ skillName11 }}'
-          },
-          'replaceText': (cv.skills[3] ? cv.skills[3].skillName : '')
-        }
-      },
-      {
-        'replaceAllText': {
-          'containsText': {
-            'text': '{{ skillName10 }}'
-          },
-          'replaceText': (cv.skills[2] ? cv.skills[2].skillName : '')
-        }
       }
     ]
   }
   slides.presentations.batchUpdate({resource, presentationId: fileId})
 }
 
-export default { create, update }
+// For testing purposes only, can be removed
+const getTemplate = async (fileId) => {
+  const auth = await google.auth.getClient({
+    scopes: [
+      'https://www.googleapis.com/auth/slides'
+    ]
+  })
+
+  const slides = google.slides({
+    version: 'v1',
+    auth
+  })
+  const slidesData = await slides.presentations.get({presentationId: fileId})
+  return slidesData
+}
+
+export default { create, update, getTemplate }

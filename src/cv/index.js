@@ -21,8 +21,12 @@ export default () => {
       logger.debug('Created new copy with id', id)
       setTimeout(async () => {
         logger.debug('Populating CV with data...')
+
+        // For testing purposes only, can be removed
+        const slidesData = await service.getTemplate(id)
+
         await service.update(id, req.body)
-        res.json({cvUrl: `https://docs.google.com/presentation/d/${id}`})
+        res.json({cvUrl: `https://docs.google.com/presentation/d/${id}`, slidesData})
       }, 4000)
     } catch (e) {
       next(e)
