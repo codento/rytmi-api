@@ -1,3 +1,5 @@
+import os from 'os'
+import fs from 'fs'
 import { google } from 'googleapis'
 import { orderBy } from 'lodash'
 
@@ -221,20 +223,31 @@ const update = async (fileId, cv) => {
   slides.presentations.batchUpdate({resource, presentationId: fileId})
 }
 
-// For testing purposes only, can be removed
-const getTemplate = async (fileId) => {
+const runExport = async (fileId) => {
   const auth = await google.auth.getClient({
     scopes: [
-      'https://www.googleapis.com/auth/slides'
+      'https://www.googleapis.com/auth/drive'
     ]
   })
 
-  const slides = google.slides({
-    version: 'v1',
+  const drive = google.drive({
+    version: 'v3',
     auth
   })
-  const slidesData = await slides.presentations.get({presentationId: fileId})
-  return slidesData
+
+  const path = `${os.tmpdir()}/${fileId}.pdf`
+  const dest = fs.createWriteStream(path)
+
+  return new Promise(async (resolve, reject) => {
+    const res = await drive.files.export(
+      {fileId, mimeType: 'application/pdf'},
+      {responseType: 'stream'}
+    )
+    res.data
+      .on('error', (err) => reject(err))
+      .pipe(dest)
+    dest.on('finish', () => resolve(path))
+  })
 }
 
-export default { create, update, getTemplate }
+export default { create, update, runExport }
