@@ -1,4 +1,4 @@
-import { Router } from 'express'
+import { Router } from 'express'
 import bodyParser from 'body-parser'
 import logger, { httpLogger } from '../api/logging'
 import { version } from '../../package.json'
