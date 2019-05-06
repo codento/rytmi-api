@@ -7,7 +7,7 @@ export default class SkillService extends CrudService {
   }
 
   removedDeletedAt (id) {
-    return this.model.findById(id, { paranoid: false }).then(model => {
+    return this.model.findByPk(id, { paranoid: false }).then(model => {
       model.setDataValue('deletedAt', null)
       return model.save({ paranoid: false })
     })

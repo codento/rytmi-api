@@ -12,7 +12,7 @@ export const genericGetAll = async (model, modelDescription, mapDescriptionsToMo
 }
 
 export const genericGet = async (model, modelDescription, mapDescriptionsToModelFunction, id, foreignKeyId) => {
-  const modelInstance = await model.findById(id, {attributes: { exclude: ['deletedAt'] }})
+  const modelInstance = await model.findByPk(id, {attributes: { exclude: ['deletedAt'] }})
   let whereParameters = {}
   whereParameters[foreignKeyId] = id
   const modelInstanceDescriptions = await modelDescription.findAll({ where: whereParameters })
