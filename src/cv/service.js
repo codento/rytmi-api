@@ -1,7 +1,7 @@
 import { google } from 'googleapis'
 import { orderBy } from 'lodash'
 
-const templateId = '1hRLbg3-1If6AFJi8ip_yvyvTgzm5LgxiIXl3TUhvuEMFkcmQKQU'
+const templateId = '1If6AFJi8ip_yvyvTgzm5LgxiIXl3TUhvuEMFkcmQKQU'
 
 const create = async () => {
   const auth = await google.auth.getClient({
@@ -15,15 +15,13 @@ const create = async () => {
     auth
   })
 
-  const copy = await drive.files.copy({
+  const { data } = await drive.files.copy({
     fileId: templateId,
     fields: ['id'],
     requestBody: {
       name: 'Copied CV'
     }
   })
-
-  const data = copy.data
 
   setTimeout(async () => {
     await drive.permissions.create({
@@ -165,6 +163,41 @@ const createSkillTableRequests = async (fileId, cv, slides) => {
   return requests
 }
 
+const createImageReplacementRequest = async (fileId, cv, slides) => {
+  const presentation = await slides.presentations.get({
+    presentationId: fileId
+  })
+
+  const titlePage = presentation.data.slides[0]
+
+  // Find the correct element (title page should have only one image element)
+  const imageElement = titlePage.pageElements.filter(elem => 'image' in elem)[0]
+
+  return {
+    'replaceImage': {
+      'imageObjectId': imageElement.objectId,
+      'url': cv.employeePicture,
+      'imageReplaceMethod': 'CENTER_CROP'
+    }
+  }
+}
+
+const createTopSkillsReplacementRequest = cv => {
+  let topSkills = ''
+  cv.topSkills.forEach(skill => {
+    topSkills += skill.skillName + '\r\n'
+  })
+
+  return {
+    'replaceAllText': {
+      'containsText': {
+        'text': '{{ topSkills }}'
+      },
+      'replaceText': topSkills
+    }
+  }
+}
+
 const update = async (fileId, cv) => {
   const auth = await google.auth.getClient({
     scopes: [
@@ -177,23 +210,12 @@ const update = async (fileId, cv) => {
     auth
   })
 
-  let topSkills = ''
-  cv.topSkills.forEach(skill => {
-    topSkills += skill.skillName + '\r\n'
-  })
-
   const resource = {
     'requests': [
       ...createStaticTextReplacementRequests(cv),
       ...await createSkillTableRequests(fileId, cv, slides),
-      {
-        'replaceAllText': {
-          'containsText': {
-            'text': '{{ topSkills }}'
-          },
-          'replaceText': topSkills
-        }
-      }
+      await createImageReplacementRequest(fileId, cv, slides),
+      createTopSkillsReplacementRequest(cv)
     ]
   }
   slides.presentations.batchUpdate({resource, presentationId: fileId})
