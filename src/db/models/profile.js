@@ -29,8 +29,8 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       validate: {
         is: {
-          args: /^\+?[0-9 ]+$/i,
-          msg: 'Phone number must contain only numbers spaces or a plus sign'
+          args: /^\+?[0-9 ()-]+$/i,
+          msg: 'Phone number must contain only numbers, spaces, parentheses or a plus sign'
         }
       }
     },
