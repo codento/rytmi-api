@@ -1,5 +1,6 @@
 import { google } from 'googleapis'
 import { orderBy } from 'lodash'
+import MAX_SKILLS_PER_PAGE from './constants'
 
 const templateId = '1If6AFJi8ip_yvyvTgzm5LgxiIXl3TUhvuEMFkcmQKQU'
 
@@ -61,10 +62,12 @@ const createStaticTextReplacementRequests = (cv) => {
   return requests
 }
 
-// TODO: Multipage skill lists
+const getTableObjectId = (skillPageNumber, originalSkillTableObjectId) => skillPageNumber > 1 ? `skillTable${skillPageNumber}` : originalSkillTableObjectId
+
 const createSkillTableRequests = async (fileId, cv, slides) => {
-  const slidesData = await slides.presentations.get({presentationId: fileId})
+  let slidesData = await slides.presentations.get({presentationId: fileId})
   const skillTable = slidesData.data.slides[1].pageElements.find(element => element.table)
+  const originalSkillTableObjectId = skillTable.objectId
 
   // Get background colors from templates table rows
   const firstColor = skillTable.table.tableRows[1].tableCells[0].tableCellProperties.tableCellBackgroundFill.solidFill.color.rgbColor
@@ -76,24 +79,44 @@ const createSkillTableRequests = async (fileId, cv, slides) => {
   // Delete the second row from the skill table (only used for its color)
   requests.push({
     'deleteTableRow': {
-      'tableObjectId': skillTable.objectId,
+      'tableObjectId': originalSkillTableObjectId,
       'cellLocation': {
         'rowIndex': 2
       }
     }
   })
 
-  // Add new rows for skills
-  requests.push({
-    'insertTableRows': {
-      'tableObjectId': skillTable.objectId,
-      'cellLocation': {
-        'rowIndex': 1
-      },
-      'insertBelow': true,
-      'number': cv.skills.length - 1
-    }
-  })
+  // Only a certain number of skills fit into one page. Create new slides for the rest.
+  const numberOfExtraSkillPages = (Math.ceil(cv.skills.length / MAX_SKILLS_PER_PAGE)) - 1
+  for (let i = numberOfExtraSkillPages; i > 0; i--) {
+    const request = {'duplicateObject': {
+      'objectId': slidesData.data.slides[1].objectId,
+      'objectIds': {}
+    }}
+    request.duplicateObject.objectIds[originalSkillTableObjectId] = `skillTable${i + 1}`
+    requests.push(request)
+  }
+
+  // Add new rows for skills. Each page has one row already, so add one less row per page.
+  let totalNumberOfSkillRowsToAdd = cv.skills.length - Math.ceil((cv.skills.length) / MAX_SKILLS_PER_PAGE)
+  let skillPageNumber = 1
+  while (totalNumberOfSkillRowsToAdd > 0) {
+    let numberOfSkillRowsToAdd = totalNumberOfSkillRowsToAdd >= MAX_SKILLS_PER_PAGE ? MAX_SKILLS_PER_PAGE - 1 : totalNumberOfSkillRowsToAdd
+
+    requests.push({
+      'insertTableRows': {
+        'tableObjectId': getTableObjectId(skillPageNumber, originalSkillTableObjectId),
+        'cellLocation': {
+          'rowIndex': 1
+        },
+        'insertBelow': true,
+        'number': numberOfSkillRowsToAdd
+      }
+    })
+
+    totalNumberOfSkillRowsToAdd -= numberOfSkillRowsToAdd
+    skillPageNumber++
+  }
 
   // Set row background color for each skill category
   let colorToUse = firstColor
@@ -102,11 +125,12 @@ const createSkillTableRequests = async (fileId, cv, slides) => {
     if (isLastRowsCategoryDifferent) {
       colorToUse = colorToUse === firstColor ? secondColor : firstColor
     }
+    let skillPageNumber = Math.ceil((index + 1) / MAX_SKILLS_PER_PAGE)
     requests.push({'updateTableCellProperties': {
-      'objectId': skillTable.objectId,
+      'objectId': getTableObjectId(skillPageNumber, originalSkillTableObjectId),
       'tableRange': {
         'location': {
-          'rowIndex': index + 1,
+          'rowIndex': index + 1 - ((skillPageNumber - 1) * MAX_SKILLS_PER_PAGE),
           'columnIndex': 0
         },
         'rowSpan': 1,
@@ -128,21 +152,22 @@ const createSkillTableRequests = async (fileId, cv, slides) => {
   // Add skill names and skill levels
   orderedSkills.forEach((skill, index) => {
     let isLastRowsCategoryDifferent = orderedSkills[index - 1] && skill.skillCategory !== orderedSkills[index - 1].skillCategory
+    let skillPageNumber = Math.ceil((index + 1) / MAX_SKILLS_PER_PAGE)
     requests.push({
       'insertText': {
-        'objectId': skillTable.objectId,
+        'objectId': getTableObjectId(skillPageNumber, originalSkillTableObjectId),
         'cellLocation': {
-          'rowIndex': index + 1,
+          'rowIndex': index + 1 - ((skillPageNumber - 1) * MAX_SKILLS_PER_PAGE),
           'columnIndex': 0
         },
-        'text': index === 0 || isLastRowsCategoryDifferent ? skill.skillCategory : ''
+        'text': index % MAX_SKILLS_PER_PAGE === 0 || isLastRowsCategoryDifferent ? skill.skillCategory : ''
       }
     })
     requests.push({
       'insertText': {
-        'objectId': skillTable.objectId,
+        'objectId': getTableObjectId(skillPageNumber, originalSkillTableObjectId),
         'cellLocation': {
-          'rowIndex': index + 1,
+          'rowIndex': index + 1 - ((skillPageNumber - 1) * MAX_SKILLS_PER_PAGE),
           'columnIndex': 1
         },
         'text': skill.skillName
@@ -150,9 +175,9 @@ const createSkillTableRequests = async (fileId, cv, slides) => {
     })
     requests.push({
       'insertText': {
-        'objectId': skillTable.objectId,
+        'objectId': getTableObjectId(skillPageNumber, originalSkillTableObjectId),
         'cellLocation': {
-          'rowIndex': index + 1,
+          'rowIndex': index + 1 - ((skillPageNumber - 1) * MAX_SKILLS_PER_PAGE),
           'columnIndex': 2
         },
         'text': '' + skill.skillLevel
@@ -218,7 +243,7 @@ const update = async (fileId, cv) => {
       createTopSkillsReplacementRequest(cv)
     ]
   }
-  slides.presentations.batchUpdate({resource, presentationId: fileId})
+  await slides.presentations.batchUpdate({resource, presentationId: fileId})
 }
 
 // For testing purposes only, can be removed
