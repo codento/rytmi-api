@@ -220,7 +220,7 @@ const update = async (fileId, cv) => {
       createTopSkillsReplacementRequest(cv)
     ]
   }
-  slides.presentations.batchUpdate({resource, presentationId: fileId})
+  await slides.presentations.batchUpdate({resource, presentationId: fileId})
 }
 
 const runExport = async (fileId) => {
