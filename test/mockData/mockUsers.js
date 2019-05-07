@@ -24,10 +24,17 @@ const basicUsersProfile = {
   email: 'basic.user@codento.com',
   phone: '0401231234',
   title: 'Consultant',
-  description: 'Just consulting about everything',
   links: [],
   photoPath: 'from/somewhere',
-  active: basicUser.active
+  active: basicUser.active,
+  cvDescriptions: [
+    {
+      id: 1, // first item in cvDescriptions
+      description: 'Just consulting about everything',
+      type: 'introduction',
+      language: 'fi'
+    }
+  ]
 }
 
 const adminUsersProfile = {
@@ -38,15 +45,36 @@ const adminUsersProfile = {
   email: 'admin.user@codento.com',
   phone: '0401231234',
   title: 'Manager',
-  description: 'Just managing about everything',
   links: [],
   photoPath: 'from/somewhere',
-  active: adminUser.active
+  active: adminUser.active,
+  cvDescriptions: [
+    {
+      id: 2, // second item in cvDescriptions
+      description: 'Just managing about everything',
+      type: 'introduction',
+      language: 'fi'
+    }
+  ]
 }
 
-const userProfiles = [basicUsersProfile, adminUsersProfile]
+const cvDescriptions = [
+  {
+    profileId: 1,
+    description: 'Just consulting about everything',
+    type: 'introduction',
+    language: 'fi'
+  },
+  {
+    profileId: 2,
+    description: 'Just managing about everything',
+    type: 'introduction',
+    language: 'fi'
+  }
+]
 
 module.exports = {
   users,
-  profiles: userProfiles
+  profiles: [basicUsersProfile, adminUsersProfile],
+  cvDescriptions: cvDescriptions
 }
