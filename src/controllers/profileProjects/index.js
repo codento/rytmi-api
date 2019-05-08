@@ -14,7 +14,7 @@ profileProjectController.getList = wrapAsync(async (req, res) => {
     if (qs.infuture === 'true') {
       infuture = true
     } else {
-      res.status(404).json(errorTemplate(400, 'infuture accepts only \'true\''))
+      res.status(400).json(errorTemplate(400, 'infuture accepts only \'true\''))
     }
   }
 
@@ -33,6 +33,11 @@ profileProjectController.getByProject = wrapAsync(async (req, res) => {
 profileProjectController.getByProfile = wrapAsync(async (req, res) => {
   const profilesProjects = await profileProjectService.getByProfileId(req.profile.id)
   res.json(profilesProjects)
+})
+
+profileProjectController.getProjectByProfileId = wrapAsync(async (req, res) => {
+  const profileProjects = await profileProjectService.getByIds(req.profileProject.profileId, req.profileProject.projectId)
+  res.json(profileProjects)
 })
 
 profileProjectController.getByIds = wrapAsync(async (req, res) => {
