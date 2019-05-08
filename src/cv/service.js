@@ -3,6 +3,7 @@ import fs from 'fs'
 import { google } from 'googleapis'
 import { orderBy } from 'lodash'
 import MAX_SKILLS_PER_PAGE from './constants'
+import format from 'date-fns/format'
 
 const templateId = '1If6AFJi8ip_yvyvTgzm5LgxiIXl3TUhvuEMFkcmQKQU'
 
@@ -47,7 +48,9 @@ const createStaticTextReplacementRequests = (cv) => {
   const replacementDefinitions = [
     { text: '{{ jobTitle }}', newText: cv.jobTitle },
     { text: '{{ employeeName }}', newText: cv.employeeName },
-    { text: '{{ employeeYearOfBirth }}', newText: '' + cv.born }
+    { text: '{{ employeeYearOfBirth }}', newText: '' + cv.born },
+    { text: '{{ employeeDescription }}', newText: '' + cv.employeeDescription },
+    { text: '{{ footerText }}', newText: `CV ${cv.employeeName} ${format(new Date(), 'D.M.YYYY')}` }
   ]
 
   replacementDefinitions.forEach(definition => {
@@ -225,6 +228,22 @@ const createTopSkillsReplacementRequest = cv => {
   }
 }
 
+const createLanguagesReplacementRequest = cv => {
+  let languages = ''
+  cv.languages.forEach(language => {
+    languages += language.languageName + '\r\n'
+  })
+
+  return {
+    'replaceAllText': {
+      'containsText': {
+        'text': '{{ languages }}'
+      },
+      'replaceText': languages
+    }
+  }
+}
+
 const update = async (fileId, cv) => {
   const auth = await google.auth.getClient({
     scopes: [
@@ -242,7 +261,8 @@ const update = async (fileId, cv) => {
       ...createStaticTextReplacementRequests(cv),
       ...await createSkillTableRequests(fileId, cv, slides),
       await createImageReplacementRequest(fileId, cv, slides),
-      createTopSkillsReplacementRequest(cv)
+      createTopSkillsReplacementRequest(cv),
+      createLanguagesReplacementRequest(cv)
     ]
   }
   await slides.presentations.batchUpdate({resource, presentationId: fileId})
