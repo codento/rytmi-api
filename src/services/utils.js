@@ -12,7 +12,7 @@ export const genericGetAll = async (model, modelDescription, mapDescriptionsToMo
 }
 
 export const genericGet = async (model, modelDescription, mapDescriptionsToModelFunction, id, foreignKeyId) => {
-  const modelInstance = await model.findById(id, {attributes: { exclude: ['deletedAt'] }})
+  const modelInstance = await model.findByPk(id, {attributes: { exclude: ['deletedAt'] }})
   let whereParameters = {}
   whereParameters[foreignKeyId] = id
   const modelInstanceDescriptions = await modelDescription.findAll({ where: whereParameters })
@@ -32,7 +32,8 @@ export const genericDelete = async (model, modelDescription, id, foreignKeyId) =
 
 export const genericUpdate = async (model, modelDescription, id, attributes, foreignKeyId, getFunction, descriptionsPropertyName = 'descriptions') => {
   await model.update(attributes, { where: { id } })
-  for (const description of attributes[descriptionsPropertyName]) {
+  const descriptions = attributes[descriptionsPropertyName] ? attributes[descriptionsPropertyName] : []
+  for (const description of descriptions) {
     if (description.id) {
       await modelDescription.update(description, {where: {id: description.id}})
     } else {
@@ -49,7 +50,8 @@ export const genericCreate = async (model, modelDescription, attributes, foreign
     .build(attributes)
     .save()
     .then(createdModel => getFunction(createdModel.id))
-  for (const description of attributes[descriptionsPropertyName]) {
+  const descriptions = attributes[descriptionsPropertyName] ? attributes[descriptionsPropertyName] : []
+  for (const description of descriptions) {
     let newDesciption = { ...description }
     newDesciption[foreignKeyId] = newModel.id
     await modelDescription.build(newDesciption).save()

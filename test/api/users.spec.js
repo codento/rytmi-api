@@ -141,8 +141,7 @@ describe('API Users endpoint', () => {
   describe('Deleting users', () => {
     it('should be allowed only for admins to delete users', async () => {
       await request.delete(endpoint + userId)
-        .expect('Content-Type', /json/)
-        .expect(403)
+        .expect(401)
     })
 
     it('should allow admins to delete users', async () => {
