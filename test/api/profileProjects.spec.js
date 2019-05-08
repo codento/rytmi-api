@@ -163,7 +163,7 @@ describe('API profileprojects endpoint', () => {
         where: { profileId: adminUser.id, projectId: secondProfileProject.projectId }
       })
       await request.delete(profileProjectEndpoint + insertedProfileProject.id)
-        .expect(401)
+        .expect(403)
     })
 
     it('should allow admin to delete any profile project', async () => {
