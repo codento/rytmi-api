@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { profileProjectController, findProfileFromProjectOr404 } from '../../../controllers/profileProjects'
-import { profileController, findProfileOr404 } from '../../../controllers/profiles'
+import { findProfileOr404 } from '../../../controllers/profiles'
 import { createPermissionHandler } from '../../utils'
 
 const router = Router()
@@ -75,7 +75,7 @@ export default () => {
   *           type: integer
   *           format: int64
   */
-  router.get('/:profileId', profileProjectController.getProjectByProfileId)
+  router.get('/:profileId', profileProjectController.getByIds)
 
   /**
   * @swagger

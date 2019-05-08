@@ -314,7 +314,7 @@ describe('API profile endpoint', () => {
   })
 
   it('should allow authorized users to fetch specific project profile', async () => {
-    const response = await request.get(profileEndpoint + normalUser.id + '/projects/' + profileProject.id).expect(200)
+    const response = await request.get(profileEndpoint + normalUser.id + '/projects/' + profileProject.projectId).expect(200)
     expect(response.body.projectId).toEqual(profileProject.projectId)
     expect(response.body.profileId).toEqual(profileProject.profileId)
   })

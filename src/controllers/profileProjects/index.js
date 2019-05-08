@@ -35,15 +35,10 @@ profileProjectController.getByProfile = wrapAsync(async (req, res) => {
   res.json(profilesProjects)
 })
 
-profileProjectController.getProjectByProfileId = wrapAsync(async (req, res) => {
-  const profileProjects = await profileProjectService.getByIds(req.profileProject.profileId, req.profileProject.projectId)
-  res.json(profileProjects)
-})
-
 profileProjectController.getByIds = wrapAsync(async (req, res) => {
-  const profile = req.profile
-  const project = req.project
-  const profileProjects = await profileProjectService.getByIds(profile.id, project.id)
+  const profileId = req.profileProject ? req.profileProject.profileId : req.profile.id
+  const projectId = req.profileProject ? req.profileProject.projectId : req.project.id
+  const profileProjects = await profileProjectService.getByIds(profileId, projectId)
   res.json(profileProjects)
 })
 

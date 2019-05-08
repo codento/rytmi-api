@@ -72,7 +72,7 @@ export default () => {
   *           type: integer
   *           format: int64
   */
-  router.get('/:projectId', profileProjectController.get)
+  router.get('/:projectId', profileProjectController.getByIds)
 
   /**
   * @swagger
