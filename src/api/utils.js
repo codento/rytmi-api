@@ -39,7 +39,11 @@ module.exports = {
             admin: userModel.admin
           }
         }
-        checkUserPermissions(adminOnly, user, req[objName][key])
+        try {
+          checkUserPermissions(adminOnly, user, req[objName][key])
+        } catch (e) {
+          next(e)
+        }
       }
       next()
     }
