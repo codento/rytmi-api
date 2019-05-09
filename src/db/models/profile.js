@@ -29,13 +29,12 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       validate: {
         is: {
-          args: /^\+?[0-9 ]+$/i,
-          msg: 'Phone number must contain only numbers spaces or a plus sign'
+          args: /^\+?[0-9 ()-]+$/i,
+          msg: 'Phone number must contain only numbers, spaces, parentheses or a plus sign'
         }
       }
     },
     title: DataTypes.STRING,
-    description: DataTypes.TEXT,
     links: DataTypes.JSON,
     photoPath: DataTypes.STRING,
     active: {
@@ -51,6 +50,8 @@ module.exports = (sequelize, DataTypes) => {
     models.profile.belongsTo(models.user, {foreignKey: 'userId'})
     models.profile.hasMany(models.profileSkill, {foreignKey: 'profileId'})
     models.profile.belongsToMany(models.project, {through: models.profileProject, foreignKey: 'profileId'})
+    models.profile.hasMany(models.profileCvDescription, {foreignKey: 'profileId'})
+    models.profile.hasMany(models.employer, {foreignKey: 'profileId'})
   }
 
   return Profile

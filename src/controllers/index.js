@@ -8,7 +8,7 @@ export default function (objName, service, validator = null) {
       res.json(collection)
     }),
     get: wrapAsync(async (req, res) => {
-      const obj = req[objName]
+      const obj = await service.get(req.params.id)
       res.json(obj)
     }),
     create: wrapAsync(async (req, res) => {

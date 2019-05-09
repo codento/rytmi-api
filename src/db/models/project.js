@@ -1,14 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
   let Project = sequelize.define('project', {
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true
-    },
-    description: {
-      type: DataTypes.TEXT,
-      allowNull: true
-    },
     code: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -21,17 +12,16 @@ module.exports = (sequelize, DataTypes) => {
     endDate: {
       type: DataTypes.DATE,
       allowNull: true
+    },
+    isSecret: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false
     }
   }, {
     validate: {
       endIsAfterStart: function () {
         if (this.startDate > this.endDate) {
           throw new Error('Start date must be before end date!')
-        }
-      },
-      nameNotEmpty: function () {
-        if (this.name.length === 0) {
-          throw new Error('Name can not be empty!')
         }
       },
       codeNotNegative: function () {
@@ -44,6 +34,7 @@ module.exports = (sequelize, DataTypes) => {
 
   Project.associate = (models) => {
     models.project.belongsToMany(models.profile, {through: models.profileProject, foreignKey: 'projectId'})
+    models.project.hasMany(models.projectDescription, {foreignKey: 'projectId'})
   }
 
   return Project

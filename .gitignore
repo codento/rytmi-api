@@ -34,6 +34,11 @@ jspm_packages
 
 # dotenv config
 .env
+.dev.env
+.master.env
+
+# secrets tar (not encrypted)
+secrets.tar
 
 # coverage folder
 coverage
@@ -50,3 +55,5 @@ dist
 # IDEA project config dir
 .idea
 
+# Google service account credentials
+google_service_account_credentials.json
