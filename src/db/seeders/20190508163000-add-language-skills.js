@@ -27,14 +27,12 @@ module.exports = {
       const languageSkillGroups = await queryInterface.sequelize.query('SELECT * FROM "skillGroup" WHERE "title"=\'Language\'', {
         type: queryInterface.sequelize.QueryTypes.SELECT
       })
-      console.log(languageSkillGroups)
       let skillCategories = await [factory.build('skillCategory', {title: 'Language', skillGroupId: languageSkillGroups[0].id})]
       await queryInterface.bulkInsert('skillCategory', skillCategories)
 
       const languageSkillCategories = await queryInterface.sequelize.query('SELECT * FROM "skillCategory" WHERE "title"=\'Language\'', {
         type: queryInterface.sequelize.QueryTypes.SELECT
       })
-      console.log(languageSkillCategories)
       const skillCategoryId = languageSkillCategories[0].id
       let languageSkills = await [factory.build('skill', {name: 'Finnish', description: 'Finnish language', skillCategoryId}),
         factory.build('skill', {name: 'English', description: 'English language', skillCategoryId}),
