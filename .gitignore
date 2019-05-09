@@ -37,8 +37,9 @@ jspm_packages
 .dev.env
 .master.env
 
-# secrets tar (not encrypted)
+# travis secret tar (not encrypted)
 secrets.tar
+deploy_rsa
 
 # coverage folder
 coverage
