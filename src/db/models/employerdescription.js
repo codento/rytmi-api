@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     language: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: false
     }
   }, {
     validate: {
