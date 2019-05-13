@@ -9,7 +9,7 @@ factory.define('profile')
   .attr('lastName')
   .attr('email', () => { return faker.internet.email() })
   .attr('phone', () => { return faker.phone.phoneNumber().replace('x', '') })
-  .attr('birthday', () => { return faker.date.past(20, '1997-12-31') })
+  .attr('birthYear', () => { return faker.date.past(20, '1997-12-31').getFullYear() })
   .attr('title', () => { return faker.name.jobTitle() })
 
   .attr('links')

@@ -8,12 +8,16 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false
     },
-    birthday: {
-      type: DataTypes.DATE,
+    birthYear: {
+      type: DataTypes.INTEGER,
       validate: {
-        isBefore: {
-          args: new Date().toISOString(),
-          msg: 'Birthday must be in the past'
+        len: {
+          args: [4, 4],
+          msg: 'Birth year must be a valid year'
+        },
+        max: {
+          args: new Date().getFullYear(),
+          msg: 'Birth year must be in the past'
         }
       }
     },

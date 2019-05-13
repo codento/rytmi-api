@@ -99,7 +99,7 @@ describe('API profile endpoint', () => {
         userId: userId,
         firstName: 'Some',
         lastName: 'User',
-        birthday: new Date('1985-10-20').toISOString(),
+        birthYear: 1985,
         email: 'some.user@codento.com',
         phone: '0401231234',
         title: 'Consultant',
