@@ -1,57 +1,86 @@
 import CrudService from '../crud'
 import models from '../../db/models'
+import { genericGetAll, genericGet, genericDelete, genericUpdate, genericCreate } from '../utils'
 
 const Op = models.sequelize.Op
+
+const mapDescriptionsToModel = (profileProject, profileProjectDescriptions) => {
+  const descriptions = []
+  profileProjectDescriptions.forEach(description => descriptions.push({
+    title: description.title,
+    language: description.language,
+    id: description.id
+  }))
+  if (profileProject) {
+    return {
+      id: profileProject.id,
+      profileId: profileProject.profileId,
+      projectId: profileProject.projectId,
+      startDate: profileProject.startDate,
+      endDate: profileProject.endDate,
+      workPercentage: profileProject.workPercentage,
+      descriptions: descriptions
+    }
+  }
+  return null
+}
 
 export default class ProfileProjectService extends CrudService {
   constructor () {
     super(models.profileProject)
   }
 
-  getInFuture () {
-    return models.profileProject.findAll({
-      where: {
-        endDate: {
-          [Op.or]: {
-            [Op.eq]: null,
-            [Op.gt]: new Date()
-          }
+  async getInFuture () {
+    return genericGetAll(models.profileProject, models.profileProjectDescription, mapDescriptionsToModel, 'profileProjectId', {
+      endDate: {
+        [Op.or]: {
+          [Op.eq]: null,
+          [Op.gt]: new Date()
         }
       }
     })
   }
 
-  getByProfileId (profileId) {
-    return models.profileProject.findAll({where: {profileId: profileId}})
+  // Overrides CrudService's function
+  async getAll () {
+    return genericGetAll(models.profileProject, models.profileProjectDescription, mapDescriptionsToModel, 'profileProjectId')
   }
 
-  getByProjectId (projectId) {
-    return models.profileProject.findAll({where: {projectId: projectId}})
+  // Overrides CrudService's function
+  async get (id) {
+    return genericGet(models.profileProject, models.profileProjectDescription, mapDescriptionsToModel, id, 'profileProjectId')
   }
 
-  getByIds (profileId, projectId) {
-    return models.profileProject.findOne({
-      where: {
-        profileId: profileId,
-        projectId: projectId
-      }
+  async getByProfileId (profileId) {
+    return genericGetAll(models.profileProject, models.profileProjectDescription, mapDescriptionsToModel, 'profileProjectId', {profileId: profileId})
+  }
+
+  async getByProjectId (projectId) {
+    return genericGetAll(models.profileProject, models.profileProjectDescription, mapDescriptionsToModel, 'profileProjectId', {projectId: projectId})
+  }
+
+  async getByIds (profileId, projectId) {
+    const profileProjects = await genericGetAll(models.profileProject, models.profileProjectDescription, mapDescriptionsToModel, 'profileProjectId', {
+      profileId: profileId,
+      projectId: projectId
     })
+    return profileProjects ? profileProjects[0] : null
   }
 
-  create (projectId, profileId, attrs) {
+  // Overrides CrudService's function
+  async create (projectId, profileId, attrs) {
     attrs.projectId = parseInt(projectId)
     attrs.profileId = parseInt(profileId)
-    return super.create(attrs)
+    return genericCreate(models.profileProject, models.profileProjectDescription, attrs, 'profileProjectId', this.get)
   }
 
-  update (id, attrs) {
-    return models.profileProject
-      .findOne({where: {
-        id: id
-      }})
-      .then(profileProject => {
-        return profileProject
-          .update(attrs)
-      })
+  // Overrides CrudService's function
+  async update (id, attrs) {
+    return genericUpdate(models.profileProject, models.profileProjectDescription, id, attrs, 'profileProjectId', this.get)
+  }
+
+  // Overrides CrudService's function
+  async delete (id) {
+    return genericDelete(models.profileProject, models.profileProjectDescription, id, 'profileProjectId')
   }
 }

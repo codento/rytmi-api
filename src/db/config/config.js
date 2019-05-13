@@ -9,7 +9,7 @@ module.exports = {
     dialect: 'postgres',
     operatorsAliases: false,
     seederStorage: 'sequelize',
-    logging: console.log,
+    logging: false,
     define: {
       freezeTableName: true
     }

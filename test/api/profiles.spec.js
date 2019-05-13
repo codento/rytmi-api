@@ -8,7 +8,7 @@ import {
   user as userModel,
   skill as skillModel,
   profileSkill as profileSkillModel,
-  profileProject as ppModel
+  profileProject as profileProjectModel
 } from '../../src/db/models'
 import { profiles } from '../mockData/mockUsers'
 
@@ -32,18 +32,20 @@ describe('API profile endpoint', () => {
       exp: Date.now() + 3600
     })
     const firstProfileProject = {
+      id: 3589,
       profileId: normalUser.id,
       projectId: 1,
       workPercentage: 100,
       startDate: new Date('2019-10-01').toISOString(),
       endDate: new Date('2019-10-31').toISOString()
     }
-    profileProject = await ppModel.create(firstProfileProject)
+    profileProject = await profileProjectModel.create(firstProfileProject)
     request.set('Authorization', `Bearer ${jwtToken}`)
   })
 
   afterAll(async () => {
     await profileSkillModel.destroy({ where: {}, truncate: true, force: true })
+    await profileProjectModel.destroy({ where: {id: 3589} })
   })
 
   describe('Fetching profiles', () => {
@@ -101,7 +103,7 @@ describe('API profile endpoint', () => {
         email: 'some.user@codento.com',
         phone: '0401231234',
         title: 'Consultant',
-        description: 'Just consulting about everything',
+        cvDescriptions: [],
         links: [],
         photoPath: 'from/somewhere',
         active: true
@@ -312,7 +314,7 @@ describe('API profile endpoint', () => {
   })
 
   it('should allow authorized users to fetch specific project profile', async () => {
-    const response = await request.get(profileEndpoint + normalUser.id + '/projects/' + profileProject.id).expect(200)
+    const response = await request.get(profileEndpoint + normalUser.id + '/projects/' + profileProject.projectId).expect(200)
     expect(response.body.projectId).toEqual(profileProject.projectId)
     expect(response.body.profileId).toEqual(profileProject.profileId)
   })

@@ -31,6 +31,7 @@ export default class ProfileSkillService extends CrudService {
       })
   }
 
+  // Overrides CrudService's function
   create (profileId, attrs) {
     return models.profileSkill.findOne({ where: { profileId, skillId: attrs.skillId }, paranoid: false })
       .then((profileSkill) => {
@@ -49,6 +50,7 @@ export default class ProfileSkillService extends CrudService {
     })
   }
 
+  // Overrides CrudService's function
   update (profileId, profileSkillId, attrs) {
     attrs.id = parseInt(profileSkillId)
     attrs.profileId = parseInt(profileId)
@@ -65,6 +67,7 @@ export default class ProfileSkillService extends CrudService {
       })
   }
 
+  // Overrides CrudService's function
   delete (profileId, profileSkillId) {
     return models.profileSkill
       .findOne({

@@ -11,6 +11,7 @@ export default class UserService extends CrudService {
       .findOne({ where: { googleId: googleId } })
   }
 
+  // Overrides CrudService's function
   async delete (userId) {
     return models.sequelize.transaction((t) => {
       return models.profile.destroy({ where: { userId } }, { transaction: t })

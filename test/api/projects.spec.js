@@ -6,7 +6,7 @@ import { createUserToken, invalidToken, testAdminToken } from './tokens'
 import {
   user as userModel,
   project as projectModel,
-  profileProject as ppModel
+  profileProject as profileProjectModel
 } from '../../src/db/models'
 import { projects } from '../mockData/mockProjects'
 
@@ -29,7 +29,9 @@ describe('API Projects endpoint', () => {
     request.set('Authorization', `Bearer ${jwtToken}`)
   })
   afterAll(async () => {
-    await ppModel.destroy({ where: {}, truncate: true, force: true })
+    // profileProjects are created in 'Creating project profiles'
+    const [reactProject, onGoingProject] = await projectModel.findAll()
+    profileProjectModel.destroy({ where: {projectId: [reactProject.id, onGoingProject.id]} })
   })
 
   describe('Fetching projects', () => {
@@ -44,7 +46,9 @@ describe('API Projects endpoint', () => {
 
     it('should allow authorized user to fetch specific project', async () => {
       const [reactProject] = projects
-      const expectedProject = await projectModel.findOne({ where: { name: reactProject.name } })
+      // id generation is handled with autoincrement field => first item in mock data will be id=1
+      reactProject.id = 1
+      const expectedProject = await projectModel.findOne({ where: { id: reactProject.id } })
       const response = await request.get(projectEndpoint + expectedProject.id).expect(200)
       expect(response.body).toMatchObject(reactProject)
     })
@@ -53,21 +57,36 @@ describe('API Projects endpoint', () => {
     it('should allow authorized user to create a project', async () => {
       const leanWorkshop = {
         code: 1010,
-        name: 'Lean workshop',
         startDate: new Date('2019-02-20').toISOString(),
-        endDate: new Date('2019-02-20').toISOString(),
-        description: 'Lean workshop for customer'
+        endDate: new Date('2019-02-21').toISOString(),
+        descriptions: [
+          {
+            description: 'Lean workshop for customer',
+            name: 'Lean workshop',
+            language: 'en',
+            customerName: 'Best customer ever'
+          }
+        ],
+        isSecret: false
       }
       const response = await request.post(projectEndpoint).send(leanWorkshop).expect(201)
       expect(response.body).toMatchObject(leanWorkshop)
+      refactoringProjectId = response.body.id
     })
 
     it('should allow authorized user to create a project without end date', async () => {
       const refactoringCode = {
         code: 1050,
-        name: 'Refactoring old code',
         startDate: new Date('2019-02-20').toISOString(),
-        description: 'This should be continuous'
+        descriptions: [
+          {
+            description: 'This should be continuous',
+            name: 'Refactoring old code',
+            language: 'en',
+            customerName: 'The favourite'
+          }
+        ],
+        isSecret: false
       }
       const response = await request.post(projectEndpoint).send(refactoringCode).expect(201)
       expect(response.body).toMatchObject(refactoringCode)
@@ -86,9 +105,8 @@ describe('API Projects endpoint', () => {
   describe('Updating projects', () => {
     it('should allow authorized user to edit project', async () => {
       const [reactProject] = projects
-      const expectedProject = await projectModel.findOne({ where: { name: reactProject.name } })
-      reactProject.name = 'Address app for lost'
-      expectedProject.name = 'Address app for lost'
+      const expectedProject = await projectModel.findOne({ where: { id: reactProject.id } })
+      reactProject.descriptions[0].name = 'Address app for lost'
       const response = await request.put(projectEndpoint + expectedProject.id).send(reactProject).expect(200)
       expect(response.body).toMatchObject(reactProject)
     })
@@ -99,6 +117,7 @@ describe('API Projects endpoint', () => {
     let reactProjectProfile, onGoingProjectProfile
 
     beforeAll(async () => {
+      // teared down in parent afterAll()
       const [reactProject, onGoingProject] = await projectModel.findAll()
       reactProjectId = reactProject.id
       onGoingProjectId = onGoingProject.id
@@ -164,23 +183,30 @@ describe('API Projects endpoint', () => {
     describe('projects', () => {
       const leanWorkshop = {
         code: 1010,
-        name: 'Lean workshop',
         startDate: new Date('2019-02-20').toISOString(),
-        endDate: new Date('2019-02-20').toISOString(),
-        description: 'Lean workshop for customer'
+        endDate: new Date('2019-02-21').toISOString(),
+        descriptions: [
+          {
+            description: 'Lean workshop for customer',
+            name: 'Lean workshop',
+            language: 'en',
+            customerName: 'Best customer ever'
+          }
+        ],
+        isSecret: false
       }
 
       it('Should return 400 if name is empty or null', async () => {
         const noName = Object.assign({}, leanWorkshop)
-        noName.name = null
+        noName.descriptions[0].name = null
         const response = await request.post(projectEndpoint).send(noName).expect(400)
         expect(response.body.error.details).not.toBe(null)
       })
 
-      it('Should return 400 if name is not unique', async () => {
-        const notUniqueName = Object.assign({}, leanWorkshop)
-        notUniqueName.code = 1013
-        const response = await request.post(projectEndpoint).send(notUniqueName).expect(400)
+      it('Should return 400 if code is not unique', async () => {
+        const notUniqueCode = Object.assign({}, leanWorkshop)
+        notUniqueCode.code = 1013
+        const response = await request.post(projectEndpoint).send(notUniqueCode).expect(400)
         expect(response.body.error.details).not.toBe(null)
       })
 
@@ -198,10 +224,10 @@ describe('API Projects endpoint', () => {
         expect(response.body.error.details).not.toBe(null)
       })
 
-      it('Should return 400 if code is not unique', async () => {
-        const sameCode = Object.assign({}, leanWorkshop)
-        sameCode.name = 'Some other workshop'
-        const response = await request.post(projectEndpoint).send(sameCode).expect(400)
+      it('Should return 400 if name is not unique', async () => {
+        const sameName = Object.assign({}, leanWorkshop)
+        sameName.descriptions[0].name = 'Some other workshop'
+        const response = await request.post(projectEndpoint).send(sameName).expect(400)
         expect(response.body.error.details).not.toBe(null)
       })
 
