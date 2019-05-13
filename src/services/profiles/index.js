@@ -18,7 +18,7 @@ const mapCvDescriptionsToProfile = (profile, profileCvDescriptions) => {
       userId: profile.userId,
       lastName: profile.lastName,
       firstName: profile.firstName,
-      birthday: profile.birthday,
+      birthYear: profile.birthYear,
       email: profile.email,
       phone: profile.phone,
       title: profile.title,
