@@ -5,21 +5,9 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       autoIncrement: true
     },
-    profileId: {
-      type: DataTypes.INTEGER,
-      allowNull: false
-    },
     name: {
       type: DataTypes.STRING,
       allowNull: false
-    },
-    startDate: {
-      type: DataTypes.DATE,
-      allowNull: false
-    },
-    endDate: {
-      type: DataTypes.DATE,
-      allowNull: true
     }
   }, {
     validate: {
@@ -28,8 +16,7 @@ module.exports = (sequelize, DataTypes) => {
   })
 
   Employer.associate = (models) => {
-    models.employer.hasMany(models.employerDescription, {foreignKey: 'employerId'})
-    models.employer.belongsTo(models.profile, {foreignKey: 'profileId'})
+    models.employer.hasMany(models.project, {foreignKey: 'employerId'})
   }
 
   return Employer

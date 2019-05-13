@@ -4,10 +4,7 @@ const faker = require('faker')
 faker.seed(1337)
 
 factory.define('employer')
-  .attr('profileId')
   .attr('name')
-  .attr('startDate')
-  .attr('endDate')
   .attr('createdAt', () => new Date())
   .attr('updatedAt', () => new Date())
 
@@ -18,14 +15,11 @@ module.exports = {
         type: queryInterface.sequelize.QueryTypes.SELECT
       })
       let employers = []
-      profiles.forEach(profile => {
+      profiles.forEach(() => {
         let numberOfEmployers = faker.random.number(4)
         for (let employerIndex = 0; employerIndex < numberOfEmployers; employerIndex++) {
           employers.push(factory.build('employer', {
-            profileId: profile.id,
-            name: faker.company.companyName(),
-            startDate: new Date(2018 - employerIndex, faker.random.number(5), faker.random.number(28)),
-            endDate: new Date(2018 - employerIndex, 6 + faker.random.number(6), faker.random.number(28))
+            name: faker.company.companyName()
           }))
         }
       })

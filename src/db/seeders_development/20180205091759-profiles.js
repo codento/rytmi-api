@@ -10,8 +10,6 @@ factory.define('profile')
   .attr('email', () => { return faker.internet.email() })
   .attr('phone', () => { return faker.phone.phoneNumber().replace('x', '') })
   .attr('birthday', () => { return faker.date.past(20, '1997-12-31') })
-  .attr('title', () => { return faker.name.jobTitle() })
-
   .attr('links')
   .attr('photoPath', () => { return faker.internet.avatar() })
   .attr('active', () => { return faker.random.boolean() })

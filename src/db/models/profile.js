@@ -34,7 +34,6 @@ module.exports = (sequelize, DataTypes) => {
         }
       }
     },
-    title: DataTypes.STRING,
     links: DataTypes.JSON,
     photoPath: DataTypes.STRING,
     active: {
@@ -51,7 +50,6 @@ module.exports = (sequelize, DataTypes) => {
     models.profile.hasMany(models.profileSkill, {foreignKey: 'profileId'})
     models.profile.belongsToMany(models.project, {through: models.profileProject, foreignKey: 'profileId'})
     models.profile.hasMany(models.profileCvDescription, {foreignKey: 'profileId'})
-    models.profile.hasMany(models.employer, {foreignKey: 'profileId'})
   }
 
   return Profile
