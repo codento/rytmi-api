@@ -1,3 +1,4 @@
+import '@babel/polyfill'
 import supertest from 'supertest'
 import defaults from 'superagent-defaults'
 import { endpointAuthorizationTest } from '../utils'

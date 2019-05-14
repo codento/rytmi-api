@@ -1,3 +1,4 @@
+import '@babel/polyfill'
 import { endpointAuthorizationTest } from '../utils'
 import app from '../../src/api/app'
 import supertest from 'supertest'

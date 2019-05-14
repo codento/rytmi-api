@@ -53,8 +53,7 @@
     }
   },
   "dependencies": {
-    "babel-core": "^6.26.3",
-    "babel-register": "^6.26.0",
+    "@babel/polyfill": "^7.4.4",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "date-fns": "^1.30.1",
@@ -74,12 +73,14 @@
     "winston": "^2.4.4"
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0",
+    "@babel/cli": "^7.4.4",
+    "@babel/core": "^7.4.4",
+    "@babel/node": "^7.2.2",
+    "@babel/plugin-proposal-object-rest-spread": "^7.4.4",
+    "@babel/preset-env": "^7.4.4",
+    "@babel/register": "^7.4.4",
     "babel-eslint": "^10.0.1",
-    "babel-jest": "^22.4.4",
-    "babel-plugin-transform-object-rest-spread": "^6.26.0",
-    "babel-polyfill": "^6.26.0",
-    "babel-preset-env": "^1.7.0",
+    "babel-jest": "^24.8.0",
     "eslint": "^4.19.1",
     "eslint-config-standard": "^11.0.0",
     "eslint-plugin-import": "^2.17.2",
@@ -88,7 +89,7 @@
     "eslint-plugin-standard": "^3.1.0",
     "faker": "^4.1.0",
     "husky": "^1.2.0",
-    "jest": "^22.4.4",
+    "jest": "^24.8.0",
     "nodemon": "^1.19.0",
     "rosie": "^1.6.0",
     "sequelize-cli": "^5.4.0",

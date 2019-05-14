@@ -1,3 +1,4 @@
+import '@babel/polyfill'
 import supertest from 'supertest'
 import app from '../../src/api/app'
 import { user as userModel, profile as profileModel } from '../../src/db/models'
