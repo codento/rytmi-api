@@ -1,6 +1,6 @@
 'use strict'
-require('babel-register')
-require('babel-polyfill')
+require('@babel/register')
+require('@babel/polyfill')
 
 const roles = [
   { title: 'software developer', createdAt: new Date(), updatedAt: new Date() },
