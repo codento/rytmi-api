@@ -46,7 +46,6 @@ module.exports = {
           }
         }
         try {
-          console.log(user.userId, userId)
           checkUserPermissions(adminOnly, user, userId)
         } catch (e) {
           next(e)

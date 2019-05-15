@@ -327,12 +327,6 @@ describe('API profile endpoint', () => {
     await request.get(profileEndpoint + normalUserProfileId + '/projects/123123').expect(404)
   })
 
-  describe('Deleting profiles', () => {
-    it('should not allow deleting profiles', () => {
-      request.delete(profileEndpoint + normalUserProfileId).expect(404)
-    })
-  })
-
   describe('Endpoint authorization', () => {
     request.set('Authorization', `Bearer ${invalidToken}`)
 
