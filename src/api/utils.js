@@ -32,15 +32,22 @@ module.exports = {
       const methods = ['POST', 'PUT', 'DELETE']
       if (methods.includes(req.method)) {
         let user = req.user
-        if (!user && req[objName].userId) {
-          const userModel = await models.user.findByPk(req[objName].userId)
+        let userId = req[objName][key]
+        // fetch userId from profile
+        if (key === 'profileId') {
+          const profileModel = await models.profile.findByPk(req[objName].profileId)
+          userId = profileModel.userId
+        }
+        if (!user) {
+          const userModel = await models.user.findByPk(userId)
           user = {
             userId: userModel.id,
             admin: userModel.admin
           }
         }
         try {
-          checkUserPermissions(adminOnly, user, req[objName][key])
+          console.log(user.userId, userId)
+          checkUserPermissions(adminOnly, user, userId)
         } catch (e) {
           next(e)
         }

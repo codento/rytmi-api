@@ -16,27 +16,7 @@ const adminUser = {
 
 const users = [basicUser, adminUser]
 
-const basicUsersProfile = {
-  userId: 1,
-  firstName: basicUser.firstName,
-  lastName: basicUser.lastName,
-  birthYear: 1980,
-  email: 'basic.user@codento.com',
-  phone: '0401231234',
-  title: 'Consultant',
-  links: [],
-  photoPath: 'from/somewhere',
-  active: basicUser.active,
-  cvDescriptions: [
-    {
-      id: 1, // first item in cvDescriptions
-      description: 'Just consulting about everything',
-      type: 'introduction',
-      language: 'fi'
-    }
-  ]
-}
-
+// id (=> profileId) will be 1
 const adminUsersProfile = {
   userId: 2,
   firstName: adminUser.firstName,
@@ -50,8 +30,30 @@ const adminUsersProfile = {
   active: adminUser.active,
   cvDescriptions: [
     {
-      id: 2, // second item in cvDescriptions
+      id: 2,
       description: 'Just managing about everything',
+      type: 'introduction',
+      language: 'fi'
+    }
+  ]
+}
+
+// id (=> profileId) will be 2
+const basicUsersProfile = {
+  userId: 1,
+  firstName: basicUser.firstName,
+  lastName: basicUser.lastName,
+  birthYear: 1980,
+  email: 'basic.user@codento.com',
+  phone: '0401231234',
+  title: 'Consultant',
+  links: [],
+  photoPath: 'from/somewhere',
+  active: basicUser.active,
+  cvDescriptions: [
+    {
+      id: 1,
+      description: 'Just consulting about everything',
       type: 'introduction',
       language: 'fi'
     }
@@ -60,13 +62,13 @@ const adminUsersProfile = {
 
 const cvDescriptions = [
   {
-    profileId: 1,
+    profileId: 2,
     description: 'Just consulting about everything',
     type: 'introduction',
     language: 'fi'
   },
   {
-    profileId: 2,
+    profileId: 1,
     description: 'Just managing about everything',
     type: 'introduction',
     language: 'fi'
@@ -75,6 +77,6 @@ const cvDescriptions = [
 
 module.exports = {
   users,
-  profiles: [basicUsersProfile, adminUsersProfile],
+  profiles: [adminUsersProfile, basicUsersProfile],
   cvDescriptions: cvDescriptions
 }
