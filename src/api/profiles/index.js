@@ -5,7 +5,7 @@ import { profileController, findProfileOr404 } from '../../controllers/profiles'
 import { createPermissionHandler } from '../utils'
 
 const router = Router()
-const permissionHandler = createPermissionHandler('profile', 'id')
+const permissionHandler = createPermissionHandler('profile', 'userId')
 
 export default () => {
   router.param('id', findProfileOr404)
