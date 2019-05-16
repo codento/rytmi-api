@@ -3,7 +3,7 @@ import {profileSkillController, findProfileSkillFromProfileOr404} from '../../..
 import { createPermissionHandler } from '../../utils'
 
 const router = Router()
-const permissionHandler = createPermissionHandler('profile', 'id')
+const permissionHandler = createPermissionHandler('profile', 'userId')
 
 export default () => {
   router.param('profileSkillId', findProfileSkillFromProfileOr404)

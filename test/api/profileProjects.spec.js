@@ -1,3 +1,4 @@
+import '@babel/polyfill'
 import supertest from 'supertest'
 import defaults from 'superagent-defaults'
 import { endpointAuthorizationTest } from '../utils'
@@ -6,6 +7,7 @@ import { createUserToken, invalidToken, testAdminToken } from './tokens'
 import {
   user as userModel,
   project as projectModel,
+  profile as profileModel,
   profileProject as profileProjectModel,
   profileProjectDescription as profileProjectDescriptionModel
 } from '../../src/db/models'
@@ -15,13 +17,19 @@ const request = defaults(supertest(app))
 const profileProjectEndpoint = '/api/profileprojects/'
 
 describe('API profileprojects endpoint', () => {
-  let normalUser, adminUser
+  let normalUser, adminUser, normalUserProfileId, adminUserProfileId
   let firstProfileProject, secondProfileProject
 
   beforeAll(async () => {
     const users = await userModel.findAll()
     normalUser = users.filter((user) => user.admin === false).pop()
+    normalUserProfileId = await profileModel.findOne({ where: {userId: normalUser.id} }).then(profile => {
+      return profile.id
+    })
     adminUser = users.filter((user) => user.admin === true).pop()
+    adminUserProfileId = await profileModel.findOne({ where: {userId: adminUser.id} }).then(profile => {
+      return profile.id
+    })
     request.set('Accept', 'application/json')
     const jwtToken = createUserToken({
       googleId: normalUser.googleId,
@@ -33,7 +41,7 @@ describe('API profileprojects endpoint', () => {
     const [someProject, anotherProject] = await projectModel.findAll()
     firstProfileProject = {
       id: 1200,
-      profileId: normalUser.id,
+      profileId: normalUserProfileId,
       projectId: someProject.id,
       workPercentage: 100,
       startDate: new Date('2019-10-01').toISOString(),
@@ -48,7 +56,7 @@ describe('API profileprojects endpoint', () => {
     }
     secondProfileProject = {
       id: 1201,
-      profileId: adminUser.id,
+      profileId: adminUserProfileId,
       projectId: anotherProject.id,
       workPercentage: 100,
       startDate: new Date('2019-11-03').toISOString(),
@@ -90,7 +98,7 @@ describe('API profileprojects endpoint', () => {
     it('should allow authorized user to fetch specific profile project', async () => {
       const expectedProfileProject = firstProfileProject
       const insertedProfileProject = await profileProjectModel.findOne({
-        where: { profileId: normalUser.id, projectId: firstProfileProject.projectId }
+        where: { profileId: normalUserProfileId, projectId: firstProfileProject.projectId }
       })
       const response = await request.get(profileProjectEndpoint + insertedProfileProject.id).expect(200)
       expect(response.body).toMatchObject(expectedProfileProject)
@@ -105,7 +113,7 @@ describe('API profileprojects endpoint', () => {
     it('should allow authorized user to update their own profile projects', async () => {
       const expectedProfileProject = Object.assign({}, firstProfileProject)
       const insertedProfileProject = await profileProjectModel.findOne({
-        where: { profileId: normalUser.id, projectId: firstProfileProject.projectId }
+        where: { profileId: normalUserProfileId, projectId: firstProfileProject.projectId }
       })
       expectedProfileProject.workPercentage = 80
       const response = await request.put(profileProjectEndpoint + insertedProfileProject.id)
@@ -116,7 +124,7 @@ describe('API profileprojects endpoint', () => {
     it('should not allow authorized user to edit other users profile projects', async () => {
       const expectedProfileProject = Object.assign({}, secondProfileProject)
       const insertedProfileProject = await profileProjectModel.findOne({
-        where: { profileId: adminUser.id, projectId: secondProfileProject.projectId }
+        where: { profileId: adminUserProfileId, projectId: secondProfileProject.projectId }
       })
       expectedProfileProject.workPercentage = 80
       await request.put(profileProjectEndpoint + insertedProfileProject.id)
@@ -128,7 +136,7 @@ describe('API profileprojects endpoint', () => {
       request.set('Authorization', `Bearer ${testAdminToken}`)
       const expectedProfileProject = Object.assign({}, firstProfileProject)
       const insertedProfileProject = await profileProjectModel.findOne({
-        where: { profileId: normalUser.id, projectId: firstProfileProject.projectId }
+        where: { profileId: normalUserProfileId, projectId: firstProfileProject.projectId }
       })
       expectedProfileProject.workPercentage = 70
       const response = await request.put(profileProjectEndpoint + insertedProfileProject.id)
@@ -148,19 +156,19 @@ describe('API profileprojects endpoint', () => {
   describe('Deleting profile projects', () => {
     it('should allow authorized user to delete their own profile project', async () => {
       const insertedProfileProject = await profileProjectModel.findOne({
-        where: { profileId: normalUser.id, projectId: firstProfileProject.projectId }
+        where: { profileId: normalUserProfileId, projectId: firstProfileProject.projectId }
       })
       await request.delete(profileProjectEndpoint + insertedProfileProject.id)
         .expect(204)
       const shouldNotBeFound = await profileProjectModel.findOne({
-        where: { profileId: normalUser.id, projectId: firstProfileProject.projectId }
+        where: { profileId: normalUserProfileId, projectId: firstProfileProject.projectId }
       })
       expect(shouldNotBeFound).toBe(null)
     })
 
     it('should not allow authorized user to delete other users profile project', async () => {
       const insertedProfileProject = await profileProjectModel.findOne({
-        where: { profileId: adminUser.id, projectId: secondProfileProject.projectId }
+        where: { profileId: adminUserProfileId, projectId: secondProfileProject.projectId }
       })
       await request.delete(profileProjectEndpoint + insertedProfileProject.id)
         .expect(403)
@@ -172,7 +180,7 @@ describe('API profileprojects endpoint', () => {
       await request.delete(profileProjectEndpoint + insertedProfileProject.id)
         .expect(204)
       const shouldNotBeFound = await profileProjectModel.findOne({
-        where: { profileId: normalUser.id, projectId: firstProfileProject.projectId }
+        where: { profileId: normalUserProfileId, projectId: firstProfileProject.projectId }
       })
       expect(shouldNotBeFound).toBe(null)
     })

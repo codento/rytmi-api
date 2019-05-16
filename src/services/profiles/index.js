@@ -32,6 +32,10 @@ export default class ProfileService extends CrudService {
     return genericGet(models.profile, models.profileCvDescription, mapCvDescriptionsToProfile, id, 'profileId')
   }
 
+  getProfileByUserId (userId) {
+    return models.profile.findOne({where: {userId: userId}})
+  }
+
   // Overrides CrudService's function
   getFiltered (criteria, isParanoid = true) {
     return genericGetAll(models.profile, models.profileCvDescription, mapCvDescriptionsToProfile, 'profileId', criteria, isParanoid)

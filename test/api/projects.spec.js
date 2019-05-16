@@ -1,3 +1,4 @@
+import '@babel/polyfill'
 import supertest from 'supertest'
 import defaults from 'superagent-defaults'
 import { endpointAuthorizationTest } from '../utils'
@@ -7,7 +8,8 @@ import {
   user as userModel,
   project as projectModel,
   profileProject as profileProjectModel,
-  employer as employerModel
+  employer as employerModel,
+  profile as profileModel
 } from '../../src/db/models'
 import { projects } from '../mockData/mockProjects'
 
@@ -16,10 +18,13 @@ const projectEndpoint = '/api/projects/'
 let employerCodento = {}
 
 describe('API Projects endpoint', () => {
-  let normalUser, refactoringProjectId
+  let normalUser, normalUserProfileId, refactoringProjectId
   beforeAll(async () => {
     const users = await userModel.findAll()
     normalUser = users.filter((user) => user.admin === false).pop()
+    normalUserProfileId = await profileModel.findOne({ where: {userId: normalUser.id} }).then(profile => {
+      return profile.id
+    })
     request.set('Accept', 'application/json')
     const jwtToken = createUserToken({
       googleId: normalUser.googleId,
@@ -131,14 +136,14 @@ describe('API Projects endpoint', () => {
       reactProjectId = reactProject.id
       onGoingProjectId = onGoingProject.id
       reactProjectProfile = {
-        profileId: normalUser.id,
+        profileId: normalUserProfileId,
         projectId: reactProjectId,
         workPercentage: 100,
         startDate: new Date('2019-10-01').toISOString(),
         endDate: new Date('2019-10-31').toISOString()
       }
       onGoingProjectProfile = {
-        profileId: normalUser.id,
+        profileId: normalUserProfileId,
         projectId: onGoingProjectId,
         workPercentage: 100,
         startDate: new Date('2019-11-03').toISOString(),
@@ -148,7 +153,7 @@ describe('API Projects endpoint', () => {
 
     describe('Creating project profiles', () => {
       it('should allow authorized user to add themself to a project', async () => {
-        const response = await request.post(projectEndpoint + reactProjectId + '/profiles/' + normalUser.id)
+        const response = await request.post(projectEndpoint + reactProjectId + '/profiles/' + normalUserProfileId)
           .send(reactProjectProfile).expect(201)
         expect(response.body).toMatchObject(reactProjectProfile)
       })
@@ -156,7 +161,7 @@ describe('API Projects endpoint', () => {
       it('should allow admin to add any user to a project', async () => {
         // Set admin token
         request.set('Authorization', `Bearer ${testAdminToken}`)
-        const response = await request.post(projectEndpoint + onGoingProjectId + '/profiles/' + normalUser.id)
+        const response = await request.post(projectEndpoint + onGoingProjectId + '/profiles/' + normalUserProfileId)
           .send(onGoingProjectProfile).expect(201)
         expect(response.body).toMatchObject(onGoingProjectProfile)
         // Set normal token after test

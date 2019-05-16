@@ -1,3 +1,4 @@
+import '@babel/polyfill'
 import { endpointAuthorizationTest } from '../utils'
 import app from '../../src/api/app'
 import supertest from 'supertest'
@@ -16,7 +17,7 @@ const request = defaults(supertest(app))
 
 const profileEndpoint = '/api/profiles/'
 
-let normalUser, adminUser
+let normalUser, adminUser, normalUserProfileId
 
 describe('API profile endpoint', () => {
   let profileProject
@@ -31,9 +32,12 @@ describe('API profile endpoint', () => {
       admin: normalUser.admin,
       exp: Date.now() + 3600
     })
+    normalUserProfileId = await profileModel.findOne({ where: {userId: normalUser.id} }).then(profile => {
+      return profile.id
+    })
     const firstProfileProject = {
       id: 3589,
-      profileId: normalUser.id,
+      profileId: normalUserProfileId,
       projectId: 1,
       workPercentage: 100,
       startDate: new Date('2019-10-01').toISOString(),
@@ -77,8 +81,8 @@ describe('API profile endpoint', () => {
     })
 
     it('should allow authorized users to fetch specific user', async () => {
-      const expectedProfile = profiles[0]
-      const response = await request.get(profileEndpoint + normalUser.id).expect(200)
+      const expectedProfile = profiles[1]
+      const response = await request.get(profileEndpoint + normalUserProfileId).expect(200)
       expect(response.body).toMatchObject(expectedProfile)
     })
   })
@@ -99,6 +103,7 @@ describe('API profile endpoint', () => {
         userId: userId,
         firstName: 'Some',
         lastName: 'User',
+        birthYear: 1985,
         email: 'some.user@codento.com',
         photoPath: 'from/somewhere',
         active: true
@@ -113,14 +118,14 @@ describe('API profile endpoint', () => {
 
   describe('Updating profiles', () => {
     it('should allow authorized user to edit him/her own profile', async () => {
-      const expectedProfile = profiles[0]
+      const expectedProfile = profiles[1]
       expectedProfile.firstName = 'Hessu'
       const attributes = {
-        id: normalUser.id,
+        id: normalUserProfileId,
         userId: normalUser.id,
         firstName: 'Hessu'
       }
-      const response = await request.put(profileEndpoint + normalUser.id).send(attributes).expect(200)
+      const response = await request.put(profileEndpoint + normalUserProfileId).send(attributes).expect(200)
       expect(response.body).toMatchObject(expectedProfile)
     })
 
@@ -129,19 +134,19 @@ describe('API profile endpoint', () => {
       const profileSkill = {
         description: 'so node',
         knows: 0,
-        profileId: normalUser.id,
+        profileId: normalUserProfileId,
         skillId: nodeJs.id,
         visibleInCV: true,
         wantsTo: 0
       }
-      const response = await request.post(profileEndpoint + normalUser.id + '/skills/')
+      const response = await request.post(profileEndpoint + normalUserProfileId + '/skills/')
         .send(profileSkill).expect(201)
       expect(response.body).toMatchObject(profileSkill)
     })
 
     it('should allow authorized user to fetch profile skills', async () => {
-      const expectedProfileSkills = await profileSkillModel.findAll({ where: { profileId: normalUser.id } })
-      const response = await request.get(profileEndpoint + normalUser.id + '/skills')
+      const expectedProfileSkills = await profileSkillModel.findAll({ where: { profileId: normalUserProfileId } })
+      const response = await request.get(profileEndpoint + normalUserProfileId + '/skills')
       expect(response.body.length).toEqual(expectedProfileSkills.length)
       expectedProfileSkills.forEach((profileSkill, idx) => {
         expect(profileSkill.id).toEqual(response.body[idx].id)
@@ -151,13 +156,13 @@ describe('API profile endpoint', () => {
     })
 
     it('should allow authorized user to edit skills of their own profile', async () => {
-      const profileSkills = await profileSkillModel.findAll({ where: { profileId: normalUser.id } })
+      const profileSkills = await profileSkillModel.findAll({ where: { profileId: normalUserProfileId } })
       const profileSkillToUpdate = {
         id: profileSkills[0].id,
         wantsTo: 3,
         knows: 5
       }
-      const response = await request.put(profileEndpoint + normalUser.id + '/skills/' + profileSkillToUpdate.id)
+      const response = await request.put(profileEndpoint + normalUserProfileId + '/skills/' + profileSkillToUpdate.id)
         .send(profileSkillToUpdate)
         .expect(200)
       expect(response.body).toMatchObject(profileSkillToUpdate)
@@ -165,13 +170,13 @@ describe('API profile endpoint', () => {
     describe('Validating input', () => {
       it('should not allow two profiles with the same email', async () => {
         const attributes = {
-          id: normalUser.id,
+          id: normalUserProfileId,
           userId: normalUser.id,
-          email: profiles[1].email
+          email: profiles[0].email
         }
-        await request.put(profileEndpoint + normalUser.id).send(attributes).expect(400)
+        await request.put(profileEndpoint + normalUserProfileId).send(attributes).expect(400)
         const unchangedProfile = await profileModel.findOne({ where: { userId: normalUser.id } })
-        expect(unchangedProfile.email).toEqual(profiles[0].email)
+        expect(unchangedProfile.email).toEqual(profiles[1].email)
       })
 
       it('should not allow two skill profiles for same skill', async () => {
@@ -179,12 +184,12 @@ describe('API profile endpoint', () => {
         const profileSkill = {
           description: 'so node',
           knows: 0,
-          profileId: normalUser.id,
+          profileId: normalUserProfileId,
           skillId: nodeJs.id,
           visibleInCV: true,
           wantsTo: 0
         }
-        await request.post(profileEndpoint + normalUser.id + '/skills/')
+        await request.post(profileEndpoint + normalUserProfileId + '/skills/')
           .send(profileSkill).expect(400)
       })
 
@@ -197,7 +202,7 @@ describe('API profile endpoint', () => {
         ]
 
         const created = await request
-          .post(profileEndpoint + normalUser.id + '/skills')
+          .post(profileEndpoint + normalUserProfileId + '/skills')
           .send({})
           .expect(400)
         expect(created.body.error.details).toMatchObject(validationErrors)
@@ -225,14 +230,14 @@ describe('API profile endpoint', () => {
       })
 
       it('should allow admin to edit any profile', async () => {
-        const expectedProfile = profiles[0]
+        const expectedProfile = profiles[1]
         expectedProfile.firstName = 'Mikki'
         const attributes = {
-          id: normalUser.id,
+          id: normalUserProfileId,
           userId: normalUser.id,
           firstName: 'Mikki'
         }
-        const response = await request.put(profileEndpoint + normalUser.id).send(attributes).expect(200)
+        const response = await request.put(profileEndpoint + normalUserProfileId).send(attributes).expect(200)
         expect(response.body).toMatchObject(expectedProfile)
       })
 
@@ -241,34 +246,34 @@ describe('API profile endpoint', () => {
         const profileSkill = {
           description: 'so node',
           knows: 2,
-          profileId: normalUser.id,
+          profileId: normalUserProfileId,
           skillId: react.id,
           visibleInCV: true,
           wantsTo: 2
         }
-        const response = await request.post(profileEndpoint + normalUser.id + '/skills/')
+        const response = await request.post(profileEndpoint + normalUserProfileId + '/skills/')
           .send(profileSkill).expect(201)
         expect(response.body).toMatchObject(profileSkill)
       })
 
       it('should allow admin to edit skills of any profile', async () => {
-        const profileSkills = await profileSkillModel.findAll({ where: { profileId: normalUser.id } })
+        const profileSkills = await profileSkillModel.findAll({ where: { profileId: normalUserProfileId } })
         const profileSkillToUpdate = {
           id: profileSkills[0].id,
           wantsTo: 4,
           knows: 5
         }
-        const response = await request.put(profileEndpoint + normalUser.id + '/skills/' + profileSkillToUpdate.id)
+        const response = await request.put(profileEndpoint + normalUserProfileId + '/skills/' + profileSkillToUpdate.id)
           .send(profileSkillToUpdate)
           .expect(200)
         expect(response.body).toMatchObject(profileSkillToUpdate)
       })
 
       it('should allow admin user to delete skill from any profile', async () => {
-        const profileSkills = await profileSkillModel.findAll({ where: { profileId: normalUser.id } })
-        await request.delete(profileEndpoint + normalUser.id + '/skills/' + profileSkills[0].id)
+        const profileSkills = await profileSkillModel.findAll({ where: { profileId: normalUserProfileId } })
+        await request.delete(profileEndpoint + normalUserProfileId + '/skills/' + profileSkills[0].id)
           .expect(204)
-        const profileSkillsAfterDelete = await profileSkillModel.findAll({ where: { profileId: normalUser.id }, paranoid: true })
+        const profileSkillsAfterDelete = await profileSkillModel.findAll({ where: { profileId: normalUserProfileId }, paranoid: true })
         expect(profileSkillsAfterDelete.length).toEqual(1)
         profileSkillsAfterDelete.forEach((profileSkill) => {
           expect(profileSkill.id).not.toEqual(profileSkills[0].id)
@@ -278,10 +283,10 @@ describe('API profile endpoint', () => {
   })
 
   it('should allow authorized user to delete skill from their profile', async () => {
-    const profileSkills = await profileSkillModel.findAll({ where: { profileId: normalUser.id } })
-    await request.delete(profileEndpoint + normalUser.id + '/skills/' + profileSkills[0].id)
+    const profileSkills = await profileSkillModel.findAll({ where: { profileId: normalUserProfileId } })
+    await request.delete(profileEndpoint + normalUserProfileId + '/skills/' + profileSkills[0].id)
       .expect(204)
-    const profileSkillsAfterDelete = await profileSkillModel.findAll({ where: { profileId: normalUser.id }, paranoid: true })
+    const profileSkillsAfterDelete = await profileSkillModel.findAll({ where: { profileId: normalUserProfileId }, paranoid: true })
     expect(profileSkillsAfterDelete.length).toEqual(0)
     profileSkillsAfterDelete.forEach((profileSkill) => {
       expect(profileSkill.id).not.toEqual(profileSkills[0].id)
@@ -289,39 +294,33 @@ describe('API profile endpoint', () => {
   })
 
   it('should recreate the profile skill if user is trying to add once deleted skill', async () => {
-    const [react] = await profileSkillModel.findAll({ where: { profileId: normalUser.id }, paranoid: false })
+    const [react] = await profileSkillModel.findAll({ where: { profileId: normalUserProfileId }, paranoid: false })
     const profileSkill = {
       description: 'some skill',
       knows: 2,
-      profileId: normalUser.id,
+      profileId: normalUserProfileId,
       skillId: react.id,
       visibleInCV: true,
       wantsTo: 2
     }
-    const response = await request.post(profileEndpoint + normalUser.id + '/skills')
+    const response = await request.post(profileEndpoint + normalUserProfileId + '/skills')
       .send(profileSkill).expect(201)
     expect(response.body).toMatchObject(profileSkill)
   })
 
   it('should allow authorized users to fetch project profiles', async () => {
-    const response = await request.get(profileEndpoint + normalUser.id + '/projects').expect(200)
+    const response = await request.get(profileEndpoint + normalUserProfileId + '/projects').expect(200)
     expect(response.body.length).toBe(1)
   })
 
   it('should allow authorized users to fetch specific project profile', async () => {
-    const response = await request.get(profileEndpoint + normalUser.id + '/projects/' + profileProject.projectId).expect(200)
+    const response = await request.get(profileEndpoint + normalUserProfileId + '/projects/' + profileProject.projectId).expect(200)
     expect(response.body.projectId).toEqual(profileProject.projectId)
     expect(response.body.profileId).toEqual(profileProject.profileId)
   })
 
   it('should return 404 for missing project profile', async () => {
-    await request.get(profileEndpoint + normalUser.id + '/projects/123123').expect(404)
-  })
-
-  describe('Deleting profiles', () => {
-    it('should not allow deleting profiles', () => {
-      request.delete(profileEndpoint + normalUser.id).expect(404)
-    })
+    await request.get(profileEndpoint + normalUserProfileId + '/projects/123123').expect(404)
   })
 
   describe('Endpoint authorization', () => {

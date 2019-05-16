@@ -1,3 +1,4 @@
+import '@babel/polyfill'
 import app from '../../src/api/app'
 import supertest from 'supertest'
 import defaults from 'superagent-defaults'

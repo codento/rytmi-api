@@ -5,17 +5,17 @@ export default class CrudService {
 
   get (id) {
     return this.model
-      .findByPk(id, {attributes: { exclude: ['deletedAt', 'createdAt', 'updatedAt'] }})
+      .findByPk(id, {attributes: { exclude: ['deletedAt'] }})
   }
 
   getAll () {
     return this.model
-      .findAll({attributes: { exclude: ['deletedAt', 'createdAt', 'updatedAt'] }})
+      .findAll({attributes: { exclude: ['deletedAt'] }})
   }
 
   getFiltered (criteria, isParanoid = true) {
     return this.model
-      .findAll({where: criteria, paranoid: isParanoid, attributes: { exclude: ['deletedAt', 'createdAt', 'updatedAt'] }})
+      .findAll({where: criteria, paranoid: isParanoid})
   }
 
   create (attrs) {

@@ -62,22 +62,22 @@ async function getOrCreateUser (googleId, ticketPayload) {
 
 async function getOrCreateProfile (userId, ticketPayload) {
   const profileService = new ProfileService()
-
-  let profile = await profileService.get(userId)
+  let profile = await profileService.getProfileByUserId(userId)
   if (!profile) {
-    try {
-      profile = await profileService.create({
-        userId: userId,
-        firstName: ticketPayload.given_name,
-        lastName: ticketPayload.family_name,
-        email: ticketPayload.email,
-        photoPath: ticketPayload.picture,
-        active: true
-      })
-    } catch (err) {
+    profile = await profileService.create({
+      userId: userId,
+      firstName: ticketPayload.given_name,
+      lastName: ticketPayload.family_name,
+      email: ticketPayload.email,
+      photoPath: ticketPayload.picture,
+      active: true
+    }).catch((err) => {
       logger.error('Trouble creating profile', err.message)
       throw new Error('Could not create profile')
-    }
+    })
+  } else {
+    // get profile with descriptions
+    profile = await profileService.get(profile.id)
   }
   return profile
 }
