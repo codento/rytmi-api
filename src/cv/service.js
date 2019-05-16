@@ -281,7 +281,6 @@ const runExport = async (fileId) => {
   })
 
   const path = `${os.tmpdir()}/${fileId}.pdf`
-  console.log(path)
   const dest = fs.createWriteStream(path)
 
   return new Promise(async (resolve, reject) => {

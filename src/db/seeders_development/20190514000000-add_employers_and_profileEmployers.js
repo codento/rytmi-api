@@ -24,9 +24,11 @@ module.exports = {
     try {
       let employers = []
       for (let i = 0; i < 25; i++) {
-        employers.push(factory.build('employer', {
-          name: faker.company.companyName()
-        }))
+        let name = faker.company.companyName()
+        while (employers.map(employer => employer.name).includes(name)) {
+          name = faker.company.companyName()
+        }
+        employers.push(factory.build('employer', { name }))
       }
       await queryInterface.bulkInsert('employer', employers)
 

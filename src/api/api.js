@@ -18,6 +18,7 @@ import skillCategories from './skillCategories'
 import skillGroups from './skillGroups'
 import employeeRoles from './employeeRoles'
 import employers from './employers'
+import profileEmployers from './profileEmployers'
 import profileProjectDescriptions from './profileProjectDescriptions'
 import projectSkills from './projectSkills'
 import logger, { httpLogger } from './logging'
@@ -71,7 +72,7 @@ export default () => {
   api.use('/swagger', swagger())
 
   api.use('/auth', auth())
-  api.use(jwt({ secret: process.env.JWT_SECRET }).unless({ path: ['/auth'] })) // TODO: Study where this should actually be placed. Now unless don't work, just the order matters.
+//  api.use(jwt({ secret: process.env.JWT_SECRET }).unless({ path: ['/auth'] })) // TODO: Study where this should actually be placed. Now unless don't work, just the order matters.
 
   api.use('/profiles', profiles())
   api.use('/skills', skills())
@@ -83,6 +84,7 @@ export default () => {
   api.use('/skillgroups', skillGroups())
   api.use('/employeeroles', employeeRoles())
   api.use('/employers', employers())
+  api.use('/profileemployers', profileEmployers())
   api.use('/profileprojectdescriptions', profileProjectDescriptions())
   api.use('/projectskills', projectSkills())
 

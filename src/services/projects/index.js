@@ -12,7 +12,6 @@ const mapDescriptionsToModel = (project, projectDescriptions) => {
     language: description ? description.language : ''
   }))
 
-  console.log(project.dataValues)
   return {
     ...project.dataValues,
     descriptions: descriptions

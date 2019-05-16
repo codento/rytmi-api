@@ -13,8 +13,9 @@ const mapCvDescriptionsToProfile = (profile, profileCvDescriptions) => {
   }))
 
   if (profile) {
+    const { createdAt, updatedAt, ...restOfTheDataValues } = profile.dataValues
     return {
-      ...profile.dataValues,
+      ...restOfTheDataValues,
       cvDescriptions: cvDescriptions
     }
   }

@@ -17,13 +17,13 @@ const adminUser = {
 const users = [basicUser, adminUser]
 
 const basicUsersProfile = {
+  id: 1,
   userId: 1,
   firstName: basicUser.firstName,
   lastName: basicUser.lastName,
   birthday: new Date('1980-10-20').toISOString(),
   email: 'basic.user@codento.com',
   phone: '0401231234',
-  title: 'Consultant',
   links: [],
   photoPath: 'from/somewhere',
   active: basicUser.active,
@@ -34,17 +34,18 @@ const basicUsersProfile = {
       type: 'introduction',
       language: 'fi'
     }
-  ]
+  ],
+  employeeRoles: []
 }
 
 const adminUsersProfile = {
+  id: 2,
   userId: 2,
   firstName: adminUser.firstName,
   lastName: adminUser.lastName,
   birthday: new Date('1970-05-20').toISOString(),
   email: 'admin.user@codento.com',
   phone: '0401231234',
-  title: 'Manager',
   links: [],
   photoPath: 'from/somewhere',
   active: adminUser.active,
@@ -55,7 +56,8 @@ const adminUsersProfile = {
       type: 'introduction',
       language: 'fi'
     }
-  ]
+  ],
+  employeeRoles: []
 }
 
 const cvDescriptions = [
