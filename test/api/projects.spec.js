@@ -7,14 +7,15 @@ import { createUserToken, invalidToken, testAdminToken } from './tokens'
 import {
   user as userModel,
   project as projectModel,
-  profile as profileModel,
-  profileProject as profileProjectModel
+  profileProject as profileProjectModel,
+  employer as employerModel,
+  profile as profileModel
 } from '../../src/db/models'
 import { projects } from '../mockData/mockProjects'
 
 const request = defaults(supertest(app))
-
 const projectEndpoint = '/api/projects/'
+let employerCodento = {}
 
 describe('API Projects endpoint', () => {
   let normalUser, normalUserProfileId, refactoringProjectId
@@ -32,6 +33,10 @@ describe('API Projects endpoint', () => {
       exp: Date.now() + 36000
     })
     request.set('Authorization', `Bearer ${jwtToken}`)
+
+    // const employers = await employerModel.findAll()
+    const [employer] = await employerModel.findAll()
+    employerCodento = employer.dataValues
   })
   afterAll(async () => {
     // profileProjects are created in 'Creating project profiles'
@@ -72,7 +77,9 @@ describe('API Projects endpoint', () => {
             customerName: 'Best customer ever'
           }
         ],
-        isSecret: false
+        isSecret: false,
+        employerId: employerCodento.id,
+        isInternal: true
       }
       const response = await request.post(projectEndpoint).send(leanWorkshop).expect(201)
       expect(response.body).toMatchObject(leanWorkshop)
@@ -91,7 +98,9 @@ describe('API Projects endpoint', () => {
             customerName: 'The favourite'
           }
         ],
-        isSecret: false
+        isSecret: false,
+        employerId: employerCodento.id,
+        isInternal: true
       }
       const response = await request.post(projectEndpoint).send(refactoringCode).expect(201)
       expect(response.body).toMatchObject(refactoringCode)

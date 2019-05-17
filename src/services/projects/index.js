@@ -13,11 +13,7 @@ const mapDescriptionsToModel = (project, projectDescriptions) => {
   }))
 
   return {
-    id: project.id,
-    code: project.code,
-    startDate: project.startDate,
-    endDate: project.endDate,
-    isSecret: project.isSecret,
+    ...project.dataValues,
     descriptions: descriptions
   }
 }

@@ -24,7 +24,6 @@ const adminUsersProfile = {
   birthYear: 1970,
   email: 'admin.user@codento.com',
   phone: '0401231234',
-  title: 'Manager',
   links: [],
   photoPath: 'from/somewhere',
   active: adminUser.active,
@@ -35,7 +34,8 @@ const adminUsersProfile = {
       type: 'introduction',
       language: 'fi'
     }
-  ]
+  ],
+  employeeRoles: []
 }
 
 // id (=> profileId) will be 2
@@ -46,7 +46,6 @@ const basicUsersProfile = {
   birthYear: 1980,
   email: 'basic.user@codento.com',
   phone: '0401231234',
-  title: 'Consultant',
   links: [],
   photoPath: 'from/somewhere',
   active: basicUser.active,
@@ -57,7 +56,8 @@ const basicUsersProfile = {
       type: 'introduction',
       language: 'fi'
     }
-  ]
+  ],
+  employeeRoles: []
 }
 
 const cvDescriptions = [

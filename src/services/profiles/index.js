@@ -13,19 +13,9 @@ const mapCvDescriptionsToProfile = (profile, profileCvDescriptions) => {
   }))
 
   if (profile) {
+    const { createdAt, updatedAt, ...restOfTheDataValues } = profile.dataValues
     return {
-      id: profile.id,
-      userId: profile.userId,
-      lastName: profile.lastName,
-      firstName: profile.firstName,
-      birthYear: profile.birthYear,
-      email: profile.email,
-      phone: profile.phone,
-      title: profile.title,
-      links: profile.links,
-      photoPath: profile.photoPath,
-      active: profile.active,
-      employeeRoles: profile.employeeRoles,
+      ...restOfTheDataValues,
       cvDescriptions: cvDescriptions
     }
   }

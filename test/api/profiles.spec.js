@@ -105,10 +105,6 @@ describe('API profile endpoint', () => {
         lastName: 'User',
         birthYear: 1985,
         email: 'some.user@codento.com',
-        phone: '0401231234',
-        title: 'Consultant',
-        cvDescriptions: [],
-        links: [],
         photoPath: 'from/somewhere',
         active: true
       }

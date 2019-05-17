@@ -5,6 +5,10 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       unique: true
     },
+    employerId: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
     startDate: {
       type: DataTypes.DATE,
       allowNull: false
@@ -14,6 +18,10 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true
     },
     isSecret: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false
+    },
+    isInternal: {
       type: DataTypes.BOOLEAN,
       allowNull: false
     }
