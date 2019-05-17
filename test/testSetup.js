@@ -3,8 +3,8 @@ require('@babel/polyfill')
 
 const { Op } = require('sequelize')
 const { migrationsUmzug } = require('./utils')
-const { user, profile, profileCvDescription, skill, skillCategory, skillGroup, project, projectDescription } = require('../src/db/models/')
-const { users, profiles, cvDescriptions } = require('./mockData/mockUsers')
+const { user, profile, skill, skillCategory, skillGroup, project, projectDescription } = require('../src/db/models/')
+const { users, profiles } = require('./mockData/mockUsers')
 const { skills, skillCategories, skillGroups } = require('./mockData/mockSkills')
 const { projects, projectDescriptions } = require('./mockData/mockProjects')
 const tearDown = require('./testTeardown')
@@ -30,7 +30,6 @@ const insertTestData = async () => {
 const insertTestUsersWithProfiles = async () => {
   await user.bulkCreate(users)
   await profile.bulkCreate(profiles)
-  await profileCvDescription.bulkCreate(cvDescriptions)
 }
 
 const insertProjects = async () => {
