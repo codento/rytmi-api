@@ -37,12 +37,11 @@ const create = async () => {
         domain: 'codento.com'
       }
     })
-  }, 4000)
+  }, 2000)
 
   return data
 }
 
-// TODO: Rest of the static texts
 const createStaticTextReplacementRequests = (cv) => {
   let requests = []
   const replacementDefinitions = [
@@ -53,13 +52,25 @@ const createStaticTextReplacementRequests = (cv) => {
     { text: '{{ footerText }}', newText: `CV ${cv.employeeName} ${format(new Date(), 'D.M.YYYY')}` }
   ]
 
+  const arr = [1, 2, 3]
+  arr.map((index) => {
+    // If there's not enough top projects (3), replace text with empty string
+    const project = index <= cv.topProjects.length ? cv.topProjects[index - 1] : undefined
+    replacementDefinitions.push(
+      { text: `{{ projectName${index} }}`, newText: project ? project.projectName : '' },
+      { text: `{{ customer${index} }}`, newText: project && project.projectCustomer ? `(${project.projectCustomer})` : '' },
+      { text: `{{ projectTitle${index} }}`, newText: project ? project.projectTitle : '' },
+      { text: `{{ projectDuration${index} }}`, newText: project ? project.projectDuration : '' }
+    )
+  })
+
   replacementDefinitions.forEach(definition => {
     requests.push({
-      'replaceAllText': {
-        'containsText': {
-          'text': definition.text
+      replaceAllText: {
+        containsText: {
+          text: definition.text
         },
-        'replaceText': definition.newText
+        replaceText: definition.newText
       }
     })
   })
@@ -69,14 +80,38 @@ const createStaticTextReplacementRequests = (cv) => {
 
 const getTableObjectId = (skillPageNumber, originalSkillTableObjectId) => skillPageNumber > 1 ? `skillTable${skillPageNumber}` : originalSkillTableObjectId
 
-const createSkillTableRequests = async (fileId, cv, slides) => {
-  let slidesData = await slides.presentations.get({presentationId: fileId})
-  const skillTable = slidesData.data.slides[1].pageElements.find(element => element.table)
-  const originalSkillTableObjectId = skillTable.objectId
+const duplicateObject = (tableObjectId, newIds = {}) => {
+  return {
+    duplicateObject: {
+      objectId: tableObjectId,
+      objectIds: newIds
+    }
+  }
+}
+
+const createTableTextRequest = (methodKey, tableObjectId, row, col, textValueOrRange) => {
+  return {
+    // insertText or deleteText
+    [methodKey]: {
+      objectId: tableObjectId,
+      cellLocation: {
+        rowIndex: row,
+        columnIndex: col
+      },
+      // for deleting, define text range: {'type': 'ALL'} will delete all text
+      [methodKey === 'insertText' ? 'text' : 'textRange']: textValueOrRange
+    }
+  }
+}
+
+const createSkillTableRequests = (cv, template) => {
+  const skillSlideTemplate = template.slides[1]
+  const skillTableTemplate = skillSlideTemplate.pageElements.find(element => element.table)
+  const originalSkillTableObjectId = skillTableTemplate.objectId
 
   // Get background colors from templates table rows
-  const firstColor = skillTable.table.tableRows[1].tableCells[0].tableCellProperties.tableCellBackgroundFill.solidFill.color.rgbColor
-  const secondColor = skillTable.table.tableRows[2].tableCells[0].tableCellProperties.tableCellBackgroundFill.solidFill.color.rgbColor
+  const firstColor = skillTableTemplate.table.tableRows[1].tableCells[0].tableCellProperties.tableCellBackgroundFill.solidFill.color.rgbColor
+  const secondColor = skillTableTemplate.table.tableRows[2].tableCells[0].tableCellProperties.tableCellBackgroundFill.solidFill.color.rgbColor
 
   let requests = []
   const orderedSkills = orderBy(cv.skills, ['skillCategory', 'skillLevel', 'skillName'], ['asc', 'desc', 'asc'])
@@ -94,12 +129,7 @@ const createSkillTableRequests = async (fileId, cv, slides) => {
   // Only a certain number of skills fit into one page. Create new slides for the rest.
   const numberOfExtraSkillPages = (Math.ceil(cv.skills.length / MAX_SKILLS_PER_PAGE)) - 1
   for (let i = numberOfExtraSkillPages; i > 0; i--) {
-    const request = {'duplicateObject': {
-      'objectId': slidesData.data.slides[1].objectId,
-      'objectIds': {}
-    }}
-    request.duplicateObject.objectIds[originalSkillTableObjectId] = `skillTable${i + 1}`
-    requests.push(request)
+    requests.push(duplicateObject(skillSlideTemplate, {[originalSkillTableObjectId]: `skillTable${i + 1}`}))
   }
 
   // Add new rows for skills. Each page has one row already, so add one less row per page.
@@ -150,7 +180,7 @@ const createSkillTableRequests = async (fileId, cv, slides) => {
           }
         }
       },
-      'fields': 'tableCellBackgroundFill.solidFill.color'
+      fields: 'tableCellBackgroundFill.solidFill.color'
     }})
   })
 
@@ -158,47 +188,52 @@ const createSkillTableRequests = async (fileId, cv, slides) => {
   orderedSkills.forEach((skill, index) => {
     let isLastRowsCategoryDifferent = orderedSkills[index - 1] && skill.skillCategory !== orderedSkills[index - 1].skillCategory
     let skillPageNumber = Math.ceil((index + 1) / MAX_SKILLS_PER_PAGE)
-    requests.push({
-      'insertText': {
-        'objectId': getTableObjectId(skillPageNumber, originalSkillTableObjectId),
-        'cellLocation': {
-          'rowIndex': index + 1 - ((skillPageNumber - 1) * MAX_SKILLS_PER_PAGE),
-          'columnIndex': 0
-        },
-        'text': index % MAX_SKILLS_PER_PAGE === 0 || isLastRowsCategoryDifferent ? skill.skillCategory : ''
-      }
-    })
-    requests.push({
-      'insertText': {
-        'objectId': getTableObjectId(skillPageNumber, originalSkillTableObjectId),
-        'cellLocation': {
-          'rowIndex': index + 1 - ((skillPageNumber - 1) * MAX_SKILLS_PER_PAGE),
-          'columnIndex': 1
-        },
-        'text': skill.skillName
-      }
-    })
-    requests.push({
-      'insertText': {
-        'objectId': getTableObjectId(skillPageNumber, originalSkillTableObjectId),
-        'cellLocation': {
-          'rowIndex': index + 1 - ((skillPageNumber - 1) * MAX_SKILLS_PER_PAGE),
-          'columnIndex': 2
-        },
-        'text': '' + skill.skillLevel
-      }
-    })
+    let row = index + 1 - ((skillPageNumber - 1) * MAX_SKILLS_PER_PAGE)
+
+    const skillCategory = index % MAX_SKILLS_PER_PAGE === 0 || isLastRowsCategoryDifferent ? skill.skillCategory : ''
+
+    requests.push(
+      createTableTextRequest('insertText', getTableObjectId(skillPageNumber, originalSkillTableObjectId), row, 0, skillCategory),
+      createTableTextRequest('insertText', getTableObjectId(skillPageNumber, originalSkillTableObjectId), row, 1, skill.skillName),
+      createTableTextRequest('insertText', getTableObjectId(skillPageNumber, originalSkillTableObjectId), row, 2, skill.skillLevel.toString())
+    )
   })
 
   return requests
 }
 
-const createImageReplacementRequest = async (fileId, cv, slides) => {
-  const presentation = await slides.presentations.get({
-    presentationId: fileId
-  })
+const createProjectRequests = (cv, template) => {
+  let requests = []
+  const projectTableTemplate = template.slides[2].pageElements.find(element => element.table)
 
-  const titlePage = presentation.data.slides[0]
+  const createProjectTableRequest = (tableObjectId, project) => {
+    let projectHeaderRow = `${project.projectName}, ${project.projectDuration}`
+    projectHeaderRow = project.projectCustomer ? projectHeaderRow + `(${project.projectCustomer})` : projectHeaderRow
+    return [
+      // Delete template example values
+      createTableTextRequest('deleteText', tableObjectId, 1, 0, {type: 'ALL'}),
+      createTableTextRequest('deleteText', tableObjectId, 2, 1, {type: 'ALL'}),
+      createTableTextRequest('deleteText', tableObjectId, 3, 1, {type: 'ALL'}),
+      createTableTextRequest('deleteText', tableObjectId, 4, 1, {type: 'ALL'}),
+      createTableTextRequest('deleteText', tableObjectId, 5, 1, {type: 'ALL'}),
+      // Insert actual project information
+      createTableTextRequest('insertText', tableObjectId, 1, 0, projectHeaderRow),
+      createTableTextRequest('insertText', tableObjectId, 2, 1, project.projectTitle),
+      createTableTextRequest('insertText', tableObjectId, 3, 1, ''), // TODO: project tasks -> are these needed?
+      createTableTextRequest('insertText', tableObjectId, 4, 1, 'Node.js, Vuejs'), // TODO: project skills
+      createTableTextRequest('insertText', tableObjectId, 5, 1, project.projectDescription)
+    ]
+  }
+  // TODO: duplicate project table for all projects, figure oout correct layout, when to switch to next slide etc.
+  // requests.push(duplicateObject(projectTableTemplate.objectId, {[projectTableTemplate.objectId]: 'projectTable1'}))
+
+  const project = cv.projects[0]
+  Array.prototype.push.apply(requests, createProjectTableRequest(projectTableTemplate.objectId, project))
+  return requests
+}
+
+const createImageReplacementRequest = (cv, template) => {
+  const titlePage = template.slides[0]
 
   // Find the correct element (title page should have only one image element)
   const imageElement = titlePage.pageElements.filter(elem => 'image' in elem)[0]
@@ -212,7 +247,7 @@ const createImageReplacementRequest = async (fileId, cv, slides) => {
   }
 }
 
-const createTopSkillsReplacementRequest = cv => {
+const createTopSkillsReplacementRequest = (cv) => {
   let topSkills = ''
   cv.topSkills.forEach(skill => {
     topSkills += skill.skillName + '\r\n'
@@ -228,7 +263,7 @@ const createTopSkillsReplacementRequest = cv => {
   }
 }
 
-const createLanguagesReplacementRequest = cv => {
+const createLanguagesReplacementRequest = (cv) => {
   let languages = ''
   cv.languages.forEach(language => {
     languages += language.languageName + '\r\n'
@@ -256,11 +291,14 @@ const update = async (fileId, cv) => {
     auth
   })
 
+  const { data } = await slides.presentations.get({presentationId: fileId})
+
   const resource = {
     'requests': [
-      ...createStaticTextReplacementRequests(cv),
-      ...await createSkillTableRequests(fileId, cv, slides),
-      await createImageReplacementRequest(fileId, cv, slides),
+      createStaticTextReplacementRequests(cv),
+      createSkillTableRequests(cv, data),
+      createProjectRequests(cv, data),
+      createImageReplacementRequest(cv, data),
       createTopSkillsReplacementRequest(cv),
       createLanguagesReplacementRequest(cv)
     ]
@@ -289,9 +327,16 @@ const runExport = async (fileId) => {
       {responseType: 'stream'}
     )
     res.data
-      .on('error', (err) => reject(err))
+      .on('error', (err) => {
+        reject(err)
+      })
       .pipe(dest)
-    dest.on('finish', () => resolve(path))
+    dest.on('finish', () => {
+      drive.files.delete(
+        {fileId}
+      )
+      resolve(path)
+    })
   })
 }
 
