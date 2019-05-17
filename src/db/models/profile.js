@@ -46,6 +46,25 @@ module.exports = (sequelize, DataTypes) => {
     },
     employeeRoles: {
       type: DataTypes.ARRAY(DataTypes.INTEGER)
+    },
+    introduction: {
+      type: DataTypes.JSONB,
+      allowNull: true
+    },
+    education: {
+      type: DataTypes.JSONB,
+      allowNull: true
+    }
+  }, {
+    validate: {
+      introductionValidator: function () {
+        if (this.introduction) {
+          const keys = Object.keys(this.introduction)
+          if (!(keys.length === 2 && keys.includes('fi') && keys.includes('en'))) {
+            throw new Error('Introduction json keys must be exactly: fi, en')
+          }
+        }
+      }
     }
   })
 
@@ -53,7 +72,6 @@ module.exports = (sequelize, DataTypes) => {
     models.profile.belongsTo(models.user, {foreignKey: 'userId'})
     models.profile.hasMany(models.profileSkill, {foreignKey: 'profileId'})
     models.profile.belongsToMany(models.project, {through: models.profileProject, foreignKey: 'profileId'})
-    models.profile.hasMany(models.profileCvDescription, {foreignKey: 'profileId'})
   }
 
   return Profile
