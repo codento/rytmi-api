@@ -27,14 +27,11 @@ const adminUsersProfile = {
   links: [],
   photoPath: 'from/somewhere',
   active: adminUser.active,
-  cvDescriptions: [
-    {
-      id: 2,
-      description: 'Just managing about everything',
-      type: 'introduction',
-      language: 'fi'
-    }
-  ],
+  introduction: {
+    fi: 'Just managing about everything',
+    en: ''
+  },
+  education: null,
   employeeRoles: []
 }
 
@@ -49,34 +46,15 @@ const basicUsersProfile = {
   links: [],
   photoPath: 'from/somewhere',
   active: basicUser.active,
-  cvDescriptions: [
-    {
-      id: 1,
-      description: 'Just consulting about everything',
-      type: 'introduction',
-      language: 'fi'
-    }
-  ],
+  introduction: {
+    fi: 'Just consulting about everything',
+    en: ''
+  },
+  education: null,
   employeeRoles: []
 }
 
-const cvDescriptions = [
-  {
-    profileId: 2,
-    description: 'Just consulting about everything',
-    type: 'introduction',
-    language: 'fi'
-  },
-  {
-    profileId: 1,
-    description: 'Just managing about everything',
-    type: 'introduction',
-    language: 'fi'
-  }
-]
-
 module.exports = {
   users,
-  profiles: [adminUsersProfile, basicUsersProfile],
-  cvDescriptions: cvDescriptions
+  profiles: [adminUsersProfile, basicUsersProfile]
 }
