@@ -19,7 +19,7 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME}
   postgres:
-    image: postgres:10.2-alpine
+    image: postgres:11-alpine
     volumes:
       - ./init_db.sh:/docker-entrypoint-initdb.d/init_db.sh
     ports:
