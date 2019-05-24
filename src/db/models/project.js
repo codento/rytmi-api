@@ -2,7 +2,7 @@ module.exports = (sequelize, DataTypes) => {
   let Project = sequelize.define('project', {
     code: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       unique: true
     },
     employerId: {
@@ -28,7 +28,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     validate: {
       endIsAfterStart: function () {
-        if (this.startDate > this.endDate) {
+        if (this.endDate !== null && this.startDate > this.endDate) {
           throw new Error('Start date must be before end date!')
         }
       },
