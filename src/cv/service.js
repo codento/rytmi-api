@@ -1,7 +1,7 @@
 import os from 'os'
 import fs from 'fs'
 import { google } from 'googleapis'
-import { orderBy } from 'lodash'
+import { orderBy, cloneDeep } from 'lodash'
 import MAX_SKILLS_PER_PAGE from './constants'
 import format from 'date-fns/format'
 
@@ -273,26 +273,89 @@ const createTopSkillsReplacementRequest = (cv) => {
   }
 }
 
-const createTopSkillsLevelBarsRequest = (cv, template) => {
+const createTopSkillsAndLanguagesLevelVisualizationRequest = (cv, template) => {
   const titlePage = template.slides[0]
   orderBy(cv.skills, ['skillCategory', 'skillLevel', 'skillName'], ['asc', 'desc', 'asc'])
-  const lineElements = titlePage.pageElements.filter(element => 'line' in element)
-  const elementsOrderedByYPosition = orderBy(lineElements, ['transform.translateY'])
+  const circleElements = titlePage.pageElements.filter(element => 'shape' in element && element.shape.shapeType === 'ELLIPSE')
 
+  // Orders elements so that array's first element is the topleft most circle, second element is the top row's second from left element and so on.
+  const elementsOrderedByPosition = orderBy(circleElements, ['transform.translateY', 'transform.translateX'])
   const requests = []
+  const filledColor = cloneDeep(elementsOrderedByPosition[0].shape.shapeProperties.shapeBackgroundFill.solidFill.color)
+
+  // Color circles for skills
   cv.topSkills.forEach((skill, index) => {
-    let element = elementsOrderedByYPosition[index]
-    element.transform.scaleX = skill.skillLevel * 0.1
-    requests.push(
-      {
-        'updatePageElementTransform': {
-          'objectId': element.objectId,
-          'transform': element.transform,
-          'applyMode': 'ABSOLUTE'
+    for (let i = 0; i < skill.skillLevel; i++) {
+      let element = elementsOrderedByPosition[index * 5 + i]
+      requests.push(
+        {
+          'updateShapeProperties': {
+            'objectId': element.objectId,
+            'fields': 'shapeBackgroundFill.solidFill.color',
+            'shapeProperties': {
+              'shapeBackgroundFill': {
+                'solidFill': {
+                  'color': filledColor
+                }
+              }
+            }
+          }
         }
-      }
-    )
+      )
+    }
   })
+
+  // Color circles for languages
+  cv.languages.forEach((language, index) => {
+    for (let i = 0; i < language.languageLevel; i++) {
+      let element = elementsOrderedByPosition[(index + 5) * 5 + i]
+      requests.push(
+        {
+          'updateShapeProperties': {
+            'objectId': element.objectId,
+            'fields': 'shapeBackgroundFill.solidFill.color',
+            'shapeProperties': {
+              'shapeBackgroundFill': {
+                'solidFill': {
+                  'color': filledColor
+                }
+              }
+            }
+          }
+        }
+      )
+    }
+  })
+
+  // Delete circles if there are fewer than 5 skills
+  const numberOfSkillRowsToDelete = 5 - cv.topSkills.length
+  for (let rowNumber = 0; rowNumber < numberOfSkillRowsToDelete; rowNumber++) {
+    for (let circleIndex = 0; circleIndex < 5; circleIndex++) {
+      let element = elementsOrderedByPosition[(cv.topSkills.length + rowNumber) * 5 + circleIndex]
+      requests.push(
+        {
+          'deleteObject': {
+            'objectId': element.objectId
+          }
+        }
+      )
+    }
+  }
+
+  // Delete circles if there are fewer than 4 languages
+  const numberOfLanguageRowsToDelete = 4 - cv.languages.length
+  for (let rowNumber = 0; rowNumber < numberOfLanguageRowsToDelete; rowNumber++) {
+    for (let circleIndex = 0; circleIndex < 5; circleIndex++) {
+      let element = elementsOrderedByPosition[(cv.languages.length + rowNumber + 5) * 5 + circleIndex]
+      requests.push(
+        {
+          'deleteObject': {
+            'objectId': element.objectId
+          }
+        }
+      )
+    }
+  }
   return requests
 }
 
@@ -333,8 +396,8 @@ const update = async (fileId, cv) => {
       createProjectRequests(cv, data),
       createImageReplacementRequest(cv, data),
       createTopSkillsReplacementRequest(cv),
-      createTopSkillsLevelBarsRequest(cv, data),
-      createLanguagesReplacementRequest(cv)
+      createLanguagesReplacementRequest(cv),
+      createTopSkillsAndLanguagesLevelVisualizationRequest(cv, data)
     ]
   }
   await slides.presentations.batchUpdate({resource, presentationId: fileId})
