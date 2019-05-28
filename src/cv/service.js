@@ -263,6 +263,29 @@ const createTopSkillsReplacementRequest = (cv) => {
   }
 }
 
+const createTopSkillsLevelBarsRequest = (cv, template) => {
+  const titlePage = template.slides[0]
+  orderBy(cv.skills, ['skillCategory', 'skillLevel', 'skillName'], ['asc', 'desc', 'asc'])
+  const lineElements = titlePage.pageElements.filter(element => 'line' in element)
+  const elementsOrderedByYPosition = orderBy(lineElements, ['transform.translateY'])
+
+  const requests = []
+  cv.topSkills.forEach((skill, index) => {
+    let element = elementsOrderedByYPosition[index]
+    element.transform.scaleX = skill.skillLevel * 0.1
+    requests.push(
+      {
+        'updatePageElementTransform': {
+          'objectId': element.objectId,
+          'transform': element.transform,
+          'applyMode': 'ABSOLUTE'
+        }
+      }
+    )
+  })
+  return requests
+}
+
 const createLanguagesReplacementRequest = (cv) => {
   let languages = ''
   cv.languages.forEach(language => {
@@ -300,6 +323,7 @@ const update = async (fileId, cv) => {
       createProjectRequests(cv, data),
       createImageReplacementRequest(cv, data),
       createTopSkillsReplacementRequest(cv),
+      createTopSkillsLevelBarsRequest(cv, data),
       createLanguagesReplacementRequest(cv)
     ]
   }
