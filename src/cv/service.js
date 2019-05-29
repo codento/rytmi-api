@@ -49,7 +49,17 @@ const createStaticTextReplacementRequests = (cv) => {
     { text: '{{ employeeName }}', newText: cv.employeeName },
     { text: '{{ employeeYearOfBirth }}', newText: '' + cv.born },
     { text: '{{ employeeDescription }}', newText: '' + cv.employeeDescription },
-    { text: '{{ footerText }}', newText: `CV ${cv.employeeName} ${format(new Date(), 'D.M.YYYY')}` }
+    { text: '{{ footerText }}', newText: `CV ${cv.employeeName} ${format(new Date(), 'D.M.YYYY')}` },
+    { text: '{{ skillLevelName1 }}', newText: cv.skillLevelDescriptions[1].text },
+    { text: '{{ skillLevelDescription1 }}', newText: cv.skillLevelDescriptions[1].description },
+    { text: '{{ skillLevelName2 }}', newText: cv.skillLevelDescriptions[2].text },
+    { text: '{{ skillLevelDescription2 }}', newText: cv.skillLevelDescriptions[2].description },
+    { text: '{{ skillLevelName3 }}', newText: cv.skillLevelDescriptions[3].text },
+    { text: '{{ skillLevelDescription3 }}', newText: cv.skillLevelDescriptions[3].description },
+    { text: '{{ skillLevelName4 }}', newText: cv.skillLevelDescriptions[4].text },
+    { text: '{{ skillLevelDescription4 }}', newText: cv.skillLevelDescriptions[4].description },
+    { text: '{{ skillLevelName5 }}', newText: cv.skillLevelDescriptions[5].text },
+    { text: '{{ skillLevelDescription5 }}', newText: cv.skillLevelDescriptions[5].description }
   ]
 
   const arr = [1, 2, 3]
@@ -129,7 +139,7 @@ const createSkillTableRequests = (cv, template) => {
   // Only a certain number of skills fit into one page. Create new slides for the rest.
   const numberOfExtraSkillPages = (Math.ceil(cv.skills.length / MAX_SKILLS_PER_PAGE)) - 1
   for (let i = numberOfExtraSkillPages; i > 0; i--) {
-    requests.push(duplicateObject(skillSlideTemplate, {[originalSkillTableObjectId]: `skillTable${i + 1}`}))
+    requests.push(duplicateObject(skillSlideTemplate.objectId, {[originalSkillTableObjectId]: `skillTable${i + 1}`}))
   }
 
   // Add new rows for skills. Each page has one row already, so add one less row per page.
