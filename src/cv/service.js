@@ -62,6 +62,13 @@ const createStaticTextReplacementRequests = (cv) => {
     { text: '{{ skillLevelDescription5 }}', newText: cv.skillLevelDescriptions[5].description }
   ]
 
+  Object.keys(cv.staticTexts).forEach(key => {
+    replacementDefinitions.push({
+      text: `{{ ${key} }}`,
+      newText: cv.staticTexts[key][cv.currentLanguage]
+    })
+  })
+
   const arr = [1, 2, 3]
   arr.map((index) => {
     // If there's not enough top projects (3), replace text with empty string
