@@ -42,6 +42,53 @@ const create = async () => {
   return data
 }
 
+const createEducationRequests = (cv, template) => {
+  const educationPage = template.slides[3]
+
+  // Find the correct element (title page should have only one image element)
+  const lineElements = educationPage.pageElements.filter(element => 'line' in element)
+  const lineElementsOrderedByYPosition = orderBy(lineElements, ['transform.translateY'])
+
+  let requests = []
+  const replacementDefinitions = []
+  const arr = [1, 2, 3, 4]
+  arr.map((index) => {
+    // If there aren't enough degrees (4), replace text with empty string
+    const education = index <= cv.education.length ? cv.education[index - 1] : undefined
+    replacementDefinitions.push(
+      { text: `{{ schoolName${index} }}`, newText: education ? education[cv.currentLanguage].school + ' - ' : '' },
+      { text: `{{ educationTime${index} }}`, newText: education ? (education.startYear ? `${education.startYear} - ` : '') + (education.endYear ? education.endYear : '') : '' },
+      { text: `{{ educationDegree${index} }}`, newText: education ? education[cv.currentLanguage].degree : '' },
+      { text: `{{ major${index} }}`, newText: education ? education[cv.currentLanguage].major : '' },
+      { text: `{{ minor${index} }}`, newText: education ? education[cv.currentLanguage].minor : '' },
+      { text: `{{ majorText${index} }}`, newText: education && education[cv.currentLanguage].major ? cv.staticTexts.majorText[cv.currentLanguage] + ':' : '' },
+      { text: `{{ minorText${index} }}`, newText: education && education[cv.currentLanguage].minor ? cv.staticTexts.minorText[cv.currentLanguage] + ':' : '' }
+    )
+    if (!education) {
+      requests.push(
+        {
+          'deleteObject': {
+            'objectId': lineElementsOrderedByYPosition[index - 1].objectId
+          }
+        }
+      )
+    }
+  })
+
+  replacementDefinitions.forEach(definition => {
+    requests.push({
+      replaceAllText: {
+        containsText: {
+          text: definition.text
+        },
+        replaceText: definition.newText
+      }
+    })
+  })
+
+  return requests
+}
+
 const createStaticTextReplacementRequests = (cv) => {
   let requests = []
   const replacementDefinitions = [
@@ -399,6 +446,7 @@ const update = async (fileId, cv) => {
   const resource = {
     'requests': [
       createStaticTextReplacementRequests(cv),
+      createEducationRequests(cv, data),
       createSkillTableRequests(cv, data),
       createProjectRequests(cv, data),
       createImageReplacementRequest(cv, data),
