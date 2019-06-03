@@ -2,9 +2,11 @@ import SkillService from '../../services/skills'
 import baseController from '../index'
 import {findObjectOr404, wrapAsync} from '../utils'
 import ProfileSkillService from '../../services/profileSkills'
+import ProjectSkillService from '../../services/projectSkills'
 
 const skillService = new SkillService()
 const profileSkillService = new ProfileSkillService()
+const projectSkillService = new ProjectSkillService()
 
 const skillController = baseController('skill', skillService)
 
@@ -36,6 +38,7 @@ const hasSkillExistedBefore = (softDeletedSkill, error) =>
 
 const reCreateDeletedSkill = async (softDeletedSkill, newSkill) => {
   await profileSkillService.removeDeletedAt({ skillId: softDeletedSkill.id })
+  await projectSkillService.removeDeletedAt({ skillId: softDeletedSkill.id })
   await skillService.removedDeletedAt(softDeletedSkill.id)
   return skillService.update(softDeletedSkill.id, newSkill)
 }
