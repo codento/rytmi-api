@@ -21,11 +21,18 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'skillId',
       sourceKey: 'id',
       onDelete: 'cascade' })
+    models.skill.hasMany(models.projectSkill, {
+      foreignKey: 'skillId',
+      sourceKey: 'id',
+      onDelete: 'cascade' })
   }
 
   Skill.addHook('afterDestroy', (skill, options) => {
     const { id, deletedAt } = skill.dataValues
     sequelize.models.profileSkill.update(
+      { deletedAt },
+      { where: { skillId: id } })
+    sequelize.models.projectSkill.update(
       { deletedAt },
       { where: { skillId: id } })
   })
