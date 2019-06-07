@@ -69,17 +69,12 @@ describe('API Projects endpoint', () => {
         code: 1010,
         startDate: new Date('2019-02-20').toISOString(),
         endDate: new Date('2019-02-21').toISOString(),
-        descriptions: [
-          {
-            description: 'Lean workshop for customer',
-            name: 'Lean workshop',
-            language: 'en',
-            customerName: 'Best customer ever'
-          }
-        ],
+        description: { en: 'Lean workshop for customer', fi: 'Lean workshoppi asiakkaalle' },
+        name: { en: 'Lean workshop', fi: 'Lean workshoppi' },
+        customerName: { en: 'Best customer ever', fi: 'Ketterä asiakas' },
         isSecret: false,
         employerId: employerCodento.id,
-        isInternal: true
+        isInternal: false
       }
       const response = await request.post(projectEndpoint).send(leanWorkshop).expect(201)
       expect(response.body).toMatchObject(leanWorkshop)
@@ -90,14 +85,9 @@ describe('API Projects endpoint', () => {
       const refactoringCode = {
         code: 1050,
         startDate: new Date('2019-02-20').toISOString(),
-        descriptions: [
-          {
-            description: 'This should be continuous',
-            name: 'Refactoring old code',
-            language: 'en',
-            customerName: 'The favourite'
-          }
-        ],
+        description: { en: 'This should be continuous', fi: 'Jatkuu ikuisesti' },
+        name: { en: 'Refactoring old code', fi: 'Refaktorointi' },
+        customerName: { en: null, fi: null },
         isSecret: false,
         employerId: employerCodento.id,
         isInternal: true
@@ -120,7 +110,7 @@ describe('API Projects endpoint', () => {
     it('should allow authorized user to edit project', async () => {
       const [reactProject] = projects
       const expectedProject = await projectModel.findOne({ where: { id: reactProject.id } })
-      reactProject.descriptions[0].name = 'Address app for lost'
+      reactProject.name.en = 'Address app for lost'
       const response = await request.put(projectEndpoint + expectedProject.id).send(reactProject).expect(200)
       expect(response.body).toMatchObject(reactProject)
     })
@@ -199,20 +189,15 @@ describe('API Projects endpoint', () => {
         code: 1010,
         startDate: new Date('2019-02-20').toISOString(),
         endDate: new Date('2019-02-21').toISOString(),
-        descriptions: [
-          {
-            description: 'Lean workshop for customer',
-            name: 'Lean workshop',
-            language: 'en',
-            customerName: 'Best customer ever'
-          }
-        ],
+        description: { en: 'Lean workshop for customer' },
+        name: { en: 'Lean workshop' },
+        customerName: { en: 'Best customer ever' },
         isSecret: false
       }
 
       it('Should return 400 if name is empty or null', async () => {
         const noName = Object.assign({}, leanWorkshop)
-        noName.descriptions[0].name = null
+        noName.name.en = null
         const response = await request.post(projectEndpoint).send(noName).expect(400)
         expect(response.body.error.details).not.toBe(null)
       })
@@ -240,7 +225,7 @@ describe('API Projects endpoint', () => {
 
       it('Should return 400 if name is not unique', async () => {
         const sameName = Object.assign({}, leanWorkshop)
-        sameName.descriptions[0].name = 'Some other workshop'
+        sameName.name.en = 'Some other workshop'
         const response = await request.post(projectEndpoint).send(sameName).expect(400)
         expect(response.body.error.details).not.toBe(null)
       })

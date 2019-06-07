@@ -1,22 +1,5 @@
 import CrudService from '../crud'
 import models from '../../db/models'
-import { genericGetAll, genericGet, genericDelete, genericUpdate, genericCreate } from '../utils'
-
-const mapDescriptionsToModel = (project, projectDescriptions) => {
-  const descriptions = []
-  projectDescriptions.forEach(description => descriptions.push({
-    id: description ? description.id : '',
-    name: description ? description.name : '',
-    description: description ? description.description : '',
-    customerName: description ? description.customerName : '',
-    language: description ? description.language : ''
-  }))
-
-  return {
-    ...project.dataValues,
-    descriptions: descriptions
-  }
-}
 
 export default class ProjectService extends CrudService {
   constructor () {
@@ -25,10 +8,10 @@ export default class ProjectService extends CrudService {
 
   // Overrides CrudService's function
   async getAll () {
-    const projectsWithoutSkills = await genericGetAll(models.project, models.projectDescription, mapDescriptionsToModel, 'projectId')
+    const projects = await models.project.findAll().map((entry) => entry.toJSON())
     const projectsWithSkills = []
     const projectSkills = await models.projectSkill.findAll()
-    projectsWithoutSkills.forEach(project => projectsWithSkills.push({
+    projects.forEach(project => projectsWithSkills.push({
       ...project,
       projectSkills: projectSkills.filter(skill => skill.projectId === project.id).map(skill => ({ skillId: skill.skillId, projectSkillId: skill.id }))
     }))
@@ -37,27 +20,27 @@ export default class ProjectService extends CrudService {
 
   // Overrides CrudService's function
   async get (id) {
-    const project = await genericGet(models.project, models.projectDescription, mapDescriptionsToModel, id, 'projectId')
+    const project = await models.project.findByPk(id)
     const projectSkills = await models.projectSkill.findAll({where: {projectId: project.id}})
     return {
-      ...project,
+      ...project.toJSON(),
       projectSkills: projectSkills.map(skill => ({ skillId: skill.skillId }))
     }
   }
 
   // Overrides CrudService's function
-  async create (attrs) {
-    delete attrs.id
-    return genericCreate(models.project, models.projectDescription, attrs, 'projectId', this.get)
-  }
-
-  // Overrides CrudService's function
   async update (id, attrs) {
-    return genericUpdate(models.project, models.projectDescription, id, attrs, 'projectId', this.get)
+    attrs.id = parseInt(id)
+    await models.project.update(attrs, { where: { id } })
+    return this.get(id)
   }
 
   // Overrides CrudService's function
-  async delete (id) {
-    return genericDelete(models.project, models.projectDescription, id, 'projectId')
+  delete (id) {
+    return models.project.findByPk(id)
+      .then(modelInstance => {
+        return modelInstance
+          .destroy()
+      })
   }
 }

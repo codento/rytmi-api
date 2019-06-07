@@ -1,3 +1,6 @@
+
+const descriptionTemplate = { fi: null, en: null }
+const langKeys = Object.keys(descriptionTemplate)
 module.exports = (sequelize, DataTypes) => {
   let Project = sequelize.define('project', {
     code: {
@@ -7,6 +10,18 @@ module.exports = (sequelize, DataTypes) => {
     },
     employerId: {
       type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    name: {
+      type: DataTypes.JSONB,
+      allowNull: false
+    },
+    customerName: {
+      type: DataTypes.JSONB,
+      allowNull: true
+    },
+    description: {
+      type: DataTypes.JSONB,
       allowNull: false
     },
     startDate: {
@@ -36,13 +51,42 @@ module.exports = (sequelize, DataTypes) => {
         if (this.code < 0) {
           throw new Error('Code can not be negative!')
         }
+      },
+      nameValidator: function () {
+        const keys = Object.keys(this.name)
+
+        if (!(keys.length === langKeys.length && keys.every(key => langKeys.includes(key)))) {
+          throw new Error(`Project name json keys must be exactly: ${langKeys}`)
+        }
+        if (!(keys.every(key => this.name[key].length > 0))) {
+          throw new Error('Project name can\'t be empty')
+        }
+      },
+      customerNameValidator: function () {
+        if (this.customerName) {
+          const keys = Object.keys(this.customerName)
+          if (!(keys.length === langKeys.length && keys.every(key => langKeys.includes(key)))) {
+            throw new Error(`Project customer name json keys must be exactly: ${langKeys}`)
+          }
+          if (!this.isInternal && !(keys.every(key => this.customerName[key].length > 0))) {
+            throw new Error('Customer name can\'t be empty if project is not internal')
+          }
+        }
+      },
+      descriptionValidator: function () {
+        const keys = Object.keys(this.description)
+        if (!(keys.length === langKeys.length && keys.every(key => langKeys.includes(key)))) {
+          throw new Error(`Project description json keys must be exactly: ${langKeys}`)
+        }
+        if (!(keys.every(key => this.description[key].length > 0))) {
+          throw new Error('Project description can\'t be empty')
+        }
       }
     }
   })
 
   Project.associate = (models) => {
     models.project.belongsToMany(models.profile, {through: models.profileProject, foreignKey: 'projectId'})
-    models.project.hasMany(models.projectDescription, {foreignKey: 'projectId'})
   }
 
   return Project
