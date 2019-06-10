@@ -129,6 +129,7 @@ describe('API Projects endpoint', () => {
         profileId: normalUserProfileId,
         projectId: reactProjectId,
         workPercentage: 100,
+        role: { en: 'Something normal', fi: 'Normirooli' },
         startDate: new Date('2019-10-01').toISOString(),
         endDate: new Date('2019-10-31').toISOString()
       }
@@ -136,6 +137,7 @@ describe('API Projects endpoint', () => {
         profileId: normalUserProfileId,
         projectId: onGoingProjectId,
         workPercentage: 100,
+        role: { en: 'Something normal', fi: 'Normirooli' },
         startDate: new Date('2019-11-03').toISOString(),
         endDate: new Date('2019-11-30').toISOString()
       }

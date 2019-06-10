@@ -84,9 +84,6 @@ async function getOrCreateProfile (userId, ticketPayload) {
       throw new Error('Could not create profile')
     }
   } else {
-    // get profile with descriptions
-    profile = await profileService.get(profile.id)
-
     // check if profile photo has been updated
     if (profile.photoPath !== convertPhotoUrl(ticketPayload.picture)) {
       profile = await profileService.update(profile.id,
