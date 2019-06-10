@@ -1,6 +1,7 @@
 import '@babel/polyfill'
 import supertest from 'supertest'
 import defaults from 'superagent-defaults'
+import { cloneDeep } from 'lodash'
 import { endpointAuthorizationTest } from '../utils'
 import app from '../../src/api/app'
 import { createUserToken, invalidToken, testAdminToken } from './tokens'
@@ -188,59 +189,61 @@ describe('API Projects endpoint', () => {
   describe('Validations', () => {
     describe('projects', () => {
       const leanWorkshop = {
-        code: 1010,
+        code: 2010,
         startDate: new Date('2019-02-20').toISOString(),
         endDate: new Date('2019-02-21').toISOString(),
-        description: { en: 'Lean workshop for customer' },
-        name: { en: 'Lean workshop' },
-        customerName: { en: 'Best customer ever' },
-        isSecret: false
+        description: { en: 'Lean workshop for customer', fi: 'Lean workshoppi asiakkaalle' },
+        name: { en: 'Lean workshop', fi: 'Lean workshoppi' },
+        customerName: { en: 'Best customer ever', fi: 'Ketterä asiakas' },
+        isSecret: false,
+        isInternal: false,
+        employerId: 1
       }
 
-      it('Should return 400 if name is empty or null', async () => {
-        const noName = Object.assign({}, leanWorkshop)
+      it('Should return 400 if name object is empty or null', async () => {
+        const noName = cloneDeep(leanWorkshop)
+        noName.name = null
+        const response = await request.post(projectEndpoint).send(noName).expect(400)
+        expect(response.body.error.details.length).toBe(1)
+      })
+
+      it('Should return 400 if name in any language is empty or null', async () => {
+        const noName = cloneDeep(leanWorkshop)
         noName.name.en = null
         const response = await request.post(projectEndpoint).send(noName).expect(400)
-        expect(response.body.error.details).not.toBe(null)
+        expect(response.body.error.details.length).toBe(1)
+      })
+
+      it('Should return 400 if description object is empty or null', async () => {
+        const noDescription = cloneDeep(leanWorkshop)
+        noDescription.description = null
+        const response = await request.post(projectEndpoint).send(noDescription).expect(400)
+        expect(response.body.error.details.length).toBe(1)
       })
 
       it('Should return 400 if code is not unique', async () => {
-        const notUniqueCode = Object.assign({}, leanWorkshop)
-        notUniqueCode.code = 1013
+        const notUniqueCode = cloneDeep(leanWorkshop)
+        notUniqueCode.code = 1010
         const response = await request.post(projectEndpoint).send(notUniqueCode).expect(400)
-        expect(response.body.error.details).not.toBe(null)
-      })
-
-      it('Should return 400 if code is null', async () => {
-        const noCode = Object.assign({}, leanWorkshop)
-        noCode.code = null
-        const response = await request.post(projectEndpoint).send(noCode).expect(400)
-        expect(response.body.error.details).not.toBe(null)
+        expect(response.body.error.details.length).toBe(1)
       })
 
       it('Should return 400 if code is negative', async () => {
-        const negativeCode = Object.assign({}, leanWorkshop)
+        const negativeCode = cloneDeep(leanWorkshop)
         negativeCode.code = -13
         const response = await request.post(projectEndpoint).send(negativeCode).expect(400)
-        expect(response.body.error.details).not.toBe(null)
-      })
-
-      it('Should return 400 if name is not unique', async () => {
-        const sameName = Object.assign({}, leanWorkshop)
-        sameName.name.en = 'Some other workshop'
-        const response = await request.post(projectEndpoint).send(sameName).expect(400)
-        expect(response.body.error.details).not.toBe(null)
+        expect(response.body.error.details.length).toBe(1)
       })
 
       it('Should return 400 if startDate is null', async () => {
-        const noStartDate = Object.assign({}, leanWorkshop)
+        const noStartDate = cloneDeep(leanWorkshop)
         noStartDate.startDate = null
         const response = await request.post(projectEndpoint).send(noStartDate).expect(400)
-        expect(response.body.error.details).not.toBe(null)
+        expect(response.body.error.details.length).toBe(1)
       })
 
       it('Should return 400 if startDate is after endDate', async () => {
-        const startDateAfterEnd = Object.assign({}, leanWorkshop)
+        const startDateAfterEnd = cloneDeep(leanWorkshop)
         startDateAfterEnd.startDate = new Date('2019-01-02')
         startDateAfterEnd.endDate = new Date('2019-01-01')
         const response = await request.post(projectEndpoint).send(startDateAfterEnd).expect(400)

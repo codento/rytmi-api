@@ -47,18 +47,19 @@ module.exports = (sequelize, DataTypes) => {
         }
       },
       codeNotNegative: function () {
-        if (this.code < 0) {
+        if (this.code && this.code < 0) {
           throw new Error('Code can not be negative!')
         }
       },
       nameValidator: function () {
-        const keys = Object.keys(this.name)
-
-        if (!(keys.length === langKeys.length && keys.every(key => langKeys.includes(key)))) {
-          throw new Error(`Project name json keys must be exactly: ${langKeys}`)
-        }
-        if (!(keys.every(key => this.name[key].length > 0))) {
-          throw new Error('Project name can\'t be empty')
+        if (this.name) {
+          const keys = Object.keys(this.name)
+          if (!(keys.length === langKeys.length && keys.every(key => langKeys.includes(key)))) {
+            throw new Error(`Project name json keys must be exactly: ${langKeys}`)
+          }
+          if (!(keys.every(key => this.name[key] && this.name[key].length > 0))) {
+            throw new Error('Project name cannot be empty')
+          }
         }
       },
       customerNameValidator: function () {
@@ -67,18 +68,20 @@ module.exports = (sequelize, DataTypes) => {
           if (!(keys.length === langKeys.length && keys.every(key => langKeys.includes(key)))) {
             throw new Error(`Project customer name json keys must be exactly: ${langKeys}`)
           }
-          if (!this.isInternal && !(keys.every(key => this.customerName[key].length > 0))) {
-            throw new Error('Customer name can\'t be empty if project is not internal')
+          if (!this.isInternal && !(keys.every(key => this.customerName[key] && this.customerName[key].length > 0))) {
+            throw new Error('Customer name cannot be empty if project is not internal')
           }
         }
       },
       descriptionValidator: function () {
-        const keys = Object.keys(this.description)
-        if (!(keys.length === langKeys.length && keys.every(key => langKeys.includes(key)))) {
-          throw new Error(`Project description json keys must be exactly: ${langKeys}`)
-        }
-        if (!(keys.every(key => this.description[key].length > 0))) {
-          throw new Error('Project description can\'t be empty')
+        if (this.description) {
+          const keys = Object.keys(this.description)
+          if (!(keys.length === langKeys.length && keys.every(key => langKeys.includes(key)))) {
+            throw new Error(`Project description json keys must be exactly: ${langKeys}`)
+          }
+          if (!(keys.every(key => this.description[key] && this.description[key].length > 0))) {
+            throw new Error('Project description cannot be empty')
+          }
         }
       }
     }
