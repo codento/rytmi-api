@@ -43,13 +43,14 @@ module.exports = (sequelize, DataTypes) => {
         }
       },
       roleValidator: function () {
-        const keys = Object.keys(this.role)
-
-        if (!(keys.length === langKeys.length && keys.every(key => langKeys.includes(key)))) {
-          throw new Error(`Project role json keys must be exactly: ${langKeys}`)
-        }
-        if (!(keys.every(key => this.role[key].length > 0))) {
-          throw new Error('Project role can\'t be empty')
+        if (this.role) {
+          const keys = Object.keys(this.role)
+          if (!(keys.length === langKeys.length && keys.every(key => langKeys.includes(key)))) {
+            throw new Error(`Project role json keys must be exactly: ${langKeys}`)
+          }
+          if (!(keys.every(key => this.role[key] && this.role[key].length > 0))) {
+            throw new Error('Project role cannott be empty')
+          }
         }
       }
     }
