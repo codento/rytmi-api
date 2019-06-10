@@ -8,8 +8,7 @@ import {
   user as userModel,
   project as projectModel,
   profile as profileModel,
-  profileProject as profileProjectModel,
-  profileProjectDescription as profileProjectDescriptionModel
+  profileProject as profileProjectModel
 } from '../../src/db/models'
 
 const request = defaults(supertest(app))
@@ -46,13 +45,7 @@ describe('API profileprojects endpoint', () => {
       workPercentage: 100,
       startDate: new Date('2019-10-01').toISOString(),
       endDate: new Date('2019-10-31').toISOString(),
-      descriptions: [
-        {
-          id: 1, // first item in descriptions
-          title: 'Central Program Director',
-          language: 'en'
-        }
-      ]
+      role: {en: 'Central Program Director', fi: 'Koodari'}
     }
     secondProfileProject = {
       id: 1201,
@@ -61,28 +54,9 @@ describe('API profileprojects endpoint', () => {
       workPercentage: 100,
       startDate: new Date('2019-11-03').toISOString(),
       endDate: new Date('2019-11-30').toISOString(),
-      descriptions: [
-        {
-          id: 2, // second item in descriptions
-          title: 'Admin',
-          language: 'en'
-        }
-      ]
+      role: {en: 'Admin', fi: 'Valvoja'}
     }
-    const descriptions = [
-      {
-        profileProjectId: 1200,
-        title: 'Central Program Director',
-        language: 'en'
-      },
-      {
-        profileProjectId: 1201,
-        title: 'Admin',
-        language: 'en'
-      }
-    ]
     await profileProjectModel.bulkCreate([firstProfileProject, secondProfileProject])
-    await profileProjectDescriptionModel.bulkCreate(descriptions)
   })
   afterAll(async () => {
     await profileProjectModel.destroy({ where: {id: [1200, 1201]} })

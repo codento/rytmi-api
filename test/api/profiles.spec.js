@@ -40,6 +40,7 @@ describe('API profile endpoint', () => {
       profileId: normalUserProfileId,
       projectId: 1,
       workPercentage: 100,
+      role: { en: 'Something normal', fi: 'Normirooli' },
       startDate: new Date('2019-10-01').toISOString(),
       endDate: new Date('2019-10-31').toISOString()
     }

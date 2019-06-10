@@ -9,6 +9,7 @@ factory.define('profileProject')
   .attr('startDate')
   .attr('endDate')
   .attr('workPercentage')
+  .attr('role')
   .attr('createdAt', () => new Date())
   .attr('updatedAt', () => new Date())
 
@@ -41,7 +42,8 @@ module.exports = {
             projectId: project.id,
             startDate: start,
             endDate: finish,
-            workPercentage: 20
+            workPercentage: 20,
+            role: JSON.stringify({ fi: faker.name.jobTitle(), en: faker.name.jobTitle() })
           }))
         })
       })

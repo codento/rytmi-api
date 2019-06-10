@@ -1,6 +1,5 @@
 
-const descriptionTemplate = { fi: null, en: null }
-const langKeys = Object.keys(descriptionTemplate)
+const langKeys = ['fi', 'en']
 module.exports = (sequelize, DataTypes) => {
   let Project = sequelize.define('project', {
     code: {

@@ -1,3 +1,4 @@
+const langKeys = ['fi', 'en']
 module.exports = (sequelize, DataTypes) => {
   let ProfileProject = sequelize.define('profileProject', {
     id: {
@@ -24,6 +25,10 @@ module.exports = (sequelize, DataTypes) => {
     workPercentage: {
       type: DataTypes.INTEGER,
       allowNull: false
+    },
+    role: {
+      type: DataTypes.JSONB,
+      allowNull: false
     }
   }, {
     validate: {
@@ -35,6 +40,16 @@ module.exports = (sequelize, DataTypes) => {
       endBeforeStart: function () {
         if (this.endDate !== null && this.startDate > this.endDate) {
           throw new Error('Start date must be before end date!')
+        }
+      },
+      roleValidator: function () {
+        const keys = Object.keys(this.role)
+
+        if (!(keys.length === langKeys.length && keys.every(key => langKeys.includes(key)))) {
+          throw new Error(`Project role json keys must be exactly: ${langKeys}`)
+        }
+        if (!(keys.every(key => this.role[key].length > 0))) {
+          throw new Error('Project role can\'t be empty')
         }
       }
     }
