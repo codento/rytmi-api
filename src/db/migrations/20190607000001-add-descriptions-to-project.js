@@ -6,7 +6,7 @@ module.exports = {
       return Promise.all([
         queryInterface.addColumn('project', 'name', {
           defaultValue: JSON.stringify(descriptionTemplate),
-          allowNull: false,
+          allowNull: true,
           type: Sequelize.JSONB
         }, { transaction: t }),
         queryInterface.addColumn('project', 'customerName', {
@@ -16,7 +16,7 @@ module.exports = {
         }, { transaction: t }),
         queryInterface.addColumn('project', 'description', {
           defaultValue: JSON.stringify(descriptionTemplate),
-          allowNull: false,
+          allowNull: true,
           type: Sequelize.JSONB
         }, { transaction: t })
       ])

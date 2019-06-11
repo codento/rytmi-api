@@ -4,7 +4,7 @@ module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.addColumn('profileProject', 'role', {
       defaultValue: JSON.stringify(descriptionTemplate),
-      allowNull: false,
+      allowNull: true,
       type: Sequelize.JSONB
     })
   },
