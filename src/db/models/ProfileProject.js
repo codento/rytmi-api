@@ -49,7 +49,7 @@ module.exports = (sequelize, DataTypes) => {
             throw new Error(`Project role json keys must be exactly: ${langKeys}`)
           }
           if (!(keys.every(key => this.role[key] && this.role[key].length > 0))) {
-            throw new Error('Project role cannott be empty')
+            throw new Error('Project role cannot be empty')
           }
         }
       }
