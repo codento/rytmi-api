@@ -123,7 +123,7 @@ const createStaticTextReplacementRequests = (cv) => {
     replacementDefinitions.push(
       { text: `{{ projectName${index} }}`, newText: project ? project.projectName : '' },
       { text: `{{ customer${index} }}`, newText: project && project.projectCustomer ? `(${project.projectCustomer})` : '' },
-      { text: `{{ projectTitle${index} }}`, newText: project ? project.projectTitle : '' },
+      { text: `{{ projectRole${index} }}`, newText: project ? project.projectRole : '' },
       { text: `{{ projectDuration${index} }}`, newText: project ? project.projectDuration : '' }
     )
   })
@@ -311,20 +311,22 @@ const createImageReplacementRequest = (cv, template) => {
   }
 }
 
-const createTopSkillsReplacementRequest = (cv) => {
-  let topSkills = ''
-  cv.topSkills.forEach(skill => {
-    topSkills += skill.skillName + '\r\n'
-  })
-
-  return {
-    'replaceAllText': {
-      'containsText': {
-        'text': '{{ topSkills }}'
-      },
-      'replaceText': topSkills
-    }
+const createTopSkillsReplacementRequests = (cv) => {
+  const requests = []
+  for (let i = 0; i < 5; i++) {
+    const skillText = i + 1 > cv.topSkills.length ? '' : cv.topSkills[i].skillName
+    requests.push(
+      {
+        'replaceAllText': {
+          'containsText': {
+            'text': `{{ topSkill${i + 1} }}`
+          },
+          'replaceText': skillText
+        }
+      }
+    )
   }
+  return requests
 }
 
 const createTopSkillsAndLanguagesLevelVisualizationRequest = (cv, template) => {
@@ -450,7 +452,7 @@ const update = async (fileId, cv) => {
       createSkillTableRequests(cv, data),
       createProjectRequests(cv, data),
       createImageReplacementRequest(cv, data),
-      createTopSkillsReplacementRequest(cv),
+      createTopSkillsReplacementRequests(cv),
       createLanguagesReplacementRequest(cv),
       createTopSkillsAndLanguagesLevelVisualizationRequest(cv, data)
     ]
