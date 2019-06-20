@@ -144,10 +144,10 @@ const createStaticTextReplacementRequests = (cv) => {
 
 const getTableObjectId = (skillPageNumber, originalSkillTableObjectId) => skillPageNumber > 1 ? `skillTable${skillPageNumber}` : originalSkillTableObjectId
 
-const duplicateObject = (tableObjectId, newIds = {}) => {
+const duplicateObject = (objectId, newIds = {}) => {
   return {
     duplicateObject: {
-      objectId: tableObjectId,
+      objectId: objectId,
       objectIds: newIds
     }
   }
@@ -268,31 +268,33 @@ const createSkillTableRequests = (cv, template) => {
 
 const createProjectRequests = (cv, template) => {
   let requests = []
-  const projectTableTemplate = template.slides[2].pageElements.find(element => element.table)
+  const projectPageElements = template.slides[2].pageElements
+  const uniqueCustomerNames = cv.projects.map(project => project.projectCustomer).filter((customerName, index, customerNameArray) => customerNameArray.indexOf(customerName) === index)
 
-  const createProjectTableRequest = (tableObjectId, project) => {
-    let projectHeaderRow = `${project.projectName}, ${project.projectDuration}`
-    projectHeaderRow = project.projectCustomer ? projectHeaderRow + `(${project.projectCustomer})` : projectHeaderRow
-    return [
-      // Delete template example values
-      createTableTextRequest('deleteText', tableObjectId, 1, 0, {type: 'ALL'}),
-      createTableTextRequest('deleteText', tableObjectId, 2, 1, {type: 'ALL'}),
-      createTableTextRequest('deleteText', tableObjectId, 3, 1, {type: 'ALL'}),
-      createTableTextRequest('deleteText', tableObjectId, 4, 1, {type: 'ALL'}),
-      createTableTextRequest('deleteText', tableObjectId, 5, 1, {type: 'ALL'}),
-      // Insert actual project information
-      createTableTextRequest('insertText', tableObjectId, 1, 0, projectHeaderRow),
-      createTableTextRequest('insertText', tableObjectId, 2, 1, project.projectTitle),
-      createTableTextRequest('insertText', tableObjectId, 3, 1, ''), // TODO: project tasks -> are these needed?
-      createTableTextRequest('insertText', tableObjectId, 4, 1, 'Node.js, Vuejs'), // TODO: project skills
-      createTableTextRequest('insertText', tableObjectId, 5, 1, project.projectDescription)
-    ]
-  }
-  // TODO: duplicate project table for all projects, figure oout correct layout, when to switch to next slide etc.
-  // requests.push(duplicateObject(projectTableTemplate.objectId, {[projectTableTemplate.objectId]: 'projectTable1'}))
+  // First, copy all the placeholder elements needed for a customer and its projects
+  // TODO
 
-  const project = cv.projects[0]
-  Array.prototype.push.apply(requests, createProjectTableRequest(projectTableTemplate.objectId, project))
+  // const util = require('util')
+  // console.log(util.inspect(projectPageElements, false, null, true /* enable colors */))
+
+  const baseTextElement = projectPageElements.find(element =>
+    'shape' in element &&
+    'text' in element.shape &&
+    'textElements' in element.shape.text &&
+    element.shape.text.textElements.filter(textElement =>
+      'textRun' in textElement &&
+      textElement.textRun.content.includes('{{ customerName }}').length > 0))
+
+  // uniqueCustomerNames.forEach((customerName, index) => {
+  //   requests.push(duplicateObject(baseTextElement.objectId, `baseTextElement${index}`))
+  // })
+
+  // Secondly, copy project placeholders for each project for a customer
+  // TODO
+
+  // Finally, replace placeholder texts
+  // TODO
+
   return requests
 }
 
