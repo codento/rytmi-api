@@ -1,3 +1,3 @@
-const MAX_SKILLS_PER_PAGE = 19
+const MAX_SKILLS_PER_PAGE = 18
 
 export default MAX_SKILLS_PER_PAGE
