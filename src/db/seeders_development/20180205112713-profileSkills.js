@@ -1,5 +1,5 @@
-require('babel-register')
-require('babel-polyfill')
+require('@babel/register')
+require('@babel/polyfill')
 
 const rosie = require('rosie')
 const factory = rosie.Factory

@@ -1,4 +1,5 @@
 import PermissionDeniedError from '../validators/permissionDeniedError'
+import models from '../db/models'
 
 const userIsSelf = (user, id) => {
   return user.userId === id
@@ -27,10 +28,28 @@ module.exports = {
     return errorResponse
   },
   createPermissionHandler: (objName, key, adminOnly = false) => {
-    return (req, res, next) => {
+    return async (req, res, next) => {
       const methods = ['POST', 'PUT', 'DELETE']
       if (methods.includes(req.method)) {
-        checkUserPermissions(adminOnly, req.user, req[objName][key])
+        let user = req.user
+        let userId = req[objName][key]
+        // fetch userId from profile
+        if (key === 'profileId') {
+          const profileModel = await models.profile.findByPk(req[objName].profileId)
+          userId = profileModel.userId
+        }
+        if (!user) {
+          const userModel = await models.user.findByPk(userId)
+          user = {
+            userId: userModel.id,
+            admin: userModel.admin
+          }
+        }
+        try {
+          checkUserPermissions(adminOnly, user, userId)
+        } catch (e) {
+          next(e)
+        }
       }
       next()
     }

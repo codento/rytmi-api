@@ -16,37 +16,45 @@ const adminUser = {
 
 const users = [basicUser, adminUser]
 
-const basicUsersProfile = {
-  userId: 1,
-  firstName: basicUser.firstName,
-  lastName: basicUser.lastName,
-  birthday: new Date('1980-10-20').toISOString(),
-  email: 'basic.user@codento.com',
-  phone: '0401231234',
-  title: 'Consultant',
-  description: 'Just consulting about everything',
-  links: [],
-  photoPath: 'from/somewhere',
-  active: basicUser.active
-}
-
+// id (=> profileId) will be 1
 const adminUsersProfile = {
   userId: 2,
   firstName: adminUser.firstName,
   lastName: adminUser.lastName,
-  birthday: new Date('1970-05-20').toISOString(),
+  birthYear: 1970,
   email: 'admin.user@codento.com',
   phone: '0401231234',
-  title: 'Manager',
-  description: 'Just managing about everything',
   links: [],
   photoPath: 'from/somewhere',
-  active: adminUser.active
+  active: adminUser.active,
+  introduction: {
+    fi: 'Just managing about everything',
+    en: ''
+  },
+  education: null,
+  employeeRoles: []
 }
 
-const userProfiles = [basicUsersProfile, adminUsersProfile]
+// id (=> profileId) will be 2
+const basicUsersProfile = {
+  userId: 1,
+  firstName: basicUser.firstName,
+  lastName: basicUser.lastName,
+  birthYear: 1980,
+  email: 'basic.user@codento.com',
+  phone: '0401231234',
+  links: [],
+  photoPath: 'from/somewhere',
+  active: basicUser.active,
+  introduction: {
+    fi: 'Just consulting about everything',
+    en: ''
+  },
+  education: null,
+  employeeRoles: []
+}
 
 module.exports = {
   users,
-  profiles: userProfiles
+  profiles: [adminUsersProfile, basicUsersProfile]
 }

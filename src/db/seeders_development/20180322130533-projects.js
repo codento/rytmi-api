@@ -4,21 +4,45 @@ const faker = require('faker')
 faker.seed(1337)
 
 factory.define('project')
-  .attr('name', () => { return faker.company.catchPhrase() })
-  .attr('description', () => { return faker.lorem.paragraph() })
   .attr('code')
   .attr('startDate', () => { return faker.date.past() })
   .attr('endDate', () => { return faker.date.future() })
   .attr('createdAt', () => new Date())
   .attr('updatedAt', () => new Date())
+  .attr('isSecret', () => false)
+  .attr('name')
+  .attr('description')
+  .attr('customerName')
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
     try {
       let projects = []
+      const nameEndingsFi = [
+        'projekti',
+        'hanke',
+        'konsultointi'
+      ]
+      const nameEndingsEn = [
+        'project',
+        'undertaking',
+        'consulting'
+      ]
       for (var i = 0; i < 50; i++) {
+        let name = faker.commerce.productName()
+        let nameEndingNumber = faker.random.number({min: 0, max: nameEndingsFi.length - 1})
+        let companyName = faker.company.companyName()
         let project = factory.build('project', {
-          code: 5000 + i
+          code: 5000 + i,
+          name: JSON.stringify({
+            fi: `${name} -${nameEndingsFi[nameEndingNumber]}`,
+            en: `${name} -${nameEndingsEn[nameEndingNumber]}`
+          }),
+          description: JSON.stringify({
+            fi: `(suomeksi) ${faker.lorem.sentences(1, 3)}`,
+            en: `(in English) ${faker.lorem.sentences(1, 3)}`
+          }),
+          customerName: JSON.stringify({ fi: companyName, en: companyName })
         })
         projects.push(project)
       }

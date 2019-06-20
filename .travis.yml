@@ -1,6 +1,19 @@
 language: node_js
 node_js:
   - '9'
+before_install:
+  - sudo sed -i -e '/local.*peer/s/postgres/all/' -e 's/peer\|md5/trust/g' /etc/postgresql/*/main/pg_hba.conf
+  - sudo service postgresql restart
+  - sleep 1
+addons:
+  postgresql: "10"
+  apt:
+    packages:
+      - postgresql-10
+      - postgresql-client-10
+env:
+  global:
+    - PGPORT=5433
 before_script:
   - psql -c "CREATE DATABASE rytmi_test;" -U postgres
   - psql -c "CREATE USER rytmi WITH PASSWORD 'rytmi';" -U postgres
@@ -14,9 +27,10 @@ script:
 after_script:
   - ./cc-test-reporter after-build -t lcov --exit-code $TRAVIS_TEST_RESULT
 before_deploy:
-  - openssl aes-256-cbc -K $encrypted_941ed670fe2a_key -iv $encrypted_941ed670fe2a_iv -in secrets.tar.enc -out /tmp/secrets.tar -d
-  - tar xvf /tmp/secrets.tar -C /tmp
+  - openssl aes-256-cbc -K $encrypted_0eef3a9da331_key -iv $encrypted_0eef3a9da331_iv -in secrets.tar.enc -out secrets.tar -d
+  - tar xvf secrets.tar -C /tmp
   - cp /tmp/.$TRAVIS_BRANCH.env $TRAVIS_BUILD_DIR/.env
+  - cp /tmp/google_service_account_credentials.json $TRAVIS_BUILD_DIR/google_service_account_credentials.json
   - ssh-keyscan -H $DEPLOY_HOST 2>&1 | tee -a $HOME/.ssh/known_hosts
   - eval "$(ssh-agent -s)"
   - chmod 600 /tmp/deploy_rsa

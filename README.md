@@ -42,18 +42,9 @@ Install dependencies:
 npm install
 ```
 
-### Development database
-
-Use the Postgres Docker image:
-
-```
-docker-compose up -d postgres
-```
-
 ### Setting environment variables
 
-Copy the `.env-default` file in the project root directory and rename it to `.env`. Fill it with meaningful values.  
-Example using the aforementioned dev database:
+Copy the `.env-default` file in the project root directory and rename it to `.env`. Use the following values in your dev env (ask dev team about google client id):
 
 ```
 DB_HOST=localhost
@@ -69,6 +60,16 @@ JWT_VALID_TIME=3600
 
 PORT=8081
 ```
+
+### Development database
+
+Use the Postgres Docker image:
+
+```
+docker-compose up -d postgres
+```
+Make sure you don't have a local postgresql db running on the default port (5432).
+
 
 ### Setting up the database / migrating to the latest version
 
@@ -88,6 +89,11 @@ sequelize db:migrate
 
 ```
 sequelize db:seed:all --seeders-path src/db/seeders_development
+```
+
+Now you can start the server using:
+```
+npm run start
 ```
 
 ### Making changes to the database

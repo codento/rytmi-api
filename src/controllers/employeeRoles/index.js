@@ -12,7 +12,6 @@ employeeRoleController.update = wrapAsync(async (req, res) => {
 })
 
 employeeRoleController.delete = wrapAsync(async (req, res) => {
-  console.log(req)
   const action = await employeeRoleService.delete(req.params.id)
   res.json(action)
 })

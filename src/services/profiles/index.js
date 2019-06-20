@@ -6,16 +6,11 @@ export default class ProfileService extends CrudService {
     super(models.profile)
   }
 
-  getByUserId (userId) {
-    return models.profile
-      .findOne({where: {userId: userId}})
+  getProfileByUserId (userId) {
+    return models.profile.findOne({where: {userId: userId}})
   }
 
-  update (id, attrs) {
-    delete attrs.userId
-    return super.update(id, attrs)
-  }
-
+  // Overrides CrudService's function
   delete () {
     throw new Error('Not implemented')
   }

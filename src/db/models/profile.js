@@ -8,12 +8,16 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false
     },
-    birthday: {
-      type: DataTypes.DATE,
+    birthYear: {
+      type: DataTypes.INTEGER,
       validate: {
-        isBefore: {
-          args: new Date().toISOString(),
-          msg: 'Birthday must be in the past'
+        len: {
+          args: [4, 4],
+          msg: 'Birth year must be a valid year'
+        },
+        max: {
+          args: new Date().getFullYear(),
+          msg: 'Birth year must be in the past'
         }
       }
     },
@@ -29,13 +33,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       validate: {
         is: {
-          args: /^\+?[0-9 ]+$/i,
-          msg: 'Phone number must contain only numbers spaces or a plus sign'
+          args: /^\+?[0-9 ()-]+$/i,
+          msg: 'Phone number must contain only numbers, spaces, parentheses or a plus sign'
         }
       }
     },
-    title: DataTypes.STRING,
-    description: DataTypes.TEXT,
     links: DataTypes.JSON,
     photoPath: DataTypes.STRING,
     active: {
@@ -44,6 +46,25 @@ module.exports = (sequelize, DataTypes) => {
     },
     employeeRoles: {
       type: DataTypes.ARRAY(DataTypes.INTEGER)
+    },
+    introduction: {
+      type: DataTypes.JSONB,
+      allowNull: true
+    },
+    education: {
+      type: DataTypes.JSONB,
+      allowNull: true
+    }
+  }, {
+    validate: {
+      introductionValidator: function () {
+        if (this.introduction) {
+          const keys = Object.keys(this.introduction)
+          if (!(keys.length === 2 && keys.includes('fi') && keys.includes('en'))) {
+            throw new Error('Introduction json keys must be exactly: fi, en')
+          }
+        }
+      }
     }
   })
 

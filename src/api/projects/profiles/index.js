@@ -4,7 +4,7 @@ import { findProfileOr404 } from '../../../controllers/profiles'
 import { createPermissionHandler } from '../../utils'
 
 const router = Router()
-const permissionHandler = createPermissionHandler('profile', 'id')
+const permissionHandler = createPermissionHandler('profile', 'userId')
 
 export default () => {
   router.param('profileId', findProfileFromProjectOr404)
@@ -75,7 +75,7 @@ export default () => {
   *           type: integer
   *           format: int64
   */
-  router.get('/:profileId', profileProjectController.get)
+  router.get('/:profileId', profileProjectController.getByIds)
 
   /**
   * @swagger

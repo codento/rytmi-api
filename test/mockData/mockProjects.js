@@ -1,18 +1,26 @@
 
 const webapp = {
   code: 1000,
-  name: 'GIS Webapp',
   startDate: new Date('2019-01-10').toISOString(),
   endDate: new Date('2019-01-31').toISOString(),
-  description: 'Creating web app with React + Leaflet'
+  description: { en: 'Creating web app with React + Leaflet', fi: 'Sama suomeksi' },
+  name: { en: 'First Project', fi: 'Eka projekti' },
+  customerName: { en: 'Best customer ever', fi: 'Asiakas' },
+  isInternal: false,
+  isSecret: false,
+  projectSkills: []
 }
 
 const customerHelp = {
   code: 1001,
-  name: 'Smart solutions',
   startDate: new Date('2018-10-01').toISOString(),
   endDate: null,
-  description: 'Two consultants sold indefinitely to help customer\'s development team'
+  description: { en: 'Two consultants sold indefinitely to help customer\'s development team', fi: '' },
+  name: { en: 'Second Project', fi: '' },
+  customerName: { en: 'Best customer ever', fi: '' },
+  isInternal: false,
+  isSecret: false,
+  projectSkills: []
 }
 
 module.exports = {

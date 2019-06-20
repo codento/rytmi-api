@@ -1,0 +1,3 @@
+const MAX_SKILLS_PER_PAGE = 19
+
+export default MAX_SKILLS_PER_PAGE

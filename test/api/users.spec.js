@@ -1,3 +1,4 @@
+import '@babel/polyfill'
 import { endpointAuthorizationTest } from '../utils'
 import app from '../../src/api/app'
 import supertest from 'supertest'
@@ -141,7 +142,6 @@ describe('API Users endpoint', () => {
   describe('Deleting users', () => {
     it('should be allowed only for admins to delete users', async () => {
       await request.delete(endpoint + userId)
-        .expect('Content-Type', /json/)
         .expect(403)
     })
 

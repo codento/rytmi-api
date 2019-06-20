@@ -1,24 +1,31 @@
+import '@babel/polyfill'
 import supertest from 'supertest'
 import defaults from 'superagent-defaults'
+import { cloneDeep } from 'lodash'
 import { endpointAuthorizationTest } from '../utils'
 import app from '../../src/api/app'
 import { createUserToken, invalidToken, testAdminToken } from './tokens'
 import {
   user as userModel,
   project as projectModel,
-  profileProject as ppModel
+  profileProject as profileProjectModel,
+  employer as employerModel,
+  profile as profileModel
 } from '../../src/db/models'
 import { projects } from '../mockData/mockProjects'
 
 const request = defaults(supertest(app))
-
 const projectEndpoint = '/api/projects/'
+let employerCodento = {}
 
 describe('API Projects endpoint', () => {
-  let normalUser, refactoringProjectId
+  let normalUser, normalUserProfileId, refactoringProjectId
   beforeAll(async () => {
     const users = await userModel.findAll()
     normalUser = users.filter((user) => user.admin === false).pop()
+    normalUserProfileId = await profileModel.findOne({ where: {userId: normalUser.id} }).then(profile => {
+      return profile.id
+    })
     request.set('Accept', 'application/json')
     const jwtToken = createUserToken({
       googleId: normalUser.googleId,
@@ -27,9 +34,15 @@ describe('API Projects endpoint', () => {
       exp: Date.now() + 36000
     })
     request.set('Authorization', `Bearer ${jwtToken}`)
+
+    // const employers = await employerModel.findAll()
+    const [employer] = await employerModel.findAll()
+    employerCodento = employer.dataValues
   })
   afterAll(async () => {
-    await ppModel.destroy({ where: {}, truncate: true, force: true })
+    // profileProjects are created in 'Creating project profiles'
+    const [reactProject, onGoingProject] = await projectModel.findAll()
+    profileProjectModel.destroy({ where: {projectId: [reactProject.id, onGoingProject.id]} })
   })
 
   describe('Fetching projects', () => {
@@ -44,7 +57,9 @@ describe('API Projects endpoint', () => {
 
     it('should allow authorized user to fetch specific project', async () => {
       const [reactProject] = projects
-      const expectedProject = await projectModel.findOne({ where: { name: reactProject.name } })
+      // id generation is handled with autoincrement field => first item in mock data will be id=1
+      reactProject.id = 1
+      const expectedProject = await projectModel.findOne({ where: { id: reactProject.id } })
       const response = await request.get(projectEndpoint + expectedProject.id).expect(200)
       expect(response.body).toMatchObject(reactProject)
     })
@@ -53,21 +68,30 @@ describe('API Projects endpoint', () => {
     it('should allow authorized user to create a project', async () => {
       const leanWorkshop = {
         code: 1010,
-        name: 'Lean workshop',
         startDate: new Date('2019-02-20').toISOString(),
-        endDate: new Date('2019-02-20').toISOString(),
-        description: 'Lean workshop for customer'
+        endDate: new Date('2019-02-21').toISOString(),
+        description: { en: 'Lean workshop for customer', fi: 'Lean workshoppi asiakkaalle' },
+        name: { en: 'Lean workshop', fi: 'Lean workshoppi' },
+        customerName: { en: 'Best customer ever', fi: 'Ketterä asiakas' },
+        isSecret: false,
+        employerId: employerCodento.id,
+        isInternal: false
       }
       const response = await request.post(projectEndpoint).send(leanWorkshop).expect(201)
       expect(response.body).toMatchObject(leanWorkshop)
+      refactoringProjectId = response.body.id
     })
 
     it('should allow authorized user to create a project without end date', async () => {
       const refactoringCode = {
         code: 1050,
-        name: 'Refactoring old code',
         startDate: new Date('2019-02-20').toISOString(),
-        description: 'This should be continuous'
+        description: { en: 'This should be continuous', fi: 'Jatkuu ikuisesti' },
+        name: { en: 'Refactoring old code', fi: 'Refaktorointi' },
+        customerName: { en: null, fi: null },
+        isSecret: false,
+        employerId: employerCodento.id,
+        isInternal: true
       }
       const response = await request.post(projectEndpoint).send(refactoringCode).expect(201)
       expect(response.body).toMatchObject(refactoringCode)
@@ -86,9 +110,8 @@ describe('API Projects endpoint', () => {
   describe('Updating projects', () => {
     it('should allow authorized user to edit project', async () => {
       const [reactProject] = projects
-      const expectedProject = await projectModel.findOne({ where: { name: reactProject.name } })
-      reactProject.name = 'Address app for lost'
-      expectedProject.name = 'Address app for lost'
+      const expectedProject = await projectModel.findOne({ where: { id: reactProject.id } })
+      reactProject.name.en = 'Address app for lost'
       const response = await request.put(projectEndpoint + expectedProject.id).send(reactProject).expect(200)
       expect(response.body).toMatchObject(reactProject)
     })
@@ -99,20 +122,23 @@ describe('API Projects endpoint', () => {
     let reactProjectProfile, onGoingProjectProfile
 
     beforeAll(async () => {
+      // teared down in parent afterAll()
       const [reactProject, onGoingProject] = await projectModel.findAll()
       reactProjectId = reactProject.id
       onGoingProjectId = onGoingProject.id
       reactProjectProfile = {
-        profileId: normalUser.id,
+        profileId: normalUserProfileId,
         projectId: reactProjectId,
         workPercentage: 100,
+        role: { en: 'Something normal', fi: 'Normirooli' },
         startDate: new Date('2019-10-01').toISOString(),
         endDate: new Date('2019-10-31').toISOString()
       }
       onGoingProjectProfile = {
-        profileId: normalUser.id,
+        profileId: normalUserProfileId,
         projectId: onGoingProjectId,
         workPercentage: 100,
+        role: { en: 'Something normal', fi: 'Normirooli' },
         startDate: new Date('2019-11-03').toISOString(),
         endDate: new Date('2019-11-30').toISOString()
       }
@@ -120,7 +146,7 @@ describe('API Projects endpoint', () => {
 
     describe('Creating project profiles', () => {
       it('should allow authorized user to add themself to a project', async () => {
-        const response = await request.post(projectEndpoint + reactProjectId + '/profiles/' + normalUser.id)
+        const response = await request.post(projectEndpoint + reactProjectId + '/profiles/' + normalUserProfileId)
           .send(reactProjectProfile).expect(201)
         expect(response.body).toMatchObject(reactProjectProfile)
       })
@@ -128,7 +154,7 @@ describe('API Projects endpoint', () => {
       it('should allow admin to add any user to a project', async () => {
         // Set admin token
         request.set('Authorization', `Bearer ${testAdminToken}`)
-        const response = await request.post(projectEndpoint + onGoingProjectId + '/profiles/' + normalUser.id)
+        const response = await request.post(projectEndpoint + onGoingProjectId + '/profiles/' + normalUserProfileId)
           .send(onGoingProjectProfile).expect(201)
         expect(response.body).toMatchObject(onGoingProjectProfile)
         // Set normal token after test
@@ -163,57 +189,61 @@ describe('API Projects endpoint', () => {
   describe('Validations', () => {
     describe('projects', () => {
       const leanWorkshop = {
-        code: 1010,
-        name: 'Lean workshop',
+        code: 2010,
         startDate: new Date('2019-02-20').toISOString(),
-        endDate: new Date('2019-02-20').toISOString(),
-        description: 'Lean workshop for customer'
+        endDate: new Date('2019-02-21').toISOString(),
+        description: { en: 'Lean workshop for customer', fi: 'Lean workshoppi asiakkaalle' },
+        name: { en: 'Lean workshop', fi: 'Lean workshoppi' },
+        customerName: { en: 'Best customer ever', fi: 'Ketterä asiakas' },
+        isSecret: false,
+        isInternal: false,
+        employerId: 1
       }
 
-      it('Should return 400 if name is empty or null', async () => {
-        const noName = Object.assign({}, leanWorkshop)
+      it('Should return 400 if name object is empty or null', async () => {
+        const noName = cloneDeep(leanWorkshop)
         noName.name = null
         const response = await request.post(projectEndpoint).send(noName).expect(400)
-        expect(response.body.error.details).not.toBe(null)
+        expect(response.body.error.details.length).toBe(1)
       })
 
-      it('Should return 400 if name is not unique', async () => {
-        const notUniqueName = Object.assign({}, leanWorkshop)
-        notUniqueName.code = 1013
-        const response = await request.post(projectEndpoint).send(notUniqueName).expect(400)
-        expect(response.body.error.details).not.toBe(null)
+      it('Should return 400 if name in any language is empty or null', async () => {
+        const noName = cloneDeep(leanWorkshop)
+        noName.name.en = null
+        const response = await request.post(projectEndpoint).send(noName).expect(400)
+        expect(response.body.error.details.length).toBe(1)
       })
 
-      it('Should return 400 if code is null', async () => {
-        const noCode = Object.assign({}, leanWorkshop)
-        noCode.code = null
-        const response = await request.post(projectEndpoint).send(noCode).expect(400)
-        expect(response.body.error.details).not.toBe(null)
-      })
-
-      it('Should return 400 if code is negative', async () => {
-        const negativeCode = Object.assign({}, leanWorkshop)
-        negativeCode.code = -13
-        const response = await request.post(projectEndpoint).send(negativeCode).expect(400)
-        expect(response.body.error.details).not.toBe(null)
+      it('Should return 400 if description object is empty or null', async () => {
+        const noDescription = cloneDeep(leanWorkshop)
+        noDescription.description = null
+        const response = await request.post(projectEndpoint).send(noDescription).expect(400)
+        expect(response.body.error.details.length).toBe(1)
       })
 
       it('Should return 400 if code is not unique', async () => {
-        const sameCode = Object.assign({}, leanWorkshop)
-        sameCode.name = 'Some other workshop'
-        const response = await request.post(projectEndpoint).send(sameCode).expect(400)
-        expect(response.body.error.details).not.toBe(null)
+        const notUniqueCode = cloneDeep(leanWorkshop)
+        notUniqueCode.code = 1010
+        const response = await request.post(projectEndpoint).send(notUniqueCode).expect(400)
+        expect(response.body.error.details.length).toBe(1)
+      })
+
+      it('Should return 400 if code is negative', async () => {
+        const negativeCode = cloneDeep(leanWorkshop)
+        negativeCode.code = -13
+        const response = await request.post(projectEndpoint).send(negativeCode).expect(400)
+        expect(response.body.error.details.length).toBe(1)
       })
 
       it('Should return 400 if startDate is null', async () => {
-        const noStartDate = Object.assign({}, leanWorkshop)
+        const noStartDate = cloneDeep(leanWorkshop)
         noStartDate.startDate = null
         const response = await request.post(projectEndpoint).send(noStartDate).expect(400)
-        expect(response.body.error.details).not.toBe(null)
+        expect(response.body.error.details.length).toBe(1)
       })
 
       it('Should return 400 if startDate is after endDate', async () => {
-        const startDateAfterEnd = Object.assign({}, leanWorkshop)
+        const startDateAfterEnd = cloneDeep(leanWorkshop)
         startDateAfterEnd.startDate = new Date('2019-01-02')
         startDateAfterEnd.endDate = new Date('2019-01-01')
         const response = await request.post(projectEndpoint).send(startDateAfterEnd).expect(400)

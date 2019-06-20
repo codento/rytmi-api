@@ -1,3 +1,4 @@
+import '@babel/polyfill'
 import supertest from 'supertest'
 import app from '../../src/api/app'
 import { user as userModel, profile as profileModel } from '../../src/db/models'
@@ -28,6 +29,7 @@ describe('API auth endpoint', () => {
         given_name: existingUser.firstName,
         family_name: existingUser.lastName,
         email: `${existingUser.firstName}.${existingUser.lastName}@codento.com`,
+        picture: 'test-url/1234/s-96c/photo.jpg',
         exp: Math.round(Date.now()) + 36000
       }
 
@@ -53,6 +55,7 @@ describe('API auth endpoint', () => {
         given_name: 'Jorma',
         family_name: 'Nyberg',
         email: `jorma.nyberg@codento.com`,
+        picture: 'test-url/1234/s-96c/photo.jpg',
         exp: Math.round(Date.now()) + 36000
       }
 
@@ -70,6 +73,8 @@ describe('API auth endpoint', () => {
       expect(usersAfterLogin.length).toBe(expectedLength)
       expect(createdUser.firstName).toBe(googleAuthPayload.given_name)
       expect(createdUser.lastName).toBe(googleAuthPayload.family_name)
+      const createdProfile = await profileModel.find({ where: { userId: createdUser.id } })
+      expect(createdProfile.photoPath).toBe('test-url/1234/s-384c/photo.jpg')
     })
 
     it('should return 401 for foreign google domain', async () => {

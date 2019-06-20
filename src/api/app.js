@@ -1,6 +1,7 @@
 
 import express from 'express'
 import api from './api'
+import cv from '../cv'
 import cors from 'cors'
 require('dotenv').config()
 
@@ -12,5 +13,6 @@ if (process.env.NODE_ENV === 'development') {
 
 // api router
 app.use('/api', api())
+app.use('/cv', cv())
 
 module.exports = app

@@ -1,3 +1,4 @@
+import '@babel/polyfill'
 import { seederUmzug } from '../utils'
 import models from '../../src/db/models'
 

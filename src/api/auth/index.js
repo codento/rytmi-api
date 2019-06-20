@@ -61,9 +61,14 @@ async function getOrCreateUser (googleId, ticketPayload) {
 }
 
 async function getOrCreateProfile (userId, ticketPayload) {
+  const convertPhotoUrl = (url) => {
+    // url is like: .../s96-c/photo.jpg -> replace the resolution value at url end
+    const urlEndPart = url.split('/').splice(-2, 2).join('/')
+    const endPartIndex = url.search(urlEndPart)
+    return url.slice(0, endPartIndex) + urlEndPart.replace('96', '384')
+  }
   const profileService = new ProfileService()
-
-  let profile = await profileService.getByUserId(userId)
+  let profile = await profileService.getProfileByUserId(userId)
   if (!profile) {
     try {
       profile = await profileService.create({
@@ -71,12 +76,18 @@ async function getOrCreateProfile (userId, ticketPayload) {
         firstName: ticketPayload.given_name,
         lastName: ticketPayload.family_name,
         email: ticketPayload.email,
-        photoPath: ticketPayload.picture,
+        photoPath: convertPhotoUrl(ticketPayload.picture),
         active: true
       })
     } catch (err) {
       logger.error('Trouble creating profile', err.message)
       throw new Error('Could not create profile')
+    }
+  } else {
+    // check if profile photo has been updated
+    if (profile.photoPath !== convertPhotoUrl(ticketPayload.picture)) {
+      profile = await profileService.update(profile.id,
+        { photoPath: convertPhotoUrl(ticketPayload.picture) })
     }
   }
   return profile

@@ -5,7 +5,7 @@ export default class CrudService {
 
   get (id) {
     return this.model
-      .findById(id, {attributes: { exclude: ['deletedAt'] }})
+      .findByPk(id, {attributes: { exclude: ['deletedAt'] }})
   }
 
   getAll () {
