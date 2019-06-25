@@ -137,7 +137,6 @@ describe('API profile endpoint', () => {
         knows: 0,
         profileId: normalUserProfileId,
         skillId: nodeJs.id,
-        visibleInCV: true,
         wantsTo: 0
       }
       const response = await request.post(profileEndpoint + normalUserProfileId + '/skills/')
@@ -187,7 +186,6 @@ describe('API profile endpoint', () => {
           knows: 0,
           profileId: normalUserProfileId,
           skillId: nodeJs.id,
-          visibleInCV: true,
           wantsTo: 0
         }
         await request.post(profileEndpoint + normalUserProfileId + '/skills/')
@@ -198,8 +196,7 @@ describe('API profile endpoint', () => {
         const validationErrors = [
           'profileSkill.skillId cannot be null',
           'profileSkill.knows cannot be null',
-          'profileSkill.wantsTo cannot be null',
-          'profileSkill.visibleInCV cannot be null'
+          'profileSkill.wantsTo cannot be null'
         ]
 
         const created = await request
@@ -249,7 +246,6 @@ describe('API profile endpoint', () => {
           knows: 2,
           profileId: normalUserProfileId,
           skillId: react.id,
-          visibleInCV: true,
           wantsTo: 2
         }
         const response = await request.post(profileEndpoint + normalUserProfileId + '/skills/')
@@ -301,7 +297,6 @@ describe('API profile endpoint', () => {
       knows: 2,
       profileId: normalUserProfileId,
       skillId: react.id,
-      visibleInCV: true,
       wantsTo: 2
     }
     const response = await request.post(profileEndpoint + normalUserProfileId + '/skills')
