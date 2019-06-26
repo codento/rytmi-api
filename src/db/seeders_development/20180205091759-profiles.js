@@ -72,13 +72,21 @@ module.exports = {
           }
         }
 
+        const randomOtherInfo = () => {
+          return JSON.stringify({
+            fi: `Suomi ${faker.lorem.sentences(2, 4)}`,
+            en: `English ${faker.lorem.sentences(2, 4)}`
+          })
+        }
+
         let profile = factory.build('profile', {
           userId: user.id,
           firstName: user.firstName,
           lastName: user.lastName,
           links: JSON.stringify(links),
           introduction: faker.random.number(5) < 5 ? randomIntroduction() : null,
-          education: faker.random.number(5) < 5 ? JSON.stringify([randomEducation(), randomEducation()]) : null
+          education: faker.random.number(5) < 5 ? JSON.stringify([randomEducation(), randomEducation()]) : null,
+          otherInfo: randomOtherInfo()
         })
         profiles.push(profile)
       })
