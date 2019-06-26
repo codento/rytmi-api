@@ -26,7 +26,6 @@ describe('API profileskills endpoint', () => {
       knows: 2,
       profileId: normalUser.id,
       skillId: nodeJs.id,
-      visibleInCV: true,
       wantsTo: 3
     }
 
@@ -35,7 +34,6 @@ describe('API profileskills endpoint', () => {
       knows: 4,
       profileId: normalUser.id,
       skillId: react.id,
-      visibleInCV: true,
       wantsTo: 5
     }
     profileSkills = [reactProfileSkill, nodeProfileSkill]
