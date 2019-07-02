@@ -85,16 +85,19 @@ export default class ProfileProjectService extends CrudService {
         where: {
           id: id
         }})
-    const skillList = attrs.skills.map(skill => skill.id)
-    const skillsToUpdate = skillList.length > 0 ? await models.skill.findAll({
-      where: {
-        id: {
-          [Op.or]: skillList
+    if (attrs.skill) {
+      const skillList = attrs.skills.map(skill => skill.id)
+      const skillsToUpdate = skillList.length > 0 ? await models.skill.findAll({
+        where: {
+          id: {
+            [Op.or]: skillList
+          }
         }
-      }
-    })
-      : []
-    await profileProject.setSkills(skillsToUpdate)
+      })
+        : []
+      await profileProject.setSkills(skillsToUpdate)
+    }
+
     return profileProject.update(attrs)
   }
 }
