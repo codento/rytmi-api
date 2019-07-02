@@ -1,7 +1,8 @@
 import CrudService from '../crud'
 import models from '../../db/models'
+import Sequelize from 'sequelize'
 
-const Op = models.sequelize.Op
+const Op = Sequelize.Op
 
 export default class ProfileProjectService extends CrudService {
   constructor () {
@@ -10,6 +11,12 @@ export default class ProfileProjectService extends CrudService {
 
   getInFuture () {
     return models.profileProject.findAll({
+      include: [{
+        model: models.skill,
+        through: {
+          attributes: []
+        }
+      }],
       where: {
         endDate: {
           [Op.or]: {
@@ -22,15 +29,37 @@ export default class ProfileProjectService extends CrudService {
   }
 
   getByProfileId (profileId) {
-    return models.profileProject.findAll({where: {profileId: profileId}})
+    return models.profileProject.findAll({
+      include: [{
+        model: models.skill,
+        through: {
+          attributes: []
+        }
+      }],
+      where: {profileId: profileId}
+    })
   }
 
   getByProjectId (projectId) {
-    return models.profileProject.findAll({where: {projectId: projectId}})
+    return models.profileProject.findAll({
+      include: [{
+        model: models.skill,
+        through: {
+          attributes: []
+        }
+      }],
+      where: {projectId: projectId}
+    })
   }
 
   getByIds (profileId, projectId) {
     return models.profileProject.findOne({
+      include: [{
+        model: models.skill,
+        through: {
+          attributes: []
+        }
+      }],
       where: {
         profileId: profileId,
         projectId: projectId
@@ -44,14 +73,28 @@ export default class ProfileProjectService extends CrudService {
     return super.create(attrs)
   }
 
-  update (id, attrs) {
-    return models.profileProject
-      .findOne({where: {
-        id: id
-      }})
-      .then(profileProject => {
-        return profileProject
-          .update(attrs)
-      })
+  async update (id, attrs) {
+    const profileProject = await models.profileProject
+      .findOne({
+        include: [{
+          model: models.skill,
+          through: {
+            attributes: []
+          }
+        }],
+        where: {
+          id: id
+        }})
+    const skillList = attrs.skills.map(skill => skill.id)
+    const skillsToUpdate = skillList.length > 0 ? await models.skill.findAll({
+      where: {
+        id: {
+          [Op.or]: skillList
+        }
+      }
+    })
+      : []
+    await profileProject.setSkills(skillsToUpdate)
+    return profileProject.update(attrs)
   }
 }
