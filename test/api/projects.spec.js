@@ -115,6 +115,13 @@ describe('API Projects endpoint', () => {
       const response = await request.put(projectEndpoint + expectedProject.id).send(reactProject).expect(200)
       expect(response.body).toMatchObject(reactProject)
     })
+    it('should add skills to project if skills are provided', async () => {
+      const testProject = { id: projects[0].id }
+      const skillsRequest = await request.get('/api/skills')
+      testProject.skills = skillsRequest.body
+      const response = await request.put(projectEndpoint + testProject.id).send(testProject).expect(200)
+      expect(response.body).toMatchObject(testProject)
+    })
   })
 
   describe('Project profiles', () => {
