@@ -73,7 +73,7 @@ describe('API auth endpoint', () => {
       expect(usersAfterLogin.length).toBe(expectedLength)
       expect(createdUser.firstName).toBe(googleAuthPayload.given_name)
       expect(createdUser.lastName).toBe(googleAuthPayload.family_name)
-      const createdProfile = await profileModel.find({ where: { userId: createdUser.id } })
+      const createdProfile = await profileModel.findOne({ where: { userId: createdUser.id } })
       expect(createdProfile.photoPath).toBe('test-url/1234/s-384c/photo.jpg')
     })
 

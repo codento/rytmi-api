@@ -9,6 +9,20 @@ export default class ProfileProjectService extends CrudService {
     super(models.profileProject)
   }
 
+  async create (projectId, profileId, attrs) {
+    attrs.projectId = parseInt(projectId)
+    attrs.profileId = parseInt(profileId)
+    delete attrs.id
+    const profileProject = models.profileProject.build(attrs)
+    await profileProject.save()
+    if (attrs.skills) {
+      await profileProject.setSkills(models.skill.build(attrs.skills))
+    }
+    return models.profileProject.findOne({
+      include: [{ model: models.skill, through: { attributes: [] } }],
+      where: { id: profileProject.id } })
+  }
+
   getInFuture () {
     return models.profileProject.findAll({
       include: [{
@@ -67,12 +81,6 @@ export default class ProfileProjectService extends CrudService {
     })
   }
 
-  create (projectId, profileId, attrs) {
-    attrs.projectId = parseInt(projectId)
-    attrs.profileId = parseInt(profileId)
-    return super.create(attrs)
-  }
-
   async update (id, attrs) {
     const profileProject = await models.profileProject
       .findOne({
@@ -86,16 +94,7 @@ export default class ProfileProjectService extends CrudService {
           id: id
         }})
     if (attrs.skill) {
-      const skillList = attrs.skills.map(skill => skill.id)
-      const skillsToUpdate = skillList.length > 0 ? await models.skill.findAll({
-        where: {
-          id: {
-            [Op.or]: skillList
-          }
-        }
-      })
-        : []
-      await profileProject.setSkills(skillsToUpdate)
+      await profileProject.setSkills(models.skill.build(attrs.skills))
     }
 
     return profileProject.update(attrs)

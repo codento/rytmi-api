@@ -10,6 +10,7 @@ module.exports = {
       },
       profileProjectId: {
         type: Sequelize.INTEGER,
+        onDelete: 'CASCADE',
         references: {
           model: 'profileProject',
           key: 'id'
