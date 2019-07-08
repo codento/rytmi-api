@@ -10,10 +10,13 @@ export const STATIC_TEXTS = {
   levelTitle: { en: 'Level', fi: 'Taso' },
   workExperienceTitle: { en: 'WORK EXPERIENCE', fi: 'TYÖKOKEMUS' },
   projectsTitle: { en: 'PROJECTS', fi: 'PROJEKTIT' },
-  projectRoleLabel: { en: 'Role', fi: 'Rooli' },
-  projectSkillsLabel: { en: 'Technologies', fi: 'Teknologiat' },
-  projectDescLabel: { en: 'Description', fi: 'Kuvaus' },
-  educationTitle: { en: 'EDUCATION', fi: 'KOULUTUS' },
-  minorText: { en: 'Minor', fi: 'Sivuaine' },
-  majorText: { en: 'Major', fi: 'Pääaine' }
+  projectRoleLabel: { en: 'Role:', fi: 'Rooli:' },
+  projectSkillsLabel: { en: 'Technologies:', fi: 'Teknologiat:' },
+  projectDescLabel: { en: 'Description:', fi: 'Kuvaus:' },
+  educationTitle: { en: 'EDUCATION', fi: 'KOULUTUS' }
+}
+
+export const EDUCATION_LABELS = {
+  majorLabel: { en: 'Major', fi: 'Pääaine' },
+  minorLabel: { en: 'Minor', fi: 'Sivuaine' }
 }

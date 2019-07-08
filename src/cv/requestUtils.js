@@ -36,7 +36,7 @@ export const modifyTableTextRequest = (methodKey, tableObjectId, row, col, textV
 export const moveObjectRequest = (mode, objectId, originalTransformation, transformObject, unit) => {
   const absoluteTransform = {
     scaleX: transformObject.scaleX || originalTransformation.scaleX,
-    scaleY: transformObject.scaleX || originalTransformation.scaleX,
+    scaleY: transformObject.scaleY || originalTransformation.scaleY,
     translateX: transformObject.translateX || originalTransformation.translateX,
     translateY: transformObject.translateY || originalTransformation.translateY,
     unit: unit || 'EMU'
