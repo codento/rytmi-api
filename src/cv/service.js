@@ -76,11 +76,11 @@ const update = async (fileId, cv) => {
       createTopSkillsReplacementRequests(cv.topSkills),
       createTopSkillsAndLanguagesLevelVisualizationRequest(cv.topSkills, cv.languages, titlePage),
       createLanguagesReplacementRequest(cv.languages),
-      createSkillTableRequests(cv.skills, skillsPage),
-      createEducationRequests(cv.education, cv.currentLanguage, educationPage)
+      createSkillTableRequests(cv.skills, skillsPage)
     ]
   }
   await slides.presentations.batchUpdate({ resource, presentationId: fileId })
+  await createEducationRequests(slides, fileId, cv.education, cv.currentLanguage, educationPage, pageHeight)
   await createProjectRequests(slides, fileId, cv.workHistory, projectsPage, pageHeight)
 }
 
