@@ -54,6 +54,10 @@ module.exports = (sequelize, DataTypes) => {
     education: {
       type: DataTypes.JSONB,
       allowNull: true
+    },
+    otherInfo: {
+      type: DataTypes.JSONB,
+      allowNull: true
     }
   }, {
     validate: {

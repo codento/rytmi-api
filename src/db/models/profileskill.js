@@ -26,10 +26,6 @@ module.exports = (sequelize, DataTypes) => {
         max: 5
       }
     },
-    visibleInCV: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false
-    },
     description: DataTypes.TEXT
   },
   {
