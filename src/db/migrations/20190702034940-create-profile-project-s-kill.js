@@ -2,12 +2,6 @@
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.createTable('profileProjectSkill', {
-      id: {
-        allowNull: false,
-        autoIncrement: true,
-        primaryKey: true,
-        type: Sequelize.INTEGER
-      },
       profileProjectId: {
         type: Sequelize.INTEGER,
         onDelete: 'CASCADE',
@@ -32,6 +26,7 @@ module.exports = {
         type: Sequelize.DATE
       }
     })
+    await queryInterface.sequelize.query('ALTER TABLE "profileProjectSkill" ADD CONSTRAINT "pk_profileProjectSkill" PRIMARY KEY ("skillId", "profileProjectId")')
     return queryInterface.addIndex('profileProjectSkill', {
       fields: ['profileProjectId'],
       name: 'idx_profileprojectskill_profileprjectid'
