@@ -93,7 +93,7 @@ export default class ProfileProjectService extends CrudService {
         where: {
           id: id
         }})
-    if (attrs.skill) {
+    if (attrs.skills) {
       await profileProject.setSkills(models.skill.build(attrs.skills))
     }
 
