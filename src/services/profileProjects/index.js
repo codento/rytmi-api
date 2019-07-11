@@ -1,15 +1,36 @@
 import CrudService from '../crud'
 import models from '../../db/models'
+import Sequelize from 'sequelize'
 
-const Op = models.sequelize.Op
+const Op = Sequelize.Op
 
 export default class ProfileProjectService extends CrudService {
   constructor () {
     super(models.profileProject)
   }
 
+  async create (projectId, profileId, attrs) {
+    attrs.projectId = parseInt(projectId)
+    attrs.profileId = parseInt(profileId)
+    delete attrs.id
+    const profileProject = models.profileProject.build(attrs)
+    await profileProject.save()
+    if (attrs.skills) {
+      await profileProject.setSkills(models.skill.build(attrs.skills))
+    }
+    return models.profileProject.findOne({
+      include: [{ model: models.skill, through: { attributes: [] } }],
+      where: { id: profileProject.id } })
+  }
+
   getInFuture () {
     return models.profileProject.findAll({
+      include: [{
+        model: models.skill,
+        through: {
+          attributes: []
+        }
+      }],
       where: {
         endDate: {
           [Op.or]: {
@@ -22,15 +43,37 @@ export default class ProfileProjectService extends CrudService {
   }
 
   getByProfileId (profileId) {
-    return models.profileProject.findAll({where: {profileId: profileId}})
+    return models.profileProject.findAll({
+      include: [{
+        model: models.skill,
+        through: {
+          attributes: []
+        }
+      }],
+      where: {profileId: profileId}
+    })
   }
 
   getByProjectId (projectId) {
-    return models.profileProject.findAll({where: {projectId: projectId}})
+    return models.profileProject.findAll({
+      include: [{
+        model: models.skill,
+        through: {
+          attributes: []
+        }
+      }],
+      where: {projectId: projectId}
+    })
   }
 
   getByIds (profileId, projectId) {
     return models.profileProject.findOne({
+      include: [{
+        model: models.skill,
+        through: {
+          attributes: []
+        }
+      }],
       where: {
         profileId: profileId,
         projectId: projectId
@@ -38,20 +81,22 @@ export default class ProfileProjectService extends CrudService {
     })
   }
 
-  create (projectId, profileId, attrs) {
-    attrs.projectId = parseInt(projectId)
-    attrs.profileId = parseInt(profileId)
-    return super.create(attrs)
-  }
+  async update (id, attrs) {
+    const profileProject = await models.profileProject
+      .findOne({
+        include: [{
+          model: models.skill,
+          through: {
+            attributes: []
+          }
+        }],
+        where: {
+          id: id
+        }})
+    if (attrs.skill) {
+      await profileProject.setSkills(models.skill.build(attrs.skills))
+    }
 
-  update (id, attrs) {
-    return models.profileProject
-      .findOne({where: {
-        id: id
-      }})
-      .then(profileProject => {
-        return profileProject
-          .update(attrs)
-      })
+    return profileProject.update(attrs)
   }
 }

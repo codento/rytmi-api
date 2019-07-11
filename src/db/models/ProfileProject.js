@@ -69,5 +69,9 @@ module.exports = (sequelize, DataTypes) => {
     ]
   })
 
+  ProfileProject.associate = (models) => {
+    models.profileProject.belongsToMany(models.skill, { through: 'profileProjectSkill', onDelete: 'CASCADE' })
+  }
+
   return ProfileProject
 }

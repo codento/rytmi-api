@@ -8,7 +8,7 @@ const webapp = {
   customerName: { en: 'Best customer ever', fi: 'Asiakas' },
   isInternal: false,
   isSecret: false,
-  projectSkills: []
+  skills: []
 }
 
 const customerHelp = {
@@ -20,7 +20,7 @@ const customerHelp = {
   customerName: { en: 'Best customer ever', fi: '' },
   isInternal: false,
   isSecret: false,
-  projectSkills: []
+  skills: []
 }
 
 module.exports = {

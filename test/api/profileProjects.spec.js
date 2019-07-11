@@ -93,6 +93,23 @@ describe('API profileprojects endpoint', () => {
       const response = await request.put(profileProjectEndpoint + insertedProfileProject.id)
         .send({ workPercentage: 80 }).expect(200)
       expect(response.body).toMatchObject(expectedProfileProject)
+      await request.put(profileProjectEndpoint + insertedProfileProject.id)
+        .send({ workPercentage: 100 }).expect(200)
+    })
+
+    it('should add skills to profile project if skills are provided', async () => {
+      const expectedProfileProject = Object.assign({}, firstProfileProject)
+      const skillsRequest = await request.get('/api/skills')
+      const insertedProfileProject = await profileProjectModel.findOne({
+        where: { profileId: normalUserProfileId, projectId: firstProfileProject.projectId }
+      })
+      expectedProfileProject.skills = skillsRequest.body.map(skill => {
+        delete skill.createdAt
+        delete skill.updatedAt
+        return skill
+      })
+      const response = await request.put(profileProjectEndpoint + insertedProfileProject.id).send({ skills: skillsRequest.body }).expect(200)
+      expect(response.body).toMatchObject(expectedProfileProject)
     })
 
     it('should not allow authorized user to edit other users profile projects', async () => {

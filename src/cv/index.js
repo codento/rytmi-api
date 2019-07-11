@@ -26,7 +26,7 @@ export default () => {
         const filePath = await service.runExport(id)
         logger.debug('PDF downloaded to', filePath)
         res.download(filePath)
-      }, 2000)
+      }, 200)
     } catch (e) {
       next(e)
     }
