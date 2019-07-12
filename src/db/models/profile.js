@@ -58,6 +58,10 @@ module.exports = (sequelize, DataTypes) => {
     otherInfo: {
       type: DataTypes.JSONB,
       allowNull: true
+    },
+    certificatesAndOthers: {
+      type: DataTypes.JSONB,
+      allowNull: true
     }
   }, {
     validate: {
