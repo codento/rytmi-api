@@ -254,24 +254,34 @@ export const createProjectRequests = async (slides, presentationId, workHistory,
 
   // Position variables
   let currentPositionFromTop = 0
-  let currentPageNumber = 1
+  let currentPageNumber = 0
 
   // Object to store current page element ids
   const currentIds = {
-    pageId: `project-page-${currentPageNumber}`,
-    employerTableId: `project-page-${currentPageNumber}-employer-0`,
-    projectTableTemplateId: `project-template-${currentPageNumber}`
+    pageId: null,
+    employerTableId: null,
+    projectTableTemplateId: null
   }
 
-  // Duplicate template slide
-  await slides.presentations.batchUpdate({
-    resource: {
-      requests: duplicateProjectPageRequest(templatePageId, employerTemplateId, projectTemplateId, currentPageNumber, currentIds)
-    },
-    presentationId
-  })
   // Loop through employers
   for (const [employerIndex, employer] of workHistory.entries()) {
+    // Update page variables
+    currentPageNumber++
+    currentIds.pageId = `project-page-${currentPageNumber}`
+    currentIds.employerTableId = `${currentIds.pageId}-employer-${employerIndex}`
+    currentIds.projectTableTemplateId = `project-template-${currentPageNumber}`
+
+    // Duplicate template slide
+    await slides.presentations.batchUpdate({
+      resource: {
+        requests: duplicateProjectPageRequest(templatePageId, employerTemplateId, projectTemplateId, currentPageNumber, currentIds)
+      },
+      presentationId
+    })
+
+    // Update position
+    currentPositionFromTop = 0
+
     logger.debug('Updating employer information on page', currentIds.pageId)
     // Update employer data
     await slides.presentations.batchUpdate({
@@ -369,7 +379,7 @@ export const createProjectRequests = async (slides, presentationId, workHistory,
           presentationId,
           pageObjectId: currentIds.pageId
         })
-        console.log(data.pageElements.filter(element => element.table))
+
         // Find out the object id of the only line element (styling element used in employer heading) and delete it
         const lineObject = data.pageElements.find(element => element.line)
         await slides.presentations.batchUpdate({
