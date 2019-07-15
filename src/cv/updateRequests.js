@@ -1,5 +1,6 @@
 import format from 'date-fns/format'
 import { orderBy, cloneDeep } from 'lodash'
+import logger from '../api/logging'
 import jsdom from 'jsdom'
 
 import {
@@ -269,9 +270,9 @@ export const createProjectRequests = async (slides, presentationId, workHistory,
     },
     presentationId
   })
-
   // Loop through employers
   for (const [employerIndex, employer] of workHistory.entries()) {
+    logger.debug('Updating employer information on page', currentIds.pageId)
     // Update employer data
     await slides.presentations.batchUpdate({
       resource: { requests: updateEmployerTableRequests(currentIds.employerTableId, employer) },
@@ -368,7 +369,7 @@ export const createProjectRequests = async (slides, presentationId, workHistory,
           presentationId,
           pageObjectId: currentIds.pageId
         })
-
+        console.log(data.pageElements.filter(element => element.table))
         // Find out the object id of the only line element (styling element used in employer heading) and delete it
         const lineObject = data.pageElements.find(element => element.line)
         await slides.presentations.batchUpdate({
@@ -428,6 +429,7 @@ export const createProjectRequests = async (slides, presentationId, workHistory,
 }
 
 const duplicateProjectPageRequest = (templatePageId, employerTemplateId, projectTemplateId, pageNumber, nextIds) => {
+  logger.debug('Duplicating project page, the next page will be', nextIds.pageId)
   return [
     duplicateObjectRequest(templatePageId, {
       [templatePageId]: nextIds.pageId,
