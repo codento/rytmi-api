@@ -46,7 +46,7 @@ const create = async () => {
         domain: 'codento.com'
       }
     })
-  }, 200)
+  }, 1000)
 
   return data
 }
