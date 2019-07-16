@@ -1,5 +1,6 @@
 import format from 'date-fns/format'
 import { orderBy, cloneDeep } from 'lodash'
+import logger from '../api/logging'
 import jsdom from 'jsdom'
 
 import {
@@ -253,25 +254,35 @@ export const createProjectRequests = async (slides, presentationId, workHistory,
 
   // Position variables
   let currentPositionFromTop = 0
-  let currentPageNumber = 1
+  let currentPageNumber = 0
 
   // Object to store current page element ids
   const currentIds = {
-    pageId: `project-page-${currentPageNumber}`,
-    employerTableId: `project-page-${currentPageNumber}-employer-0`,
-    projectTableTemplateId: `project-template-${currentPageNumber}`
+    pageId: null,
+    employerTableId: null,
+    projectTableTemplateId: null
   }
-
-  // Duplicate template slide
-  await slides.presentations.batchUpdate({
-    resource: {
-      requests: duplicateProjectPageRequest(templatePageId, employerTemplateId, projectTemplateId, currentPageNumber, currentIds)
-    },
-    presentationId
-  })
 
   // Loop through employers
   for (const [employerIndex, employer] of workHistory.entries()) {
+    // Update page variables
+    currentPageNumber++
+    currentIds.pageId = `project-page-${currentPageNumber}`
+    currentIds.employerTableId = `${currentIds.pageId}-employer-${employerIndex}`
+    currentIds.projectTableTemplateId = `project-template-${currentPageNumber}`
+
+    // Duplicate template slide
+    await slides.presentations.batchUpdate({
+      resource: {
+        requests: duplicateProjectPageRequest(templatePageId, employerTemplateId, projectTemplateId, currentPageNumber, currentIds)
+      },
+      presentationId
+    })
+
+    // Update position
+    currentPositionFromTop = 0
+
+    logger.debug('Updating employer information on page', currentIds.pageId)
     // Update employer data
     await slides.presentations.batchUpdate({
       resource: { requests: updateEmployerTableRequests(currentIds.employerTableId, employer) },
@@ -428,6 +439,7 @@ export const createProjectRequests = async (slides, presentationId, workHistory,
 }
 
 const duplicateProjectPageRequest = (templatePageId, employerTemplateId, projectTemplateId, pageNumber, nextIds) => {
+  logger.debug('Duplicating project page, the next page will be', nextIds.pageId)
   return [
     duplicateObjectRequest(templatePageId, {
       [templatePageId]: nextIds.pageId,
