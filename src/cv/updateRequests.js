@@ -6,7 +6,8 @@ import jsdom from 'jsdom'
 import {
   MAX_SKILLS_PER_PAGE,
   STATIC_TEXTS,
-  EDUCATION_LABELS
+  EDUCATION_LABELS,
+  CERTIFICATES_AND_OTHERS_TEXTS
 } from './constants'
 import {
   deleteTableRowRequest,
@@ -513,34 +514,72 @@ export const createCertificateOrOtherRequests = async (slides, presentationId, c
     pageObjectId: pageId
   })
   const textElements = data.pageElements.filter(element => 'shape' in element)
-  // const util = require('util')
-  // console.log(util.inspect(textElements, false, null, true /* enable colors */))
+
   const templateElements = {
     title: findElementContainingText(textElements, 'certificatesAndOthersTitle'),
     nameAndYear: findElementContainingText(textElements, 'certificateOrOtherName'),
     description: findElementContainingText(textElements, 'certificateOrOtherDescription')
   }
 
-  // const duplicateRequests = []
-  // certificatesAndOthers.forEach((item, index) => {
-  //   duplicateRequests.push(duplicateObjectRequest(templateElements.nameAndYear.objectId, `nameAndYear-${index}`))
-  //   duplicateRequests.push(duplicateObjectRequest(templateElements.description.objectId, `description-${index}`))
-  // })
-  // await slides.presentations.batchUpdate({
-  //   resource: { requests: duplicateRequests },
-  //   presentationId
-  // })
+  // Create templates for each certificate
+  const duplicateRequests = []
+  certificatesAndOthers.forEach((item, index) => {
+    duplicateRequests.push(duplicateObjectRequest(templateElements.nameAndYear.objectId, {[templateElements.nameAndYear.objectId]: `nameAndYear-${index}`}))
+    duplicateRequests.push(duplicateObjectRequest(templateElements.description.objectId, {[templateElements.description.objectId]: `description-${index}`}))
+  })
+  if (duplicateRequests.length > 0) {
+    await slides.presentations.batchUpdate({
+      resource: { requests: duplicateRequests },
+      presentationId
+    })
+  }
 
-  // const elementWidth = Math.round(templateElements.title.transform.scaleX * templateElements.title.size.width.magnitude) - (2 * 0.25 * 28.3 * 12700)
-  // const spaceNeededForText = calculateTextElementHeight(templateElements.title.shape, elementWidth)
-  // console.log(spaceNeededForText)
+  // Replace the placeholder texts with actual text
+  const textReplacementRequests = []
+  certificatesAndOthers.forEach((item, index) => {
+    textReplacementRequests.push({insertText: { objectId: `nameAndYear-${index}`, text: index.toString(), insertionIndex: '{{ certificateOrOtherName }} {{ certificateOrOtherYear'.length }})
+    textReplacementRequests.push({insertText: { objectId: `nameAndYear-${index}`, text: index.toString(), insertionIndex: '{{ certificateOrOtherName'.length }})
+    textReplacementRequests.push({insertText: { objectId: `description-${index}`, text: index.toString(), insertionIndex: '{{ certificateOrOtherDescription'.length }})
+    textReplacementRequests.push(replaceAllTextRequest(`{{ certificateOrOtherYear${index} }}`, item.year))
+    textReplacementRequests.push(replaceAllTextRequest(`{{ certificateOrOtherName${index} }}`, item[language].name))
+    textReplacementRequests.push(replaceAllTextRequest(`{{ certificateOrOtherDescription${index} }}`, item[language].description))
+  })
+  textReplacementRequests.push(replaceAllTextRequest('{{ certificatesAndOthersTitle }}', CERTIFICATES_AND_OTHERS_TEXTS.title[language]))
+  await slides.presentations.batchUpdate({
+    resource: { requests: textReplacementRequests },
+    presentationId
+  })
+
+  // Calculate how much space all the elements will take total. TODO: If they won't fit onto the same page they are on now, create a new page and copy them there.
+  const pageDataWithTexts = await slides.presentations.pages.get({ presentationId, pageObjectId: pageId })
+  const updatedTextElements = []
+  certificatesAndOthers.forEach((item, index) => {
+    updatedTextElements.push(pageDataWithTexts.data.pageElements.find(element => element.objectId === `nameAndYear-${index}`))
+    updatedTextElements.push(pageDataWithTexts.data.pageElements.find(element => element.objectId === `description-${index}`))
+  })
+
+  const elementWidth = Math.round(templateElements.title.transform.scaleX * templateElements.title.size.width.magnitude) - (2 * 0.25 * 28.3 * 12700)
+  const spaceNeededForTitle = calculateTextElementHeight(templateElements.title.shape, elementWidth)
+  const paddingAmount = 200000
+  let spaceNeeded = spaceNeededForTitle + paddingAmount
   const moveRequests = []
   moveRequests.push(moveObjectRequest('ABSOLUTE', templateElements.title.objectId, templateElements.title.transform, {translateY: educationPageFinishPosition}))
+  updatedTextElements.forEach((item, index) => {
+    moveRequests.push(moveObjectRequest('ABSOLUTE', item.objectId, item.transform, {translateY: educationPageFinishPosition + spaceNeeded}))
+    let elementWidth = Math.round(item.transform.scaleX * item.size.width.magnitude) - (2 * 0.25 * 28.3 * 12700)
+    spaceNeeded += calculateTextElementHeight(item.shape, elementWidth) + (item.objectId.includes('description-') ? paddingAmount : 0)
+  })
+
   await slides.presentations.batchUpdate({
     resource: { requests: moveRequests },
     presentationId
   })
+
+  // Finally, delete the original template elements
   const deleteRequests = []
+  if (certificatesAndOthers.length === 0) {
+    deleteRequests.push({ deleteObject: { objectId: templateElements.title.objectId } })
+  }
   deleteRequests.push({ deleteObject: { objectId: templateElements.nameAndYear.objectId } })
   deleteRequests.push({ deleteObject: { objectId: templateElements.description.objectId } })
 
@@ -632,6 +671,11 @@ export const createEducationRequests = async (slides, presentationId, educationI
     if (maximumPosition < (currentPositionFromTop + newItemSize)) {
       // Delete latest education entry from page
       const deletionRequests = currentElements.map(element => ({ deleteObject: { objectId: element.objectId } }))
+
+      // Also delete the placeholder texts for certificates and others
+      const certDeleteRequests = await certificateAndOtherTemplateElementDeleteRequests(slides, presentationId, pageId)
+      certDeleteRequests.forEach(request => deletionRequests.push(request))
+
       await slides.presentations.batchUpdate({
         resource: { requests: deletionRequests },
         presentationId
@@ -699,6 +743,20 @@ export const createEducationRequests = async (slides, presentationId, educationI
 
   // These are returned for createCertificateAndOtherRequests to determine whether certificates and other similar things can fit on the same page as education
   return { currentPositionFromTop: startingPosition + currentPositionFromTop, maximumPosition, pageId }
+}
+
+const certificateAndOtherTemplateElementDeleteRequests = async (slides, presentationId, pageId) => {
+  const { data } = await slides.presentations.pages.get({
+    presentationId,
+    pageObjectId: pageId
+  })
+  const textElements = data.pageElements.filter(element => 'shape' in element)
+  const certificateTemplateElements = {
+    title: findElementContainingText(textElements, 'certificatesAndOthersTitle'),
+    nameAndYear: findElementContainingText(textElements, 'certificateOrOtherName'),
+    description: findElementContainingText(textElements, 'certificateOrOtherDescription')
+  }
+  return Object.values(certificateTemplateElements).map(element => ({ deleteObject: { objectId: element.objectId } }))
 }
 
 const educationTextsRequests = (educationItemIndex, educationItem, language, templateElements) => {
