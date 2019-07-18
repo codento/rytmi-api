@@ -20,3 +20,7 @@ export const EDUCATION_LABELS = {
   majorLabel: { en: 'Major', fi: 'Pääaine' },
   minorLabel: { en: 'Minor', fi: 'Sivuaine' }
 }
+
+export const CERTIFICATES_AND_OTHERS_TEXTS = {
+  title: { en: 'CERTIFICATES AND OTHER VALIDATIONS OF EXPERTISE', fi: 'SERTIFIKAATIT JA MUU OSAAMISEN VALIDOINTI' }
+}
