@@ -11,7 +11,8 @@ import {
   createTopSkillsAndLanguagesLevelVisualizationRequest,
   createLanguagesReplacementRequest,
   createSkillTableRequests,
-  createEducationRequests
+  createEducationRequests,
+  createCertificateOrOtherRequests
 } from './updateRequests'
 
 const templateId = '1If6AFJi8ip_yvyvTgzm5LgxiIXl3TUhvuEMFkcmQKQU'
@@ -67,7 +68,6 @@ const update = async (fileId, cv) => {
 
   const [titlePage, skillsPage, projectsPage, educationPage] = data.slides
   const pageHeight = data.pageSize.height.magnitude
-
   const resource = {
     requests: [
       createStaticTextReplacementRequests(cv),
@@ -80,7 +80,8 @@ const update = async (fileId, cv) => {
     ]
   }
   await slides.presentations.batchUpdate({ resource, presentationId: fileId })
-  await createEducationRequests(slides, fileId, cv.education, cv.currentLanguage, educationPage, pageHeight)
+  const educationPositions = await createEducationRequests(slides, fileId, cv.education, cv.currentLanguage, educationPage, pageHeight)
+  await createCertificateOrOtherRequests(slides, fileId, cv.certificatesAndOthers, cv.currentLanguage, educationPositions.pageId, pageHeight, educationPositions.maximumPosition, educationPositions.currentPositionFromTop)
   await createProjectRequests(slides, fileId, cv.workHistory, projectsPage, pageHeight)
 }
 

@@ -507,17 +507,60 @@ const updateProjectTableRequest = (tableObjectId, project) => {
   return requests
 }
 
+export const createCertificateOrOtherRequests = async (slides, presentationId, certificatesAndOthers, language, pageId, pageHeight, educationPageMaxPosition, educationPageFinishPosition) => {
+  const { data } = await slides.presentations.pages.get({
+    presentationId,
+    pageObjectId: pageId
+  })
+  const textElements = data.pageElements.filter(element => 'shape' in element)
+  // const util = require('util')
+  // console.log(util.inspect(textElements, false, null, true /* enable colors */))
+  const templateElements = {
+    title: findElementContainingText(textElements, 'certificatesAndOthersTitle'),
+    nameAndYear: findElementContainingText(textElements, 'certificateOrOtherName'),
+    description: findElementContainingText(textElements, 'certificateOrOtherDescription')
+  }
+
+  // const duplicateRequests = []
+  // certificatesAndOthers.forEach((item, index) => {
+  //   duplicateRequests.push(duplicateObjectRequest(templateElements.nameAndYear.objectId, `nameAndYear-${index}`))
+  //   duplicateRequests.push(duplicateObjectRequest(templateElements.description.objectId, `description-${index}`))
+  // })
+  // await slides.presentations.batchUpdate({
+  //   resource: { requests: duplicateRequests },
+  //   presentationId
+  // })
+
+  // const elementWidth = Math.round(templateElements.title.transform.scaleX * templateElements.title.size.width.magnitude) - (2 * 0.25 * 28.3 * 12700)
+  // const spaceNeededForText = calculateTextElementHeight(templateElements.title.shape, elementWidth)
+  // console.log(spaceNeededForText)
+  const moveRequests = []
+  moveRequests.push(moveObjectRequest('ABSOLUTE', templateElements.title.objectId, templateElements.title.transform, {translateY: educationPageFinishPosition}))
+  await slides.presentations.batchUpdate({
+    resource: { requests: moveRequests },
+    presentationId
+  })
+  const deleteRequests = []
+  deleteRequests.push({ deleteObject: { objectId: templateElements.nameAndYear.objectId } })
+  deleteRequests.push({ deleteObject: { objectId: templateElements.description.objectId } })
+
+  await slides.presentations.batchUpdate({
+    resource: { requests: deleteRequests },
+    presentationId
+  })
+}
+
 export const createEducationRequests = async (slides, presentationId, educationItems, language, educationPage, pageHeight) => {
   // Find the correct element (title page should have only one image element)
   const templateHeadingLine = educationPage.pageElements.find(element => 'line' in element)
 
   const textElements = educationPage.pageElements.filter(element => 'shape' in element)
   const templateElements = {
-    school: findElementContainingText(textElements, 'schoolName'),
-    degree: findElementContainingText(textElements, 'degree'),
-    major: findElementContainingText(textElements, 'majorLabel'),
-    minor: findElementContainingText(textElements, 'minorLabel'),
-    additionalInfo: findElementContainingText(textElements, 'Additional info')
+    school: findElementContainingText(textElements, '{{ schoolName'),
+    degree: findElementContainingText(textElements, '{{ degree'),
+    major: findElementContainingText(textElements, '{{ majorLabel'),
+    minor: findElementContainingText(textElements, '{{ minorLabel'),
+    additionalInfo: findElementContainingText(textElements, 'Additional information (optional)')
   }
   const relativePositions = {}
   Object.entries(templateElements).forEach(([key, element]) => {
@@ -535,7 +578,6 @@ export const createEducationRequests = async (slides, presentationId, educationI
   // Position variables
   let currentPositionFromTop = 0
   let currentPageNumber = 1
-
   let pageId = `education-page-${currentPageNumber}`
   // Duplicate template slide and update ids
   await slides.presentations.batchUpdate({
@@ -548,53 +590,16 @@ export const createEducationRequests = async (slides, presentationId, educationI
   // Loop through education items
   for (const [index, educationItem] of educationItems.entries()) {
     // Create new education entry to page
+    const duplicateEducationElementsRequests = duplicateEducationElementsRequest({headingLine: templateHeadingLine, ...templateElements}, index, currentPageNumber)
     await slides.presentations.batchUpdate({
-      resource: { requests: duplicateEducationElementsRequest({headingLine: templateHeadingLine, ...templateElements}, index, currentPageNumber) },
+      resource: { requests: duplicateEducationElementsRequests },
       presentationId
     })
 
     // Update data
-    // Static text replacements using palceholders: school, duration and degree
-    const requests = [
-      // Insert index to placeholders
-      {insertText: { objectId: `education-item-${index}-school`, text: index.toString(), insertionIndex: '{{ schoolName }} {{ educationDuration'.length }},
-      {insertText: { objectId: `education-item-${index}-school`, text: index.toString(), insertionIndex: '{{ schoolName'.length }},
-      // Replace placeholder with actual data
-      replaceAllTextRequest(`{{ schoolName${index} }}`, educationItem[language].school),
-      replaceAllTextRequest(`{{ educationDuration${index} }}`, `${educationItem.startYear} - ${educationItem.endYear || ''}`),
-      {insertText: { objectId: `education-item-${index}-degree`, text: index.toString(), insertionIndex: '{{ degree'.length }},
-      replaceAllTextRequest(`{{ degree${index} }}`, educationItem[language].degree.toUpperCase())
-    ]
-
-    // Insertions & replacements for major and minor (labels must be taken into account)
-    Object.keys(templateElements).filter(key => key === 'major' || key === 'minor').forEach(key => {
-      const insertionIndex = `{{ ${key}Label }}: `.length
-      const rangeObject = { type: 'FROM_START_INDEX', startIndex: insertionIndex }
-
-      if (educationItem[language][key] && educationItem[language][key].length > 0) {
-        // Delete template text and insert data
-        requests.push({deleteText: { objectId: `education-item-${index}-${key}`, textRange: rangeObject }})
-        requests.push({insertText: { objectId: `education-item-${index}-${key}`, text: educationItem[language][key], insertionIndex }})
-        // Replace static texts (labels)
-        requests.push({insertText: { objectId: `education-item-${index}-${key}`, text: index.toString(), insertionIndex: `{{ ${key}Label`.length }})
-        requests.push(replaceAllTextRequest(`{{ ${key}Label${index} }}`, EDUCATION_LABELS[`${key}Label`][language]))
-      } else {
-        // Delete the element if there's no data
-        requests.push({deleteObject: { objectId: `education-item-${index}-${key}` }})
-      }
-    })
-
-    // Additional info
-    requests.push({deleteText: { objectId: `education-item-${index}-additionalInfo`, textRange: { type: 'ALL' } }})
-    requests.push({insertText: { objectId: `education-item-${index}-additionalInfo`, text: educationItem[language].additionalInfo, insertionIndex: 0 }})
-
-    // Delete additional info element if there's no data
-    if (!educationItem[language].additionalInfo || !educationItem[language].additionalInfo.length > 0) {
-      requests.push({deleteObject: { objectId: `education-item-${index}-additionalInfo` }})
-    }
-
+    // Static text replacements using placeholders: school, duration and degree
     await slides.presentations.batchUpdate({
-      resource: { requests },
+      resource: { requests: educationTextsRequests(index, educationItem, language, templateElements) },
       presentationId
     })
 
@@ -605,7 +610,6 @@ export const createEducationRequests = async (slides, presentationId, educationI
     })
 
     const currentElements = data.pageElements.filter(element => element.objectId.includes(`education-item-${index}`))
-
     let newItemSize = 0
     // Calculate the size of all elements using their position
     currentElements.forEach(element => {
@@ -627,12 +631,9 @@ export const createEducationRequests = async (slides, presentationId, educationI
     // Move to the next page if there's not enought space on current page
     if (maximumPosition < (currentPositionFromTop + newItemSize)) {
       // Delete latest education entry from page
+      const deletionRequests = currentElements.map(element => ({ deleteObject: { objectId: element.objectId } }))
       await slides.presentations.batchUpdate({
-        resource: { requests:
-          currentElements.forEach((element) => {
-            return { deleteObject: { objectId: element.objectId } }
-          })
-        },
+        resource: { requests: deletionRequests },
         presentationId
       })
 
@@ -646,12 +647,19 @@ export const createEducationRequests = async (slides, presentationId, educationI
         },
         presentationId
       })
+
       // Reset the current position on page
       currentPositionFromTop = 0
 
       // Create new education entry to page
       await slides.presentations.batchUpdate({
         resource: { requests: duplicateEducationElementsRequest({headingLine: templateHeadingLine, ...templateElements}, index, currentPageNumber) },
+        presentationId
+      })
+
+      // Update texts
+      await slides.presentations.batchUpdate({
+        resource: { requests: educationTextsRequests(index, educationItem, language, templateElements) },
         presentationId
       })
     }
@@ -662,35 +670,98 @@ export const createEducationRequests = async (slides, presentationId, educationI
       const key = element.objectId.split('-')[3]
       // Move all elements first to current position on page
       moveRequests.push(moveObjectRequest('ABSOLUTE', `education-item-${index}-${key}`, element.transform, {translateY: startingPosition + currentPositionFromTop}))
-      // Move element relatively using sizes calulcated earlier
+      // Move element relatively using sizes calculated earlier
       moveRequests.push(moveObjectRequest('RELATIVE', `education-item-${index}-${key}`, element.transform, {translateY: relativePositions[key]}))
     })
-
     await slides.presentations.batchUpdate({
       resource: { requests: moveRequests },
       presentationId
     })
-
     // Update page position and add padding of 32 points
     currentPositionFromTop += newItemSize + (32 * 12700)
   }
 
-  // Delete education element templates from all pages
-  const deleteRequests = []
-  for (let page = 1; page <= currentPageNumber; page++) {
-    Object.keys(templateElements).forEach(key => {
-      deleteRequests.push({ deleteObject: { objectId: `education-item-template-${key}-${currentPageNumber}` } })
+  // Delete all original education text elements from all pages
+  for (let i = 1; i <= currentPageNumber; i++) {
+    await slides.presentations.batchUpdate({
+      resource: { requests: await deleteOriginalTextElementsFromEducationPage(slides, presentationId, `education-page-${i}`) },
+      presentationId
     })
-    deleteRequests.push({ deleteObject: { objectId: `education-item-template-headingLine-${currentPageNumber}` } })
   }
 
   // Delete project template page
+  const deleteRequests = []
   deleteRequests.push({ deleteObject: { objectId: templatePageId } })
-
   await slides.presentations.batchUpdate({
     resource: { requests: deleteRequests },
     presentationId
   })
+
+  // These are returned for createCertificateAndOtherRequests to determine whether certificates and other similar things can fit on the same page as education
+  return { currentPositionFromTop: startingPosition + currentPositionFromTop, maximumPosition, pageId }
+}
+
+const educationTextsRequests = (educationItemIndex, educationItem, language, templateElements) => {
+  const requests = [
+    // Insert index to placeholders
+    {insertText: { objectId: `education-item-${educationItemIndex}-school`, text: educationItemIndex.toString(), insertionIndex: '{{ schoolName }} {{ educationDuration'.length }},
+    {insertText: { objectId: `education-item-${educationItemIndex}-school`, text: educationItemIndex.toString(), insertionIndex: '{{ schoolName'.length }},
+    // Replace placeholder with actual data
+    replaceAllTextRequest(`{{ schoolName${educationItemIndex} }}`, educationItem[language].school),
+    replaceAllTextRequest(`{{ educationDuration${educationItemIndex} }}`, `${educationItem.startYear} - ${educationItem.endYear || ''}`),
+    {insertText: { objectId: `education-item-${educationItemIndex}-degree`, text: educationItemIndex.toString(), insertionIndex: '{{ degree'.length }},
+    replaceAllTextRequest(`{{ degree${educationItemIndex} }}`, educationItem[language].degree.toUpperCase())
+  ]
+
+  // Insertions & replacements for major and minor (labels must be taken into account)
+  Object.keys(templateElements).filter(key => key === 'major' || key === 'minor').forEach(key => {
+    const insertionIndex = `{{ ${key}Label }}: `.length
+    const rangeObject = { type: 'FROM_START_INDEX', startIndex: insertionIndex }
+
+    if (educationItem[language][key] && educationItem[language][key].length > 0) {
+      // Delete template text and insert data
+      requests.push({deleteText: { objectId: `education-item-${educationItemIndex}-${key}`, textRange: rangeObject }})
+      requests.push({insertText: { objectId: `education-item-${educationItemIndex}-${key}`, text: educationItem[language][key], insertionIndex }})
+      // Replace static texts (labels)
+      requests.push({insertText: { objectId: `education-item-${educationItemIndex}-${key}`, text: educationItemIndex.toString(), insertionIndex: `{{ ${key}Label`.length }})
+      requests.push(replaceAllTextRequest(`{{ ${key}Label${educationItemIndex} }}`, EDUCATION_LABELS[`${key}Label`][language]))
+    } else {
+      // Delete the element if there's no data
+      requests.push({deleteObject: { objectId: `education-item-${educationItemIndex}-${key}` }})
+    }
+  })
+
+  // Additional info
+  requests.push({deleteText: { objectId: `education-item-${educationItemIndex}-additionalInfo`, textRange: { type: 'ALL' } }})
+  requests.push({insertText: { objectId: `education-item-${educationItemIndex}-additionalInfo`, text: educationItem[language].additionalInfo, insertionIndex: 0 }})
+
+  // Delete additional info element if there's no data
+  if (!educationItem[language].additionalInfo || !educationItem[language].additionalInfo.length > 0) {
+    requests.push({deleteObject: { objectId: `education-item-${educationItemIndex}-additionalInfo` }})
+  }
+  return requests
+}
+
+const deleteOriginalTextElementsFromEducationPage = async (slides, presentationId, pageId) => {
+  const { data } = await slides.presentations.pages.get({
+    presentationId,
+    pageObjectId: pageId
+  })
+  const originalElementsDeleteRequests = []
+  const templateHeadingLineToDelete = data.pageElements.find(element => 'line' in element)
+  const textElementsToDelete = data.pageElements.filter(element => 'shape' in element)
+  const templateElementsToDelete = {
+    school: findElementContainingText(textElementsToDelete, '{{ schoolName'),
+    degree: findElementContainingText(textElementsToDelete, '{{ degree'),
+    major: findElementContainingText(textElementsToDelete, '{{ majorLabel'),
+    minor: findElementContainingText(textElementsToDelete, '{{ minorLabel'),
+    additionalInfo: findElementContainingText(textElementsToDelete, 'Additional information (optional)')
+  }
+  Object.values(templateElementsToDelete).forEach(key => {
+    originalElementsDeleteRequests.push({ deleteObject: { objectId: key.objectId } })
+  })
+  originalElementsDeleteRequests.push({ deleteObject: { objectId: templateHeadingLineToDelete.objectId } })
+  return originalElementsDeleteRequests
 }
 
 const duplicateEducationPageRequest = (templatePageId, newPageId, newPageNumber, templateHeadingLine, templateElements) => {
@@ -705,7 +776,7 @@ const duplicateEducationPageRequest = (templatePageId, newPageId, newPageNumber,
       [templateElements.additionalInfo.objectId]: `education-item-template-additionalInfo-${newPageNumber}`
     }),
     // Move page
-    { updateSlidesPosition: { slideObjectIds: [ newPageId ], insertionIndex: 3 + newPageNumber } }
+    { updateSlidesPosition: { slideObjectIds: [ newPageId ], insertionIndex: 4 + newPageNumber } }
   ]
 }
 
