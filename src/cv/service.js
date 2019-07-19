@@ -119,4 +119,21 @@ const runExport = async (fileId) => {
   })
 }
 
-export default { create, update, runExport }
+const deleteFile = async (fileId) => {
+  const auth = await google.auth.getClient({
+    scopes: [
+      'https://www.googleapis.com/auth/drive'
+    ]
+  })
+
+  const drive = google.drive({
+    version: 'v3',
+    auth
+  })
+
+  await drive.files.delete(
+    { fileId }
+  )
+}
+
+export default { create, update, runExport, deleteFile }
