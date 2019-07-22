@@ -1,7 +1,7 @@
 module.exports = (sequelize, DataTypes) => {
   let SkillCategory = sequelize.define('skillCategory', {
     title: {
-      type: DataTypes.STRING,
+      type: DataTypes.JSONB,
       allowNull: false,
       unique: true
     },
