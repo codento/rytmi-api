@@ -26,18 +26,18 @@ export const createStaticTextReplacementRequests = (cv) => {
     replaceAllTextRequest('{{ employeeName }}', cv.employeeName),
     replaceAllTextRequest('{{ employeeYearOfBirth }}', '' + cv.born || ''),
     replaceAllTextRequest('{{ employeeDescription }}', '' + cv.employeeDescription),
-    replaceAllTextRequest('{{ footerText }}', `CV ${cv.employeeName} ${format(new Date(), 'D.M.YYYY')}`),
-    replaceAllTextRequest('{{ skillLevelName1 }}', cv.skillLevelDescriptions[1].text),
-    replaceAllTextRequest('{{ skillLevelDescription1 }}', cv.skillLevelDescriptions[1].description),
-    replaceAllTextRequest('{{ skillLevelName2 }}', cv.skillLevelDescriptions[2].text),
-    replaceAllTextRequest('{{ skillLevelDescription2 }}', cv.skillLevelDescriptions[2].description),
-    replaceAllTextRequest('{{ skillLevelName3 }}', cv.skillLevelDescriptions[3].text),
-    replaceAllTextRequest('{{ skillLevelDescription3 }}', cv.skillLevelDescriptions[3].description),
-    replaceAllTextRequest('{{ skillLevelName4 }}', cv.skillLevelDescriptions[4].text),
-    replaceAllTextRequest('{{ skillLevelDescription4 }}', cv.skillLevelDescriptions[4].description),
-    replaceAllTextRequest('{{ skillLevelName5 }}', cv.skillLevelDescriptions[5].text),
-    replaceAllTextRequest('{{ skillLevelDescription5 }}', cv.skillLevelDescriptions[5].description)
+    replaceAllTextRequest('{{ footerText }}', `CV ${cv.employeeName} ${format(new Date(), 'D.M.YYYY')}`)
   ]
+
+  // Skill level descriptions
+  cv.skillLevelDescriptions.forEach((item, index) => {
+    // Skip 0 level
+    if (index > 0) {
+      const modifiedLevelName = `${cv.skillLevelDescriptions[index].text} (${cv.skillLevelDescriptions[index].value})`
+      requests.push(replaceAllTextRequest(`{{ skillLevelName${index} }}`, modifiedLevelName))
+      requests.push(replaceAllTextRequest(`{{ skillLevelDescription${index} }}`, cv.skillLevelDescriptions[index].description))
+    }
+  })
 
   // Headings and other static texts
   Object.keys(STATIC_TEXTS).forEach(key => {
