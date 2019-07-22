@@ -10,17 +10,15 @@ export const STATIC_TEXTS = {
   levelTitle: { en: 'Level', fi: 'Taso' },
   workExperienceTitle: { en: 'WORK EXPERIENCE', fi: 'TYÖKOKEMUS' },
   projectsTitle: { en: 'PROJECTS', fi: 'PROJEKTIT' },
+  internalProjectsTitle: { en: 'Internal projects', fi: 'Sisäiset projektit' },
   projectRoleLabel: { en: 'Role:', fi: 'Rooli:' },
   projectSkillsLabel: { en: 'Technologies:', fi: 'Teknologiat:' },
   projectDescLabel: { en: 'Description:', fi: 'Kuvaus:' },
-  educationTitle: { en: 'EDUCATION', fi: 'KOULUTUS' }
+  educationTitle: { en: 'EDUCATION', fi: 'KOULUTUS' },
+  certificatesAndOthersTitle: { en: 'CERTIFICATES AND OTHER VALIDATIONS OF EXPERTISE', fi: 'SERTIFIKAATIT JA MUU OSAAMISEN VALIDOINTI' }
 }
 
 export const EDUCATION_LABELS = {
   majorLabel: { en: 'Major', fi: 'Pääaine' },
   minorLabel: { en: 'Minor', fi: 'Sivuaine' }
-}
-
-export const CERTIFICATES_AND_OTHERS_TEXTS = {
-  title: { en: 'CERTIFICATES AND OTHER VALIDATIONS OF EXPERTISE', fi: 'SERTIFIKAATIT JA MUU OSAAMISEN VALIDOINTI' }
 }
