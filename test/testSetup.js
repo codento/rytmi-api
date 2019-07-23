@@ -37,19 +37,23 @@ const insertProjects = async () => {
 }
 
 const createSkills = async () => {
-  // slice first from skillGroups as it is inserted with migrations to db
-  await skillGroup.bulkCreate(skillGroups.slice(1))
-  const createdSkillGroup = await skillGroup.findAll({ where: { title: skillGroups[1].title } })
-  // Slicing first from skillCategories as it is inserted with migrations to db
-  const skillCategoriesToInsert = skillCategories.slice(1).map(skillCategory => {
-    skillCategory.skillGroupId = createdSkillGroup[0].id
-    return skillCategory
-  })
-  const createdSkillCategories = await skillCategory.bulkCreate(skillCategoriesToInsert)
-    .then(() => skillCategory.findAll({ where: { title: { [Op.ne]: 'Uncategorized' } } }))
-  const skillsToInsert = skills.map((skill, idx) => {
-    skill.skillCategoryId = createdSkillCategories[idx].id
-    return skill
-  })
-  await skill.bulkCreate(skillsToInsert)
+  try {
+    // slice first from skillGroups as it is inserted with migrations to db
+    await skillGroup.bulkCreate(skillGroups.slice(1))
+    const createdSkillGroup = await skillGroup.findAll({ where: { title: skillGroups[1].title } })
+    // Slicing first from skillCategories as it is inserted with migrations to db
+    const skillCategoriesToInsert = skillCategories.slice(1).map(skillCategory => {
+      skillCategory.skillGroupId = createdSkillGroup[0].id
+      return skillCategory
+    })
+    const createdSkillCategories = await skillCategory.bulkCreate(skillCategoriesToInsert)
+      .then(() => skillCategory.findAll({ where: { title: { [Op.ne]: 'Uncategorized' } } }))
+    const skillsToInsert = skills.map((skill, idx) => {
+      skill.skillCategoryId = createdSkillCategories[idx].id
+      return skill
+    })
+    await skill.bulkCreate(skillsToInsert)
+  } catch (e) {
+    console.error(e)
+  }
 }
