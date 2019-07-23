@@ -44,7 +44,7 @@ describe('API skillcategories endpoint', () => {
   describe('Creating skill categories', () => {
     it('should allow authorized user to create new skill categories', async () => {
       devOps = {
-        title: 'DevOps',
+        title: { en: 'DevOps', fi: 'DevOps' },
         skillGroupId: 1
       }
       const response = await request.post(skillCategoriesEndpoint).send(devOps).expect(201)
@@ -55,7 +55,7 @@ describe('API skillcategories endpoint', () => {
 
   describe('Updating skill categories', () => {
     it('should allow authorized user to update skill category', async () => {
-      devOps.title = 'Development & Operations'
+      devOps.title = { en: 'Development & Operations', fi: 'Kehitys ja operaatiot' }
       const response = await request.put(skillCategoriesEndpoint + devOps.id)
         .send({ title: devOps.title }).expect(200)
       expect(response.body).toMatchObject(devOps)
@@ -67,7 +67,7 @@ describe('API skillcategories endpoint', () => {
       await request.delete(skillCategoriesEndpoint + devOps.id).expect(204)
       const skillCategoriesInDb = await skillCategoriesModel.findAll()
       skillCategoriesInDb.forEach(skilLCategory => {
-        expect(skilLCategory.title).not.toMatch(devOps.title)
+        expect(skilLCategory.title).not.toMatchObject(devOps.title)
       })
     })
   })
