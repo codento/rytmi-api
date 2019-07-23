@@ -25,6 +25,8 @@ module.exports = {
              'en', (SELECT "oldTitle" FROM "skillGroup" c WHERE c."id" = s."id")
              )
         `, { transaction: transaction })
+      await queryInterface.sequelize.query(`CREATE UNIQUE INDEX skillCategory_title_idx ON "skillCategory"( (title->>'en'), (title->>'fi') )`, { transaction: transaction })
+      await queryInterface.sequelize.query(`CREATE UNIQUE INDEX skillGroup_title_idx ON "skillGroup"( (title->>'en'), (title->>'fi') )`, { transaction: transaction })
       await queryInterface.removeColumn('skillCategory', 'oldTitle', { transaction: transaction })
       await queryInterface.removeColumn('skillGroup', 'oldTitle', { transaction: transaction })
     })
