@@ -17,7 +17,7 @@ const frontEndDevelopment = {
   skillGroupId: 2
 }
 const backEndDevelopment = {
-  title: { en: 'Back-End development', fi: 'Etupään kehitys' },
+  title: { en: 'Back-End development', fi: 'Takapään kehitys' },
   skillGroupId: 2
 }
 
