@@ -20,7 +20,6 @@ const listItems = async (drive) => {
       return records
     }
   }
-  return records
 }
 
 // Delete files by id
