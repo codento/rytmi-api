@@ -564,6 +564,7 @@ export const createEducationRequests = async (slides, presentationId, educationI
     nonTextElements: { headingLine: { positionAboveKey: 'degree' } },
     textReplacementRequests: educationTextsRequests,
     objectIdPrefix: 'education',
+    paddingPtAfter: 32,
     language
   }
 
@@ -581,6 +582,7 @@ export const createEducationRequests = async (slides, presentationId, educationI
     nonTextElements: {},
     textReplacementRequests: certificateAndOtherTextsRequests,
     objectIdPrefix: 'certificate',
+    paddingPtAfter: 16,
     language,
     createOnce: ['title']
   }
@@ -728,8 +730,8 @@ const populateEducationPage = async (slides, presentationId, items, creationOpti
       resource: { requests: moveRequests },
       presentationId
     })
-    // Update page position and add padding of 32 points
-    currentPositionFromTop += newItemSize + (32 * 12700)
+    // Update page position and add padding (in points)
+    currentPositionFromTop += newItemSize + (creationOptions.paddingPtAfter * 12700)
 
     // Spme elements (e.g. title) are only created once -> skip these on next iteration (duplication, size calculation etc.)
     if (index === 0 && creationOptions.createOnce) {
@@ -771,17 +773,17 @@ const duplicateEducationElementsRequest = (templateElements, objectIdPrefix, cur
   return requests
 }
 
-const educationTextsRequests = (educationItemIndex, educationItem, language) => {
+const educationTextsRequests = (index, item, language) => {
   /* ObjectIds must match with duplicateEducationPageRequest() */
   const requests = [
     // Insert index to placeholders
-    {insertText: { objectId: `education-item-${educationItemIndex}-school`, text: educationItemIndex.toString(), insertionIndex: '{{ schoolName }} {{ educationDuration'.length }},
-    {insertText: { objectId: `education-item-${educationItemIndex}-school`, text: educationItemIndex.toString(), insertionIndex: '{{ schoolName'.length }},
+    {insertText: { objectId: `education-item-${index}-school`, text: index.toString(), insertionIndex: '{{ schoolName }} {{ educationDuration'.length }},
+    {insertText: { objectId: `education-item-${index}-school`, text: index.toString(), insertionIndex: '{{ schoolName'.length }},
     // Replace placeholder with actual data
-    replaceAllTextRequest(`{{ schoolName${educationItemIndex} }}`, educationItem[language].school),
-    replaceAllTextRequest(`{{ educationDuration${educationItemIndex} }}`, `${educationItem.startYear} - ${educationItem.endYear || ''}`),
-    {insertText: { objectId: `education-item-${educationItemIndex}-degree`, text: educationItemIndex.toString(), insertionIndex: '{{ degree'.length }},
-    replaceAllTextRequest(`{{ degree${educationItemIndex} }}`, educationItem[language].degree.toUpperCase())
+    replaceAllTextRequest(`{{ schoolName${index} }}`, item[language].school),
+    replaceAllTextRequest(`{{ educationDuration${index} }}`, `${item.startYear} - ${item.endYear || ''}`),
+    {insertText: { objectId: `education-item-${index}-degree`, text: index.toString(), insertionIndex: '{{ degree'.length }},
+    replaceAllTextRequest(`{{ degree${index} }}`, item[language].degree.toUpperCase())
   ]
 
   // Insertions & replacements for major and minor (labels must be taken into account)
@@ -790,33 +792,33 @@ const educationTextsRequests = (educationItemIndex, educationItem, language) => 
     const insertionIndex = `{{ ${key}Label }}: `.length
     const rangeObject = { type: 'FROM_START_INDEX', startIndex: insertionIndex }
 
-    if (educationItem[language][key] && educationItem[language][key].length > 0) {
+    if (item[language][key] && item[language][key].length > 0) {
       // Delete template text and insert data
-      requests.push({deleteText: { objectId: `education-item-${educationItemIndex}-${key}`, textRange: rangeObject }})
-      requests.push({insertText: { objectId: `education-item-${educationItemIndex}-${key}`, text: educationItem[language][key], insertionIndex }})
+      requests.push({deleteText: { objectId: `education-item-${index}-${key}`, textRange: rangeObject }})
+      requests.push({insertText: { objectId: `education-item-${index}-${key}`, text: item[language][key], insertionIndex }})
       // Replace static texts (labels)
-      requests.push({insertText: { objectId: `education-item-${educationItemIndex}-${key}`, text: educationItemIndex.toString(), insertionIndex: `{{ ${key}Label`.length }})
-      requests.push(replaceAllTextRequest(`{{ ${key}Label${educationItemIndex} }}`, EDUCATION_LABELS[`${key}Label`][language]))
+      requests.push({insertText: { objectId: `education-item-${index}-${key}`, text: index.toString(), insertionIndex: `{{ ${key}Label`.length }})
+      requests.push(replaceAllTextRequest(`{{ ${key}Label${index} }}`, EDUCATION_LABELS[`${key}Label`][language]))
     } else {
       // Delete the element if there's no data
-      requests.push({deleteObject: { objectId: `education-item-${educationItemIndex}-${key}` }})
+      requests.push({deleteObject: { objectId: `education-item-${index}-${key}` }})
     }
   })
 
   // Additional info
-  requests.push({deleteText: { objectId: `education-item-${educationItemIndex}-additionalInfo`, textRange: { type: 'ALL' } }})
-  requests.push({insertText: { objectId: `education-item-${educationItemIndex}-additionalInfo`, text: educationItem[language].additionalInfo, insertionIndex: 0 }})
+  requests.push({deleteText: { objectId: `education-item-${index}-additionalInfo`, textRange: { type: 'ALL' } }})
+  requests.push({insertText: { objectId: `education-item-${index}-additionalInfo`, text: item[language].additionalInfo, insertionIndex: 0 }})
 
   // Delete additional info element if there's no data
-  if (!educationItem[language].additionalInfo || !educationItem[language].additionalInfo.length > 0) {
-    requests.push({deleteObject: { objectId: `education-item-${educationItemIndex}-additionalInfo` }})
+  if (!item[language].additionalInfo || !item[language].additionalInfo.length > 0) {
+    requests.push({deleteObject: { objectId: `education-item-${index}-additionalInfo` }})
   }
   return requests
 }
 
 const certificateAndOtherTextsRequests = (index, item, language) => {
   /* ObjectIds must match with duplicateEducationPageRequest() */
-  return [
+  const requests = [
     // Insert index to placeholders
     {insertText: { objectId: `certificate-item-${index}-nameAndYear`, text: index.toString(), insertionIndex: '{{ certificateOrOtherName }} {{ certificateOrOtherYear'.length }},
     {insertText: { objectId: `certificate-item-${index}-nameAndYear`, text: index.toString(), insertionIndex: '{{ certificateOrOtherName'.length }},
@@ -827,6 +829,11 @@ const certificateAndOtherTextsRequests = (index, item, language) => {
     replaceAllTextRequest(`{{ certificateOrOtherName${index} }}`, item[language].name),
     replaceAllTextRequest(`{{ certificateOrOtherDescription${index} }}`, item[language].description)
   ]
+  // Delete description element if there's no data
+  if (!item[language].description || !item[language].description.length > 0) {
+    requests.push({deleteObject: { objectId: `certificate-item-${index}-description` }})
+  }
+  return requests
 }
 
 const findElementContainingText = (elements, textToFind) => {
