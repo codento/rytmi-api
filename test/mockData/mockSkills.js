@@ -1,6 +1,6 @@
 
 const uncategorizedSkillGroup = {
-  title: { en: 'Uncategorized', fi: '' }
+  title: { en: 'Uncategorized', fi: 'Uncategorized' }
 }
 
 const softwareDevelopment = {
@@ -8,7 +8,7 @@ const softwareDevelopment = {
 }
 
 const uncategorized = {
-  title: { en: 'Uncategorized', fi: '' },
+  title: { en: 'Uncategorized', fi: 'Uncategorized' },
   skillGroupId: 1
 }
 
