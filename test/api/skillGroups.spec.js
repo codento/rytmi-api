@@ -44,7 +44,7 @@ describe('API skillcategories endpoint', () => {
   describe('Creating skill categories', () => {
     it('should allow authorized user to create new skill groups', async () => {
       agileMethods = {
-        title: 'Agile methods'
+        title: { en: 'Agile methods', fi: 'Agilemetodit' }
       }
       const response = await request.post(skillGroupsEndpoint).send(agileMethods).expect(201)
       expect(response.body).toMatchObject(agileMethods)
@@ -54,7 +54,7 @@ describe('API skillcategories endpoint', () => {
 
   describe('Updating skill categories', () => {
     it('should allow authorized user to update skill group', async () => {
-      agileMethods.title = 'Agile methods and practices'
+      agileMethods.title = { en: 'Agile methods and practices', fi: 'Agilemetodit ja tavat' }
       const response = await request.put(skillGroupsEndpoint + agileMethods.id)
         .send({ title: agileMethods.title }).expect(200)
       expect(response.body).toMatchObject(agileMethods)
@@ -65,8 +65,8 @@ describe('API skillcategories endpoint', () => {
     it('should allow authorized user to delete skill category', async () => {
       await request.delete(skillGroupsEndpoint + agileMethods.id).expect(204)
       const skillGroupsInDb = await skillGroupModel.findAll()
-      skillGroupsInDb.forEach(skilLCategory => {
-        expect(skilLCategory.title).not.toMatch(agileMethods.title)
+      skillGroupsInDb.forEach(skillCategory => {
+        expect(skillCategory.title).not.toMatchObject(agileMethods.title)
       })
     })
   })

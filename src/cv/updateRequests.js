@@ -24,20 +24,20 @@ export const createStaticTextReplacementRequests = (cv) => {
   const requests = [
     replaceAllTextRequest('{{ jobTitle }}', cv.jobTitle.toUpperCase()),
     replaceAllTextRequest('{{ employeeName }}', cv.employeeName),
-    replaceAllTextRequest('{{ employeeYearOfBirth }}', '' + cv.born),
+    replaceAllTextRequest('{{ employeeYearOfBirth }}', '' + cv.born || ''),
     replaceAllTextRequest('{{ employeeDescription }}', '' + cv.employeeDescription),
-    replaceAllTextRequest('{{ footerText }}', `CV ${cv.employeeName} ${format(new Date(), 'D.M.YYYY')}`),
-    replaceAllTextRequest('{{ skillLevelName1 }}', cv.skillLevelDescriptions[1].text),
-    replaceAllTextRequest('{{ skillLevelDescription1 }}', cv.skillLevelDescriptions[1].description),
-    replaceAllTextRequest('{{ skillLevelName2 }}', cv.skillLevelDescriptions[2].text),
-    replaceAllTextRequest('{{ skillLevelDescription2 }}', cv.skillLevelDescriptions[2].description),
-    replaceAllTextRequest('{{ skillLevelName3 }}', cv.skillLevelDescriptions[3].text),
-    replaceAllTextRequest('{{ skillLevelDescription3 }}', cv.skillLevelDescriptions[3].description),
-    replaceAllTextRequest('{{ skillLevelName4 }}', cv.skillLevelDescriptions[4].text),
-    replaceAllTextRequest('{{ skillLevelDescription4 }}', cv.skillLevelDescriptions[4].description),
-    replaceAllTextRequest('{{ skillLevelName5 }}', cv.skillLevelDescriptions[5].text),
-    replaceAllTextRequest('{{ skillLevelDescription5 }}', cv.skillLevelDescriptions[5].description)
+    replaceAllTextRequest('{{ footerText }}', `CV ${cv.employeeName} ${format(new Date(), 'D.M.YYYY')}`)
   ]
+
+  // Skill level descriptions
+  cv.skillLevelDescriptions.forEach((item, index) => {
+    // Skip 0 level
+    if (index > 0) {
+      const modifiedLevelName = `${cv.skillLevelDescriptions[index].text} (${cv.skillLevelDescriptions[index].value})`
+      requests.push(replaceAllTextRequest(`{{ skillLevelName${index} }}`, modifiedLevelName))
+      requests.push(replaceAllTextRequest(`{{ skillLevelDescription${index} }}`, cv.skillLevelDescriptions[index].description))
+    }
+  })
 
   // Headings and other static texts
   Object.keys(STATIC_TEXTS).forEach(key => {
@@ -308,8 +308,6 @@ export const createProjectRequests = async (slides, presentationId, workHistory,
       })
     }
 
-    // TODO: order projects by customerName, internal projects last
-
     // Loop through employer's projects
     for (const [projectIndex, project] of employer.projects.entries()) {
       // Column idexes for project table texts
@@ -447,7 +445,7 @@ const duplicateProjectPageRequest = (templatePageId, employerTemplateId, project
       [projectTemplateId]: nextIds.projectTableTemplateId
     }),
     // Move page
-    {updateSlidesPosition: { slideObjectIds: [ nextIds.pageId ], insertionIndex: 3 + pageNumber }}
+    {updateSlidesPosition: { slideObjectIds: [ nextIds.pageId ], insertionIndex: 4 + pageNumber }}
   ]
 }
 
@@ -507,94 +505,138 @@ const updateProjectTableRequest = (tableObjectId, project) => {
   return requests
 }
 
-export const createEducationRequests = async (slides, presentationId, educationItems, language, educationPage, pageHeight) => {
+export const createEducationRequests = async (slides, presentationId, educationItems, certificatesAndOthers, language, educationPage, pageHeight) => {
   // Find the correct element (title page should have only one image element)
   const templateHeadingLine = educationPage.pageElements.find(element => 'line' in element)
 
+  // Find template elements from page
   const textElements = educationPage.pageElements.filter(element => 'shape' in element)
-  const templateElements = {
-    school: findElementContainingText(textElements, 'schoolName'),
-    degree: findElementContainingText(textElements, 'degree'),
-    major: findElementContainingText(textElements, 'majorLabel'),
-    minor: findElementContainingText(textElements, 'minorLabel'),
-    additionalInfo: findElementContainingText(textElements, 'Additional info')
+  const educationElements = {
+    school: findElementContainingText(textElements, '{{ schoolName'),
+    degree: findElementContainingText(textElements, '{{ degree'),
+    major: findElementContainingText(textElements, '{{ majorLabel'),
+    minor: findElementContainingText(textElements, '{{ minorLabel'),
+    additionalInfo: findElementContainingText(textElements, 'Additional information (optional)')
   }
-  const relativePositions = {}
-  Object.entries(templateElements).forEach(([key, element]) => {
+  const otherElements = {
+    title: findElementContainingText(textElements, 'certificatesAndOthersTitle'),
+    nameAndYear: findElementContainingText(textElements, 'certificateOrOtherName'),
+    description: findElementContainingText(textElements, 'certificateOrOtherDescription')
+  }
+
+  const allPageElements = { headingLine: templateHeadingLine, ...educationElements, ...otherElements }
+  /* const relativePositions = {}
+  // Calculate the size and position of education elements first (filled first)
+  Object.entries(educationElements).forEach(([key, element]) => {
     const elementSize = element.transform.scaleY * element.size.height.magnitude
     relativePositions[key] = elementSize
   })
-
+ */
   // Save template page object id (for deleting page after update)
   const templatePageId = educationPage.objectId
 
   // Position constants
-  const startingPosition = templateElements.school.transform.translateY
+  const startingPosition = educationElements.school.transform.translateY
   const maximumPosition = pageHeight - startingPosition - 1000000
 
-  // Position variables
-  let currentPositionFromTop = 0
   let currentPageNumber = 1
-
   let pageId = `education-page-${currentPageNumber}`
+
   // Duplicate template slide and update ids
   await slides.presentations.batchUpdate({
     resource: {
-      requests: duplicateEducationPageRequest(templatePageId, pageId, currentPageNumber, templateHeadingLine, templateElements)
+      requests: duplicateEducationPageRequest(templatePageId, pageId, currentPageNumber, allPageElements)
     },
     presentationId
   })
 
+  const pageProperties = {
+    startingPageNumber: currentPageNumber,
+    startingPosition,
+    currentPositionFromTop: 0,
+    maximumPosition,
+    templatePageId
+  }
+
+  const educationOptions = {
+    templateElements: { headingLine: templateHeadingLine, ...educationElements },
+    pageTemplateElements: allPageElements,
+    nonTextElements: { headingLine: { positionAboveKey: 'degree' } },
+    textReplacementRequests: educationTextsRequests,
+    objectIdPrefix: 'education',
+    paddingPtAfter: 32,
+    language
+  }
+
+  let updatedValues
   // Loop through education items
-  for (const [index, educationItem] of educationItems.entries()) {
+  if (educationItems.length > 0) {
+    updatedValues = await populateEducationPage(slides, presentationId, educationItems, educationOptions, pageProperties)
+    pageProperties.currentPositionFromTop = updatedValues.currentPositionFromTop
+    pageProperties.startingPageNumber = updatedValues.currentPageNumber
+  }
+
+  const certificateOptions = {
+    templateElements: otherElements,
+    pageTemplateElements: allPageElements,
+    nonTextElements: {},
+    textReplacementRequests: certificateAndOtherTextsRequests,
+    objectIdPrefix: 'certificate',
+    paddingPtAfter: 16,
+    language,
+    createOnce: ['title']
+  }
+  // Loop through certificates, workshops and other items
+  if (certificatesAndOthers.length > 0) {
+    updatedValues = await populateEducationPage(slides, presentationId, certificatesAndOthers, certificateOptions, pageProperties)
+  }
+
+  // Delete template elements from all pages (objectIds were defined when page was duplicated)
+  const deleteRequests = []
+  for (let page = 1; page <= updatedValues.currentPageNumber; page++) {
+    deleteRequests.push(
+      ...Object.keys({ headingLine: templateHeadingLine, ...educationElements })
+        .map(key => ({ deleteObject: { objectId: `education-item-template-${key}-${page}` } })),
+      ...Object.keys(otherElements)
+        .map(key => ({ deleteObject: { objectId: `certificate-item-template-${key}-${page}` } }))
+    )
+  }
+  // Delete education template page
+  deleteRequests.push({ deleteObject: { objectId: templatePageId } })
+
+  await slides.presentations.batchUpdate({
+    resource: { requests: deleteRequests },
+    presentationId
+  })
+}
+
+const populateEducationPage = async (slides, presentationId, items, creationOptions, pageProperties) => {
+  let relativePositions = {}
+  let currentPageNumber = pageProperties.startingPageNumber
+  let currentPositionFromTop = pageProperties.currentPositionFromTop
+  let pageId = `education-page-${currentPageNumber}`
+
+  const { templateElements, nonTextElements, objectIdPrefix } = creationOptions
+
+  const elementsToSkip = []
+  // Helper const for elements that are used in text replacement requests
+  const textTemplateElements = Object.keys(templateElements).filter(key => !Object.keys(nonTextElements).includes(key))
+
+  for (const [index, item] of items.entries()) {
     // Create new education entry to page
     await slides.presentations.batchUpdate({
-      resource: { requests: duplicateEducationElementsRequest({headingLine: templateHeadingLine, ...templateElements}, index, currentPageNumber) },
+      resource: { requests:
+        duplicateEducationElementsRequest(templateElements, objectIdPrefix, index, currentPageNumber, elementsToSkip)
+      },
       presentationId
     })
 
     // Update data
-    // Static text replacements using palceholders: school, duration and degree
-    const requests = [
-      // Insert index to placeholders
-      {insertText: { objectId: `education-item-${index}-school`, text: index.toString(), insertionIndex: '{{ schoolName }} {{ educationDuration'.length }},
-      {insertText: { objectId: `education-item-${index}-school`, text: index.toString(), insertionIndex: '{{ schoolName'.length }},
-      // Replace placeholder with actual data
-      replaceAllTextRequest(`{{ schoolName${index} }}`, educationItem[language].school),
-      replaceAllTextRequest(`{{ educationDuration${index} }}`, `${educationItem.startYear} - ${educationItem.endYear || ''}`),
-      {insertText: { objectId: `education-item-${index}-degree`, text: index.toString(), insertionIndex: '{{ degree'.length }},
-      replaceAllTextRequest(`{{ degree${index} }}`, educationItem[language].degree.toUpperCase())
-    ]
-
-    // Insertions & replacements for major and minor (labels must be taken into account)
-    Object.keys(templateElements).filter(key => key === 'major' || key === 'minor').forEach(key => {
-      const insertionIndex = `{{ ${key}Label }}: `.length
-      const rangeObject = { type: 'FROM_START_INDEX', startIndex: insertionIndex }
-
-      if (educationItem[language][key] && educationItem[language][key].length > 0) {
-        // Delete template text and insert data
-        requests.push({deleteText: { objectId: `education-item-${index}-${key}`, textRange: rangeObject }})
-        requests.push({insertText: { objectId: `education-item-${index}-${key}`, text: educationItem[language][key], insertionIndex }})
-        // Replace static texts (labels)
-        requests.push({insertText: { objectId: `education-item-${index}-${key}`, text: index.toString(), insertionIndex: `{{ ${key}Label`.length }})
-        requests.push(replaceAllTextRequest(`{{ ${key}Label${index} }}`, EDUCATION_LABELS[`${key}Label`][language]))
-      } else {
-        // Delete the element if there's no data
-        requests.push({deleteObject: { objectId: `education-item-${index}-${key}` }})
-      }
-    })
-
-    // Additional info
-    requests.push({deleteText: { objectId: `education-item-${index}-additionalInfo`, textRange: { type: 'ALL' } }})
-    requests.push({insertText: { objectId: `education-item-${index}-additionalInfo`, text: educationItem[language].additionalInfo, insertionIndex: 0 }})
-
-    // Delete additional info element if there's no data
-    if (!educationItem[language].additionalInfo || !educationItem[language].additionalInfo.length > 0) {
-      requests.push({deleteObject: { objectId: `education-item-${index}-additionalInfo` }})
-    }
-
+    // Static text replacements using placeholders
     await slides.presentations.batchUpdate({
-      resource: { requests },
+      resource: { requests:
+        creationOptions.textReplacementRequests(index, item, creationOptions.language, textTemplateElements)
+      },
       presentationId
     })
 
@@ -604,13 +646,12 @@ export const createEducationRequests = async (slides, presentationId, educationI
       pageObjectId: pageId
     })
 
-    const currentElements = data.pageElements.filter(element => element.objectId.includes(`education-item-${index}`))
-
+    const currentElements = data.pageElements.filter(element => element.objectId.includes(`${objectIdPrefix}-item-${index}`))
     let newItemSize = 0
     // Calculate the size of all elements using their position
     currentElements.forEach(element => {
       const key = element.objectId.split('-')[3]
-      if (key !== 'headingLine') {
+      if (!Object.keys(nonTextElements).includes(key) && !elementsToSkip.includes(key)) {
         const elementHeight = Math.round(element.transform.scaleY * element.size.height.magnitude)
         // Remove padding of 0.25cm converted to points -> EMU from both ends
         const elementWidth = Math.round(element.transform.scaleX * element.size.width.magnitude) - (2 * 0.25 * 28.3 * 12700)
@@ -621,18 +662,17 @@ export const createEducationRequests = async (slides, presentationId, educationI
         newItemSize += Math.max(elementHeight, spaceNeededForText)
       }
     })
-    // Heading line element should be positioned under school name and above degree
-    relativePositions.headingLine = relativePositions.degree
+    // Custom, non-text element position (e.g. heading line element should be positioned under above key 'degree')
+    Object.entries(nonTextElements).forEach(([key, value]) => {
+      relativePositions[key] = relativePositions[value.positionAboveKey]
+    })
+    // Move to the next page if there's not enough space on the current page
+    if (pageProperties.maximumPosition < (currentPositionFromTop + newItemSize)) {
+      // Delete latest entry from page
+      const deletionRequests = currentElements.map(element => ({ deleteObject: { objectId: element.objectId } }))
 
-    // Move to the next page if there's not enought space on current page
-    if (maximumPosition < (currentPositionFromTop + newItemSize)) {
-      // Delete latest education entry from page
       await slides.presentations.batchUpdate({
-        resource: { requests:
-          currentElements.forEach((element) => {
-            return { deleteObject: { objectId: element.objectId } }
-          })
-        },
+        resource: { requests: deletionRequests },
         presentationId
       })
 
@@ -642,16 +682,27 @@ export const createEducationRequests = async (slides, presentationId, educationI
       // Duplicate template slide and update ids
       await slides.presentations.batchUpdate({
         resource: {
-          requests: duplicateEducationPageRequest(templatePageId, pageId, currentPageNumber, templateHeadingLine, templateElements)
+          requests: duplicateEducationPageRequest(pageProperties.templatePageId, pageId, currentPageNumber, creationOptions.pageTemplateElements)
         },
         presentationId
       })
+
       // Reset the current position on page
       currentPositionFromTop = 0
 
       // Create new education entry to page
       await slides.presentations.batchUpdate({
-        resource: { requests: duplicateEducationElementsRequest({headingLine: templateHeadingLine, ...templateElements}, index, currentPageNumber) },
+        resource: {
+          requests: duplicateEducationElementsRequest(templateElements, objectIdPrefix, index, currentPageNumber, elementsToSkip)
+        },
+        presentationId
+      })
+
+      // Update texts
+      await slides.presentations.batchUpdate({
+        resource: {
+          requests: creationOptions.textReplacementRequests(index, item, creationOptions.language, textTemplateElements)
+        },
         presentationId
       })
     }
@@ -661,62 +712,127 @@ export const createEducationRequests = async (slides, presentationId, educationI
     currentElements.forEach(element => {
       const key = element.objectId.split('-')[3]
       // Move all elements first to current position on page
-      moveRequests.push(moveObjectRequest('ABSOLUTE', `education-item-${index}-${key}`, element.transform, {translateY: startingPosition + currentPositionFromTop}))
-      // Move element relatively using sizes calulcated earlier
-      moveRequests.push(moveObjectRequest('RELATIVE', `education-item-${index}-${key}`, element.transform, {translateY: relativePositions[key]}))
+      moveRequests.push(moveObjectRequest(
+        'ABSOLUTE',
+        `${objectIdPrefix}-item-${index}-${key}`, // id generated during element duplication
+        element.transform, // original transform values of object
+        { translateY: pageProperties.startingPosition + currentPositionFromTop } // new transform values
+      ))
+      // Move element relatively using sizes calculated earlier
+      moveRequests.push(moveObjectRequest(
+        'RELATIVE',
+        `${objectIdPrefix}-item-${index}-${key}`,
+        element.transform,
+        { translateY: relativePositions[key] }
+      ))
     })
-
     await slides.presentations.batchUpdate({
       resource: { requests: moveRequests },
       presentationId
     })
+    // Update page position and add padding (in points)
+    currentPositionFromTop += newItemSize + (creationOptions.paddingPtAfter * 12700)
 
-    // Update page position and add padding of 32 points
-    currentPositionFromTop += newItemSize + (32 * 12700)
+    // Spme elements (e.g. title) are only created once -> skip these on next iteration (duplication, size calculation etc.)
+    if (index === 0 && creationOptions.createOnce) {
+      elementsToSkip.push(...creationOptions.createOnce)
+    }
   }
-
-  // Delete education element templates from all pages
-  const deleteRequests = []
-  for (let page = 1; page <= currentPageNumber; page++) {
-    Object.keys(templateElements).forEach(key => {
-      deleteRequests.push({ deleteObject: { objectId: `education-item-template-${key}-${currentPageNumber}` } })
-    })
-    deleteRequests.push({ deleteObject: { objectId: `education-item-template-headingLine-${currentPageNumber}` } })
-  }
-
-  // Delete project template page
-  deleteRequests.push({ deleteObject: { objectId: templatePageId } })
-
-  await slides.presentations.batchUpdate({
-    resource: { requests: deleteRequests },
-    presentationId
-  })
+  return { currentPageNumber, currentPositionFromTop }
 }
 
-const duplicateEducationPageRequest = (templatePageId, newPageId, newPageNumber, templateHeadingLine, templateElements) => {
+const duplicateEducationPageRequest = (templatePageId, newPageId, newPageNumber, templateElements) => {
   return [
     duplicateObjectRequest(templatePageId, {
       [templatePageId]: newPageId,
-      [templateHeadingLine.objectId]: `education-item-template-headingLine-${newPageNumber}`,
+      // Education items
+      [templateElements.headingLine.objectId]: `education-item-template-headingLine-${newPageNumber}`,
       [templateElements.school.objectId]: `education-item-template-school-${newPageNumber}`,
       [templateElements.degree.objectId]: `education-item-template-degree-${newPageNumber}`,
       [templateElements.major.objectId]: `education-item-template-major-${newPageNumber}`,
       [templateElements.minor.objectId]: `education-item-template-minor-${newPageNumber}`,
-      [templateElements.additionalInfo.objectId]: `education-item-template-additionalInfo-${newPageNumber}`
+      [templateElements.additionalInfo.objectId]: `education-item-template-additionalInfo-${newPageNumber}`,
+      // Certificates, workshops and other items
+      [templateElements.title.objectId]: `certificate-item-template-title-${newPageNumber}`,
+      [templateElements.nameAndYear.objectId]: `certificate-item-template-nameAndYear-${newPageNumber}`,
+      [templateElements.description.objectId]: `certificate-item-template-description-${newPageNumber}`
     }),
     // Move page
-    { updateSlidesPosition: { slideObjectIds: [ newPageId ], insertionIndex: 3 + newPageNumber } }
+    { updateSlidesPosition: { slideObjectIds: [ newPageId ], insertionIndex: 5 + newPageNumber } }
   ]
 }
 
-const duplicateEducationElementsRequest = (templateElements, currentIndex, currentPageNumber) => {
+const duplicateEducationElementsRequest = (templateElements, objectIdPrefix, currentIndex, currentPageNumber, skipKeys = []) => {
   const requests = []
-  Object.entries(templateElements).forEach(([key, element]) => {
-    const templateElementId = `education-item-template-${key}-${currentPageNumber}`
-    const newId = `education-item-${currentIndex}-${key}`
+  Object.keys(templateElements).filter(key => !skipKeys.includes(key)).forEach((key) => {
+    const templateElementId = `${objectIdPrefix}-item-template-${key}-${currentPageNumber}`
+    const newId = `${objectIdPrefix}-item-${currentIndex}-${key}`
     // Duplicate from template elements
     requests.push(duplicateObjectRequest(templateElementId, { [templateElementId]: newId }))
   })
+  return requests
+}
+
+const educationTextsRequests = (index, item, language) => {
+  /* ObjectIds must match with duplicateEducationPageRequest() */
+  const requests = [
+    // Insert index to placeholders
+    {insertText: { objectId: `education-item-${index}-school`, text: index.toString(), insertionIndex: '{{ schoolName }} {{ educationDuration'.length }},
+    {insertText: { objectId: `education-item-${index}-school`, text: index.toString(), insertionIndex: '{{ schoolName'.length }},
+    // Replace placeholder with actual data
+    replaceAllTextRequest(`{{ schoolName${index} }}`, item[language].school),
+    replaceAllTextRequest(`{{ educationDuration${index} }}`, `${item.startYear} - ${item.endYear || ''}`),
+    {insertText: { objectId: `education-item-${index}-degree`, text: index.toString(), insertionIndex: '{{ degree'.length }},
+    replaceAllTextRequest(`{{ degree${index} }}`, item[language].degree.toUpperCase())
+  ]
+
+  // Insertions & replacements for major and minor (labels must be taken into account)
+  const labelledItemKeys = ['major', 'minor']
+  labelledItemKeys.forEach(key => {
+    const insertionIndex = `{{ ${key}Label }}: `.length
+    const rangeObject = { type: 'FROM_START_INDEX', startIndex: insertionIndex }
+
+    if (item[language][key] && item[language][key].length > 0) {
+      // Delete template text and insert data
+      requests.push({deleteText: { objectId: `education-item-${index}-${key}`, textRange: rangeObject }})
+      requests.push({insertText: { objectId: `education-item-${index}-${key}`, text: item[language][key], insertionIndex }})
+      // Replace static texts (labels)
+      requests.push({insertText: { objectId: `education-item-${index}-${key}`, text: index.toString(), insertionIndex: `{{ ${key}Label`.length }})
+      requests.push(replaceAllTextRequest(`{{ ${key}Label${index} }}`, EDUCATION_LABELS[`${key}Label`][language]))
+    } else {
+      // Delete the element if there's no data
+      requests.push({deleteObject: { objectId: `education-item-${index}-${key}` }})
+    }
+  })
+
+  // Additional info
+  requests.push({deleteText: { objectId: `education-item-${index}-additionalInfo`, textRange: { type: 'ALL' } }})
+  requests.push({insertText: { objectId: `education-item-${index}-additionalInfo`, text: item[language].additionalInfo, insertionIndex: 0 }})
+
+  // Delete additional info element if there's no data
+  if (!item[language].additionalInfo || !item[language].additionalInfo.length > 0) {
+    requests.push({deleteObject: { objectId: `education-item-${index}-additionalInfo` }})
+  }
+  return requests
+}
+
+const certificateAndOtherTextsRequests = (index, item, language) => {
+  /* ObjectIds must match with duplicateEducationPageRequest() */
+  const requests = [
+    // Insert index to placeholders
+    {insertText: { objectId: `certificate-item-${index}-nameAndYear`, text: index.toString(), insertionIndex: '{{ certificateOrOtherName }} {{ certificateOrOtherYear'.length }},
+    {insertText: { objectId: `certificate-item-${index}-nameAndYear`, text: index.toString(), insertionIndex: '{{ certificateOrOtherName'.length }},
+    {insertText: { objectId: `certificate-item-${index}-description`, text: index.toString(), insertionIndex: '{{ certificateOrOtherDescription'.length }},
+
+    // Replace placeholder with actual data
+    replaceAllTextRequest(`{{ certificateOrOtherYear${index} }}`, item.year),
+    replaceAllTextRequest(`{{ certificateOrOtherName${index} }}`, item[language].name),
+    replaceAllTextRequest(`{{ certificateOrOtherDescription${index} }}`, item[language].description)
+  ]
+  // Delete description element if there's no data
+  if (!item[language].description || !item[language].description.length > 0) {
+    requests.push({deleteObject: { objectId: `certificate-item-${index}-description` }})
+  }
   return requests
 }
 
@@ -790,7 +906,8 @@ const calculateTextElementHeight = (elemenWithText, elementWidth, overrideTextCo
           height += spaceAbove + spaceBelow + textStyle.fontSize.magnitude * 12700 * lineSpacing
         }
         // Append the width of text to current line's width
-        currentLineWidth += 1.3 * getWidthOfText(
+        // Use factor of 1.4 (experimental) for taking into account long words splitting to next line
+        currentLineWidth += 1.4 * getWidthOfText(
           overrideTextContent || textElement.textRun.content,
           textStyle.fontFamily,
           textStyle.fontSize.magnitude,
@@ -821,6 +938,7 @@ const getWidthOfText = (text, fontName, fontSize, bold = false, italic = false, 
   // context.font uses the same syntax as the CSS font property: context.font="italic small-caps bold 12px arial";
   const fontWeight = bold ? 'bold' : (weight || '')
   getWidthOfText.context.font = `${italic ? 'italic' : ''} ${fontWeight} ${fontSize}px ${fontName}`
+  // Convert pixels to points (12 pt = 16 px) and then to EMU (1 EMU = 12700 pt) -> 12 / 16 * 12700 = 9525
   const widthInEMU = Math.round(getWidthOfText.context.measureText(text).width * 9525)
   return widthInEMU
 }

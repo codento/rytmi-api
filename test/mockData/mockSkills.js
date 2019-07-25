@@ -1,23 +1,23 @@
 
 const uncategorizedSkillGroup = {
-  title: 'Uncategorized'
+  title: { en: 'Uncategorized', fi: 'Uncategorized' }
 }
 
 const softwareDevelopment = {
-  title: 'Software development'
+  title: { en: 'Software development', fi: 'Sovelluskehitys' }
 }
 
 const uncategorized = {
-  title: 'Uncategorized',
+  title: { en: 'Uncategorized', fi: 'Uncategorized' },
   skillGroupId: 1
 }
 
 const frontEndDevelopment = {
-  title: 'Front-End development',
+  title: { en: 'Front-End development', fi: 'Etupään kehitys' },
   skillGroupId: 2
 }
 const backEndDevelopment = {
-  title: 'Back-End development',
+  title: { en: 'Back-End development', fi: 'Takapään kehitys' },
   skillGroupId: 2
 }
 
