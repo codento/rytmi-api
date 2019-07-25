@@ -6,33 +6,56 @@ export default class ProjectService extends CrudService {
     super(models.project)
   }
 
+  async create (attrs) {
+    delete attrs.id
+    let project = models.project.build(attrs)
+    project = await project.save()
+    if (attrs.skills) {
+      await project.setSkills(models.skill.build(attrs.skills))
+    }
+    return models.project.findByPk(project.id, {
+      include: [{
+        model: models.skill
+      }]
+    })
+  }
+
   // Overrides CrudService's function
   async getAll () {
-    const projects = await models.project.findAll().map((entry) => entry.toJSON())
-    const projectsWithSkills = []
-    const projectSkills = await models.projectSkill.findAll()
-    projects.forEach(project => projectsWithSkills.push({
-      ...project,
-      projectSkills: projectSkills.filter(skill => skill.projectId === project.id).map(skill => ({ skillId: skill.skillId, projectSkillId: skill.id }))
-    }))
-    return projectsWithSkills
+    return models.project.findAll({
+      include: [{
+        model: models.skill
+      }],
+      order: [['id']]
+    })
   }
 
   // Overrides CrudService's function
   async get (id) {
-    const project = await models.project.findByPk(id)
-    const projectSkills = await models.projectSkill.findAll({where: {projectId: project.id}})
-    return {
-      ...project.toJSON(),
-      projectSkills: projectSkills.map(skill => ({ skillId: skill.skillId }))
-    }
+    return models.project.findByPk(id, {
+      include: [{
+        model: models.skill
+      }]
+    })
   }
 
   // Overrides CrudService's function
   async update (id, attrs) {
     attrs.id = parseInt(id)
     await models.project.update(attrs, { where: { id } })
-    return this.get(id)
+    const project = await models.project.findOne({
+      include: [{
+        model: models.skill
+      }],
+      where: { id } })
+    if (attrs.skills) {
+      await project.setSkills(models.skill.build(attrs.skills))
+    }
+    return models.project.findOne({
+      include: [{
+        model: models.skill
+      }],
+      where: { id: id } })
   }
 
   // Overrides CrudService's function

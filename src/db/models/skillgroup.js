@@ -1,7 +1,7 @@
 module.exports = (sequelize, DataTypes) => {
   const SkillGroup = sequelize.define('skillGroup', {
     title: {
-      type: DataTypes.STRING,
+      type: DataTypes.JSONB,
       allowNull: false,
       unique: true
     }

@@ -89,6 +89,7 @@ module.exports = (sequelize, DataTypes) => {
 
   Project.associate = (models) => {
     models.project.belongsToMany(models.profile, {through: models.profileProject, foreignKey: 'projectId'})
+    models.project.belongsToMany(models.skill, { through: 'projectSkill', onDelete: 'CASCADE' })
   }
 
   return Project

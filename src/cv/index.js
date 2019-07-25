@@ -16,19 +16,34 @@ export default () => {
 
   cv.post('/', async (req, res, next) => {
     logger.debug('New POST request to /cv from', req.url)
+    let id
     try {
-      const { id } = await service.create()
-      logger.debug('Created new copy with id', id)
-      setTimeout(async () => {
-        logger.debug('Populating CV with data...')
-        await service.update(id, req.body)
-        logger.debug('Exporting CV to PDF...')
-        const filePath = await service.runExport(id)
-        logger.debug('PDF downloaded to', filePath)
-        res.download(filePath)
-      }, 2000)
-    } catch (e) {
-      next(e)
+      const data = await service.create()
+      id = data.id
+    } catch (err) {
+      logger.debug('Error copying template:', err)
+      return res.status(500).send({ error: 'GENERIC', description: 'There was an error when copying cv template' })
+    }
+
+    logger.debug('Created new copy with id', id)
+    logger.debug('Populating CV with data...')
+    try {
+      await service.update(id, req.body)
+    } catch (err) {
+      logger.debug('Error updating template:', err)
+      await service.deleteFile(id)
+      return res.status(500).send({ error: 'GENERIC', description: 'There was an error updating cv template' })
+    }
+
+    logger.debug('Exporting CV to PDF...')
+    try {
+      const filePath = await service.runExport(id)
+      logger.debug('PDF downloaded to', filePath)
+      res.download(filePath)
+    } catch (err) {
+      logger.debug('Error while exporting:', err)
+      await service.deleteFile(id)
+      return res.status(500).send({ error: 'GENERIC', description: 'Cv export failed' })
     }
   })
 
