@@ -9,7 +9,7 @@ export const STATIC_TEXTS = {
   skillTitle: { en: 'Skill', fi: 'Taito' },
   levelTitle: { en: 'Level', fi: 'Taso' },
   workExperienceTitle: { en: 'WORK EXPERIENCE', fi: 'TYÖKOKEMUS' },
-  projectsTitle: { en: 'PROJECTS', fi: 'PROJEKTIT' },
+  projectsTitle: { en: 'PROJECTS/ROLES', fi: 'PROJEKTIT/ROOLIT' },
   internalProjectsTitle: { en: 'Internal projects', fi: 'Sisäiset projektit' },
   projectRoleLabel: { en: 'Role:', fi: 'Rooli:' },
   projectSkillsLabel: { en: 'Technologies:', fi: 'Teknologiat:' },
