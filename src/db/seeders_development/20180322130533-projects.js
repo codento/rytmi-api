@@ -42,7 +42,10 @@ module.exports = {
             fi: `(suomeksi) ${faker.lorem.sentences(1, 3)}`,
             en: `(in English) ${faker.lorem.sentences(1, 3)}`
           }),
-          customerName: JSON.stringify({ fi: companyName, en: companyName })
+          customerName: JSON.stringify({ fi: companyName, en: companyName }),
+          isSecret: i < 2,
+          isInternal: i > 2 && i < 8,
+          isConfidential: i > 35
         })
         projects.push(project)
       }

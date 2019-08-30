@@ -38,6 +38,10 @@ module.exports = (sequelize, DataTypes) => {
     isInternal: {
       type: DataTypes.BOOLEAN,
       allowNull: false
+    },
+    isConfidential: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false
     }
   }, {
     validate: {
