@@ -8,8 +8,8 @@ const skillNames = ['Vue.js', 'Node.js', 'JavaScript', 'Java', 'Python', 'React.
 factory.define('skill')
   .attr('name')
   .attr('description', () => { return faker.lorem.paragraph() })
-  .attr('createdAt', () => new Date())
-  .attr('updatedAt', () => new Date())
+  .attr('createdAt', () => { return faker.date.between('2016-01-01', '2016-12-31') })
+  .attr('updatedAt', () => { return faker.date.between('2017-01-01', '2017-12-31') })
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
