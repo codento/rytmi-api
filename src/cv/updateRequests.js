@@ -62,15 +62,18 @@ export const createProfileImageRequest = (pictureUrl, titlePage) => {
   }
 }
 
-export const createTopProjectsReplacementRequests = (topProjects) => {
+export const createTopProjectsReplacementRequests = (topProjects, currentLanguage) => {
   const requests = []
   const arr = [1, 2, 3]
   arr.map((index) => {
     // If there are not enough top projects (3), replace text with empty string
     const project = index <= topProjects.length ? topProjects[index - 1] : undefined
+    const customerName = project && project.projectCustomer ? `(${project.projectCustomer})` : ''
     requests.push(
       replaceAllTextRequest(`{{ projectName${index} }}`, project ? project.projectName : ''),
-      replaceAllTextRequest(`{{ customer${index} }}`, project && project.projectCustomer ? `(${project.projectCustomer})` : ''),
+      replaceAllTextRequest(`{{ customer${index} }}`, project && project.isConfidential
+        ? `(${STATIC_TEXTS.confidentialCustomerLabel[currentLanguage]})`
+        : customerName),
       replaceAllTextRequest(`{{ projectRole${index} }}`, project ? project.projectRole : ''),
       replaceAllTextRequest(`{{ projectDuration${index} }}`, project ? project.projectDuration : '')
     )
@@ -623,22 +626,24 @@ export const createEducationRequests = async (slides, presentationId, educationI
   }
 
   // Delete template elements from all pages (objectIds were defined when page was duplicated)
-  const deleteRequests = []
-  for (let page = 1; page <= updatedValues.currentPageNumber; page++) {
-    deleteRequests.push(
-      ...Object.keys({ headingLine: templateHeadingLine, ...educationElements })
-        .map(key => ({ deleteObject: { objectId: `education-item-template-${key}-${page}` } })),
-      ...Object.keys(otherElements)
-        .map(key => ({ deleteObject: { objectId: `certificate-item-template-${key}-${page}` } }))
-    )
-  }
-  // Delete education template page
-  deleteRequests.push({ deleteObject: { objectId: templatePageId } })
+  if (updatedValues) {
+    const deleteRequests = []
+    for (let page = 1; page <= updatedValues.currentPageNumber; page++) {
+      deleteRequests.push(
+        ...Object.keys({ headingLine: templateHeadingLine, ...educationElements })
+          .map(key => ({ deleteObject: { objectId: `education-item-template-${key}-${page}` } })),
+        ...Object.keys(otherElements)
+          .map(key => ({ deleteObject: { objectId: `certificate-item-template-${key}-${page}` } }))
+      )
+    }
+    // Delete education template page
+    deleteRequests.push({ deleteObject: { objectId: templatePageId } })
 
-  await slides.presentations.batchUpdate({
-    resource: { requests: deleteRequests },
-    presentationId
-  })
+    await slides.presentations.batchUpdate({
+      resource: { requests: deleteRequests },
+      presentationId
+    })
+  }
 }
 
 const populateEducationPage = async (slides, presentationId, items, creationOptions, pageProperties) => {

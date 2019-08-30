@@ -73,7 +73,7 @@ const update = async (fileId, cv) => {
     requests: [
       createStaticTextReplacementRequests(cv),
       createProfileImageRequest(cv.employeePicture, titlePage),
-      createTopProjectsReplacementRequests(cv.topProjects),
+      createTopProjectsReplacementRequests(cv.topProjects, cv.currentLanguage),
       createTopSkillsReplacementRequests(cv.topSkills),
       createTopSkillsAndLanguagesLevelVisualizationRequest(cv.topSkills, cv.languages, titlePage),
       createLanguagesReplacementRequest(cv.languages)
@@ -115,7 +115,11 @@ const update = async (fileId, cv) => {
 
     // Replace internal projects' customer name with correct label
     employer.projects = employer.projects.map(project => {
-      const mappedCustomer = project.projectCustomer || STATIC_TEXTS.internalProjectsTitle[cv.currentLanguage]
+      let mappedCustomer = project.projectCustomer || STATIC_TEXTS.internalProjectsTitle[cv.currentLanguage]
+      // Replace confidential projects customer name
+      if (project.isConfidential) {
+        mappedCustomer = STATIC_TEXTS.confidentialCustomerLabel[cv.currentLanguage]
+      }
       return { ...project, projectCustomer: mappedCustomer }
     })
   })

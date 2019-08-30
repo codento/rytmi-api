@@ -11,6 +11,7 @@ export const STATIC_TEXTS = {
   workExperienceTitle: { en: 'WORK EXPERIENCE', fi: 'TYÖKOKEMUS' },
   projectsTitle: { en: 'PROJECTS/ROLES', fi: 'PROJEKTIT/ROOLIT' },
   internalProjectsTitle: { en: 'Internal projects', fi: 'Sisäiset projektit' },
+  confidentialCustomerLabel: { en: 'Customer: confidential', fi: 'Asiakkuus: luottamuksellinen' },
   projectRoleLabel: { en: 'Role:', fi: 'Rooli:' },
   projectSkillsLabel: { en: 'Technologies:', fi: 'Teknologiat:' },
   projectDescLabel: { en: 'Description:', fi: 'Kuvaus:' },
