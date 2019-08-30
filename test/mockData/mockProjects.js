@@ -8,6 +8,7 @@ const webapp = {
   customerName: { en: 'Best customer ever', fi: 'Asiakas' },
   isInternal: false,
   isSecret: false,
+  isConfidential: false,
   skills: []
 }
 
@@ -20,6 +21,7 @@ const customerHelp = {
   customerName: { en: 'Best customer ever', fi: '' },
   isInternal: false,
   isSecret: false,
+  isConfidential: false,
   skills: []
 }
 
