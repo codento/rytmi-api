@@ -74,6 +74,7 @@ describe('API Projects endpoint', () => {
         name: { en: 'Lean workshop', fi: 'Lean workshoppi' },
         customerName: { en: 'Best customer ever', fi: 'Ketterä asiakas' },
         isSecret: false,
+        isConfidential: false,
         employerId: employerCodento.id,
         isInternal: false
       }
@@ -90,6 +91,7 @@ describe('API Projects endpoint', () => {
         name: { en: 'Refactoring old code', fi: 'Refaktorointi' },
         customerName: { en: null, fi: null },
         isSecret: false,
+        isConfidential: false,
         employerId: employerCodento.id,
         isInternal: true
       }
@@ -203,6 +205,7 @@ describe('API Projects endpoint', () => {
         name: { en: 'Lean workshop', fi: 'Lean workshoppi' },
         customerName: { en: 'Best customer ever', fi: 'Ketterä asiakas' },
         isSecret: false,
+        isConfidential: false,
         isInternal: false,
         employerId: 1
       }

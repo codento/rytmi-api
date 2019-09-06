@@ -62,15 +62,18 @@ export const createProfileImageRequest = (pictureUrl, titlePage) => {
   }
 }
 
-export const createTopProjectsReplacementRequests = (topProjects) => {
+export const createTopProjectsReplacementRequests = (topProjects, currentLanguage) => {
   const requests = []
   const arr = [1, 2, 3]
   arr.map((index) => {
     // If there are not enough top projects (3), replace text with empty string
     const project = index <= topProjects.length ? topProjects[index - 1] : undefined
+    const customerName = project && project.projectCustomer ? `(${project.projectCustomer})` : ''
     requests.push(
       replaceAllTextRequest(`{{ projectName${index} }}`, project ? project.projectName : ''),
-      replaceAllTextRequest(`{{ customer${index} }}`, project && project.projectCustomer ? `(${project.projectCustomer})` : ''),
+      replaceAllTextRequest(`{{ customer${index} }}`, project && project.isConfidential
+        ? `(${STATIC_TEXTS.confidentialCustomerLabel[currentLanguage]})`
+        : customerName),
       replaceAllTextRequest(`{{ projectRole${index} }}`, project ? project.projectRole : ''),
       replaceAllTextRequest(`{{ projectDuration${index} }}`, project ? project.projectDuration : '')
     )
@@ -244,48 +247,56 @@ const getSkillTableObjectId = (skillPageNumber, originalSkillTableObjectId) => s
 export const createProjectRequests = async (slides, presentationId, workHistory, projectPage, pageHeight) => {
   // Save template object ids
   const templatePageId = projectPage.objectId
-  const [currentEmployerElement, currentProjectElement] = projectPage.pageElements.filter(element => element.table)
-  const employerTemplateId = currentEmployerElement.objectId
+  const [employerElement, currentProjectElement] = projectPage.pageElements.filter(element => element.table)
+  const employerTemplateId = employerElement.objectId
   const projectTemplateId = currentProjectElement.objectId
+  // Find the correct element (page should have only one line element)
+  const templateLine = projectPage.pageElements.find(element => 'line' in element)
+  const templateLineId = projectPage.pageElements.find(element => 'line' in element).objectId
 
   // Position constants
-  const startingPosition = currentEmployerElement.transform.translateY
+  const startingPosition = employerElement.transform.translateY
+  const startingLinePosition = templateLine.transform.translateY
   const maximumPosition = pageHeight - startingPosition - 1000000
 
   // Position variables
   let currentPositionFromTop = 0
-  let currentPageNumber = 0
+  let currentPageNumber = 1
 
   // Object to store current page element ids
   const currentIds = {
-    pageId: null,
-    employerTableId: null,
-    projectTableTemplateId: null
+    pageId: `project-page-${currentPageNumber}`,
+    employerTableId: `employer-template-${currentPageNumber}`,
+    employerTableLineId: `heading-line-template-${currentPageNumber}`, // Line shape for styling
+    projectTableTemplateId: `project-template-${currentPageNumber}`
   }
+
+  // Duplicate template slide
+  await slides.presentations.batchUpdate({
+    resource: {
+      requests: duplicateProjectPageRequest(templatePageId, employerTemplateId, templateLineId, projectTemplateId, currentPageNumber, currentIds)
+    },
+    presentationId
+  })
 
   // Loop through employers
   for (const [employerIndex, employer] of workHistory.entries()) {
-    // Update page variables
-    currentPageNumber++
-    currentIds.pageId = `project-page-${currentPageNumber}`
-    currentIds.employerTableId = `${currentIds.pageId}-employer-${employerIndex}`
-    currentIds.projectTableTemplateId = `project-template-${currentPageNumber}`
+    const copiedEmployerTableId = `employer-${employerIndex}`
+    const copiedEmployerTableLineId = `employer-heading-${employerIndex}`
 
-    // Duplicate template slide
+    let employerRequests = [
+      duplicateObjectRequest(currentIds.employerTableId, {[currentIds.employerTableId]: copiedEmployerTableId}),
+      duplicateObjectRequest(currentIds.employerTableLineId, {[currentIds.employerTableLineId]: copiedEmployerTableLineId}),
+      updateEmployerTableRequests(copiedEmployerTableId, employer)
+    ]
+
+    // If there are no projects, delete projects title row
+    if (employer.projects.length === 0) {
+      employerRequests.push(deleteTableRowRequest(copiedEmployerTableId, 3))
+    }
+
     await slides.presentations.batchUpdate({
-      resource: {
-        requests: duplicateProjectPageRequest(templatePageId, employerTemplateId, projectTemplateId, currentPageNumber, currentIds)
-      },
-      presentationId
-    })
-
-    // Update position
-    currentPositionFromTop = 0
-
-    logger.debug('Updating employer information on page', currentIds.pageId)
-    // Update employer data
-    await slides.presentations.batchUpdate({
-      resource: { requests: updateEmployerTableRequests(currentIds.employerTableId, employer) },
+      resource: { requests: employerRequests },
       presentationId
     })
 
@@ -295,21 +306,80 @@ export const createProjectRequests = async (slides, presentationId, workHistory,
       pageObjectId: currentIds.pageId
     })
 
-    // Set the current position on page using the actual size of the employer table
-    currentPositionFromTop = calculateTableHeight(
-      data.pageElements.find(element => element.objectId === currentIds.employerTableId).table
+    // Empty requests array
+    employerRequests = []
+
+    const currentEmployerTable = data.pageElements.find(element => element.objectId === copiedEmployerTableId)
+    const employerTableSize = calculateTableHeight(currentEmployerTable.table)
+
+    // If there is not enough space left, move to the next page
+    if (maximumPosition < (currentPositionFromTop + employerTableSize)) {
+      // Delete latest employer entry from current page (moving objects to another page not possible?)
+      employerRequests.push({ deleteObject: { objectId: copiedEmployerTableId } })
+      employerRequests.push({ deleteObject: { objectId: copiedEmployerTableLineId } })
+
+      // Update page template variables
+      currentPageNumber++
+      currentIds.pageId = `project-page-${currentPageNumber}`
+      currentIds.employerTableId = `employer-template-${currentPageNumber}`
+      currentIds.employerTableLineId = `heading-line-template-${currentPageNumber}`
+      currentIds.projectTableTemplateId = `project-template-${currentPageNumber}`
+
+      logger.debug('Creating a new project page', currentIds.pageId)
+      // Duplicate template slide
+      employerRequests.push(duplicateProjectPageRequest(templatePageId, employerTemplateId, templateLineId, projectTemplateId, currentPageNumber, currentIds))
+
+      // Update position
+      currentPositionFromTop = 0
+
+      // Create new objects and update employer data
+      employerRequests.push(duplicateObjectRequest(currentIds.employerTableId, {[currentIds.employerTableId]: copiedEmployerTableId}))
+      employerRequests.push(duplicateObjectRequest(currentIds.employerTableLineId, {[currentIds.employerTableLineId]: copiedEmployerTableLineId}))
+      employerRequests.push(updateEmployerTableRequests(copiedEmployerTableId, employer))
+
+      // If there are no projects, delete projects title row
+      if (employer.projects.length === 0) {
+        employerRequests.push(deleteTableRowRequest(copiedEmployerTableId, 3))
+      }
+    }
+
+    // Move employer objects if needed
+    if (currentPositionFromTop !== 0) {
+      // Add padding of 50 points
+      currentPositionFromTop += 50 * 12700
+      // Move objects
+      employerRequests.push(moveObjectRequest('RELATIVE', copiedEmployerTableId, currentEmployerTable.transform, {translateY: currentPositionFromTop}))
+      employerRequests.push(moveObjectRequest('ABSOLUTE', copiedEmployerTableLineId, templateLine.transform, {translateY: startingLinePosition}))
+      employerRequests.push(moveObjectRequest('RELATIVE', copiedEmployerTableLineId, templateLine.transform, {translateY: currentPositionFromTop}))
+    }
+
+    // Check if the styling element used with employer name needs to be moved
+    const employerNameRow = currentEmployerTable.table.tableRows[0]
+    const employerNameElementWidth = currentEmployerTable.table.tableColumns[0].columnWidth.magnitude
+    const sizeNeededForText = calculateTextElementHeight(
+      employerNameRow.tableCells[0],
+      employerNameElementWidth
     )
 
-    // If (theoretically) there are no projets, delete projects title row
-    if (employer.projects.length === 0) {
+    if (sizeNeededForText > employerNameRow.rowHeight.magnitude) {
+      // Move the line extra space needed
+      employerRequests.push(moveObjectRequest('RELATIVE', copiedEmployerTableLineId, templateLine.transform, {translateY: sizeNeededForText - employerNameRow.rowHeight.magnitude}))
+    }
+
+    // Set the current position on page using the actual size of the employer table
+    currentPositionFromTop += employerTableSize
+
+    // Send requests, if any
+    if (employerRequests.length > 0) {
       await slides.presentations.batchUpdate({
-        resource: { requests: [deleteTableRowRequest(currentIds.employerTableId, 3)] },
+        resource: { requests: employerRequests },
         presentationId
       })
     }
 
     // Loop through employer's projects
     for (const [projectIndex, project] of employer.projects.entries()) {
+      const projectRequests = []
       // Column idexes for project table texts
       let columnIndexesWithText = [0, 0, 1, 1, 1]
       // If customer is the same as previously, don't display it the second time
@@ -323,11 +393,10 @@ export const createProjectRequests = async (slides, presentationId, workHistory,
       }
 
       // Create a new project table
-      let copiedProjectObjectId = `employer-${employerIndex}-project-${projectIndex}`
+      const copiedProjectObjectId = `employer-${employerIndex}-project-${projectIndex}`
       await slides.presentations.batchUpdate({
         resource: {
           requests: [
-            // Duplicate template slide
             duplicateObjectRequest(currentIds.projectTableTemplateId, {[currentIds.projectTableTemplateId]: copiedProjectObjectId}),
             updateProjectTableRequest(copiedProjectObjectId, project)
           ]
@@ -349,69 +418,38 @@ export const createProjectRequests = async (slides, presentationId, workHistory,
 
       // If there is not enough space left, move to the next page
       if (maximumPosition < (currentPositionFromTop + projectTableSize)) {
-        // Delete latest project entry from page
-        await slides.presentations.batchUpdate({
-          resource: { requests: [{ deleteObject: { objectId: copiedProjectObjectId } }] },
-          presentationId
-        })
+        // Delete latest project entry from current page before moving to next page
+        // (moving objects to another page not possible?)
+        projectRequests.push({ deleteObject: { objectId: copiedProjectObjectId } })
 
         // Update page variables
         currentPageNumber++
         currentIds.pageId = `project-page-${currentPageNumber}`
-        currentIds.employerTableId = `${currentIds.pageId}-employer-${employerIndex}`
+        currentIds.employerTableId = `employer-template-${currentPageNumber}`
+        currentIds.employerTableLineId = `heading-line-template-${currentPageNumber}`
         currentIds.projectTableTemplateId = `project-template-${currentPageNumber}`
 
+        logger.debug('Creating a new project page', currentIds.pageId)
         // Duplicate template slide
-        await slides.presentations.batchUpdate({
-          resource: {
-            requests: duplicateProjectPageRequest(templatePageId, employerTemplateId, projectTemplateId, currentPageNumber, currentIds)
-          },
-          presentationId
-        })
+        projectRequests.push(duplicateProjectPageRequest(templatePageId, employerTemplateId, templateLineId, projectTemplateId, currentPageNumber, currentIds))
 
-        // Update position
+        // Update position and page count
         currentPositionFromTop = 0
 
-        // Refresh slide for finding line element
-        const { data } = await slides.presentations.pages.get({
-          presentationId,
-          pageObjectId: currentIds.pageId
-        })
-
-        // Find out the object id of the only line element (styling element used in employer heading) and delete it
-        const lineObject = data.pageElements.find(element => element.line)
-        await slides.presentations.batchUpdate({
-          resource: { requests: [
-            { deleteObject: { objectId: lineObject.objectId } },
-            // Delete employer section also
-            { deleteObject: { objectId: currentIds.employerTableId } }
-          ]},
-          presentationId
-        })
-
-        // Create a new project table
-        copiedProjectObjectId = `employer-${employerIndex}-project-${projectIndex}`
-        await slides.presentations.batchUpdate({
-          resource: {
-            requests: [
-              // Duplicate template slide
-              duplicateObjectRequest(currentIds.projectTableTemplateId, {[currentIds.projectTableTemplateId]: copiedProjectObjectId}),
-              updateProjectTableRequest(copiedProjectObjectId, project)
-            ]
-          },
-          presentationId
-        })
+        // Recreate the project table
+        projectRequests.push(duplicateObjectRequest(currentIds.projectTableTemplateId, {[currentIds.projectTableTemplateId]: copiedProjectObjectId}))
+        projectRequests.push(updateProjectTableRequest(copiedProjectObjectId, project))
       }
 
-      // Move project table
+      // // Move the table first to top of the page
+      projectRequests.push(moveObjectRequest('ABSOLUTE', copiedProjectObjectId, currentProjectElement.transform, {translateY: startingPosition}))
+      // Move then down using relative positioning
+      projectRequests.push(moveObjectRequest('RELATIVE', copiedProjectObjectId, currentProjectElement.transform, {translateY: currentPositionFromTop}))
+
+      // Send requests
       await slides.presentations.batchUpdate({
         resource: {
-          requests: [
-            // Move the table first to top of the page
-            moveObjectRequest('ABSOLUTE', copiedProjectObjectId, currentProjectElement.transform, {translateY: startingPosition}),
-            // Move then down using relative positioning
-            moveObjectRequest('RELATIVE', copiedProjectObjectId, currentProjectElement.transform, {translateY: currentPositionFromTop})
-          ]
+          requests: projectRequests
         },
         presentationId
       })
@@ -421,11 +459,12 @@ export const createProjectRequests = async (slides, presentationId, workHistory,
     }
   }
 
-  // Delete project table template from all pages
+  // Delete template tables from all pages
   const deleteRequests = []
   for (let page = 1; page <= currentPageNumber; page++) {
-    const tableToDelete = `project-template-${page}`
-    deleteRequests.push({ deleteObject: { objectId: tableToDelete } })
+    deleteRequests.push({ deleteObject: { objectId: `employer-template-${page}` } })
+    deleteRequests.push({ deleteObject: { objectId: `heading-line-template-${page}` } })
+    deleteRequests.push({ deleteObject: { objectId: `project-template-${page}` } })
   }
   // Delete project template page
   deleteRequests.push({ deleteObject: { objectId: templatePageId } })
@@ -436,16 +475,17 @@ export const createProjectRequests = async (slides, presentationId, workHistory,
   })
 }
 
-const duplicateProjectPageRequest = (templatePageId, employerTemplateId, projectTemplateId, pageNumber, nextIds) => {
+const duplicateProjectPageRequest = (templatePageId, employerTemplateId, employerTableLineId, projectTemplateId, pageNumber, nextIds) => {
   logger.debug('Duplicating project page, the next page will be', nextIds.pageId)
   return [
     duplicateObjectRequest(templatePageId, {
       [templatePageId]: nextIds.pageId,
       [employerTemplateId]: nextIds.employerTableId,
+      [employerTableLineId]: nextIds.employerTableLineId,
       [projectTemplateId]: nextIds.projectTableTemplateId
     }),
     // Move page
-    {updateSlidesPosition: { slideObjectIds: [ nextIds.pageId ], insertionIndex: 4 + pageNumber }}
+    {updateSlidesPosition: { slideObjectIds: [ nextIds.pageId ], insertionIndex: 3 + pageNumber }}
   ]
 }
 
@@ -462,7 +502,7 @@ const updateEmployerTableRequests = (tableObjectId, employer) => {
   requests.push(
     // Insert actual employer information
     modifyTableTextRequest('insertText', tableObjectId, 0, 0, employer.jobDuration),
-    modifyTableTextRequest('insertText', tableObjectId, 0, 0, employer.employerName + ' - '),
+    modifyTableTextRequest('insertText', tableObjectId, 0, 0, employer.employerName + ' – '),
     modifyTableTextRequest('insertText', tableObjectId, 1, 0, employer.jobTitle.toUpperCase()),
     modifyTableTextRequest('insertText', tableObjectId, 2, 0, employer.jobDescription)
   )
@@ -506,7 +546,7 @@ const updateProjectTableRequest = (tableObjectId, project) => {
 }
 
 export const createEducationRequests = async (slides, presentationId, educationItems, certificatesAndOthers, language, educationPage, pageHeight) => {
-  // Find the correct element (title page should have only one image element)
+  // Find the correct element (title page should have only one line element)
   const templateHeadingLine = educationPage.pageElements.find(element => 'line' in element)
 
   // Find template elements from page
@@ -525,13 +565,7 @@ export const createEducationRequests = async (slides, presentationId, educationI
   }
 
   const allPageElements = { headingLine: templateHeadingLine, ...educationElements, ...otherElements }
-  /* const relativePositions = {}
-  // Calculate the size and position of education elements first (filled first)
-  Object.entries(educationElements).forEach(([key, element]) => {
-    const elementSize = element.transform.scaleY * element.size.height.magnitude
-    relativePositions[key] = elementSize
-  })
- */
+
   // Save template page object id (for deleting page after update)
   const templatePageId = educationPage.objectId
 
@@ -592,22 +626,24 @@ export const createEducationRequests = async (slides, presentationId, educationI
   }
 
   // Delete template elements from all pages (objectIds were defined when page was duplicated)
-  const deleteRequests = []
-  for (let page = 1; page <= updatedValues.currentPageNumber; page++) {
-    deleteRequests.push(
-      ...Object.keys({ headingLine: templateHeadingLine, ...educationElements })
-        .map(key => ({ deleteObject: { objectId: `education-item-template-${key}-${page}` } })),
-      ...Object.keys(otherElements)
-        .map(key => ({ deleteObject: { objectId: `certificate-item-template-${key}-${page}` } }))
-    )
-  }
-  // Delete education template page
-  deleteRequests.push({ deleteObject: { objectId: templatePageId } })
+  if (updatedValues) {
+    const deleteRequests = []
+    for (let page = 1; page <= updatedValues.currentPageNumber; page++) {
+      deleteRequests.push(
+        ...Object.keys({ headingLine: templateHeadingLine, ...educationElements })
+          .map(key => ({ deleteObject: { objectId: `education-item-template-${key}-${page}` } })),
+        ...Object.keys(otherElements)
+          .map(key => ({ deleteObject: { objectId: `certificate-item-template-${key}-${page}` } }))
+      )
+    }
+    // Delete education template page
+    deleteRequests.push({ deleteObject: { objectId: templatePageId } })
 
-  await slides.presentations.batchUpdate({
-    resource: { requests: deleteRequests },
-    presentationId
-  })
+    await slides.presentations.batchUpdate({
+      resource: { requests: deleteRequests },
+      presentationId
+    })
+  }
 }
 
 const populateEducationPage = async (slides, presentationId, items, creationOptions, pageProperties) => {
@@ -758,7 +794,7 @@ const duplicateEducationPageRequest = (templatePageId, newPageId, newPageNumber,
       [templateElements.description.objectId]: `certificate-item-template-description-${newPageNumber}`
     }),
     // Move page
-    { updateSlidesPosition: { slideObjectIds: [ newPageId ], insertionIndex: 5 + newPageNumber } }
+    { updateSlidesPosition: { slideObjectIds: [ newPageId ], insertionIndex: 4 + newPageNumber } }
   ]
 }
 
@@ -915,7 +951,6 @@ const calculateTextElementHeight = (elemenWithText, elementWidth, overrideTextCo
           textStyle.italic,
           textStyle.weightedFontFamily.weight
         )
-
         if (currentLineWidth > elementWidth) {
           // Round up
           const linesToAdd = Math.ceil(currentLineWidth / elementWidth) - 1

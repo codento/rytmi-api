@@ -8,32 +8,6 @@
 
 ## Usage
 
-### Add new skills
-
-Adding new skills to the database is done using Sequelize migrations/seeders.  
-
-create a new seeder file in src/db/seeders:
-
-```javascript
-// src/db/seeders/20180328102150-add-new-skills.js
-const dbUtils = require('../utils')
-
-const skills = {
-  'Agile methods': 'Agile consulting',
-  'Lean methods': '',
-  'S3': 'Sociocracy 3.0 methods',
-  'Facilitating': 'Generic facilitating methods'
-}
-
-module.exports = dbUtils.skillSeeder(skills)
-```
-
-run seeders with command:
-
-```
-sequelize db:seed:all
-```
-
 ## Development
 
 Install dependencies:
@@ -60,7 +34,21 @@ JWT_VALID_TIME=3600
 
 PORT=8081
 ```
-
+Set the correct google service account credentials in the google credentials file `google_service_account_credentials.json`:
+```
+{
+  "type": "service_account",
+  "project_id": {project_id},
+  "private_key_id": {private_key_id},
+  "private_key": {private_key},
+  "client_email": {client_email},
+  "client_id": {client_id},
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": {client_x509_cert_url}
+}
+```
 ### Development database
 
 Use the Postgres Docker image:
@@ -73,7 +61,7 @@ Make sure you don't have a local postgresql db running on the default port (5432
 
 ### Setting up the database / migrating to the latest version
 
-For migrations you must use sequelize-cli. Run it from under node_modules or install it globally:
+For migrations you must use sequelize-cli. Run it from under node_modules, install it globally or use npx like `npx sequelize db:migrate`:
 
 ```
 npm install sequelize-cli -g

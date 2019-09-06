@@ -48,7 +48,6 @@ const create = async () => {
       }
     }).catch((err) => { throw err })
   }, 1000)
-
   return data
 }
 
@@ -68,22 +67,26 @@ const update = async (fileId, cv) => {
 
   const [titlePage, skillsPage, projectsPage, educationPage] = data.slides
   const pageHeight = data.pageSize.height.magnitude
+
+  // Static text replacements and front page replacements
   const resource = {
     requests: [
       createStaticTextReplacementRequests(cv),
       createProfileImageRequest(cv.employeePicture, titlePage),
-      createTopProjectsReplacementRequests(cv.topProjects),
+      createTopProjectsReplacementRequests(cv.topProjects, cv.currentLanguage),
       createTopSkillsReplacementRequests(cv.topSkills),
       createTopSkillsAndLanguagesLevelVisualizationRequest(cv.topSkills, cv.languages, titlePage),
-      createLanguagesReplacementRequest(cv.languages),
-      createSkillTableRequests(cv.skills, skillsPage)
+      createLanguagesReplacementRequest(cv.languages)
     ]
   }
-
   await slides.presentations.batchUpdate({ resource, presentationId: fileId }).catch((err) => { throw err })
+
+  // Sections must be updated in reverse order for page indexes to work: education, work history, skills
+  // Create/update education pages
   await createEducationRequests(slides, fileId, cv.education, cv.certificatesAndOthers, cv.currentLanguage, educationPage, pageHeight)
     .catch((err) => { throw err })
 
+  // Ordering items in work history
   // Sort projects from latest to oldest, grouped by customer name
   cv.workHistory.forEach(employer => {
     const customerData = {}
@@ -112,7 +115,11 @@ const update = async (fileId, cv) => {
 
     // Replace internal projects' customer name with correct label
     employer.projects = employer.projects.map(project => {
-      const mappedCustomer = project.projectCustomer || STATIC_TEXTS.internalProjectsTitle[cv.currentLanguage]
+      let mappedCustomer = project.projectCustomer || STATIC_TEXTS.internalProjectsTitle[cv.currentLanguage]
+      // Replace confidential projects customer name
+      if (project.isConfidential) {
+        mappedCustomer = STATIC_TEXTS.confidentialCustomerLabel[cv.currentLanguage]
+      }
       return { ...project, projectCustomer: mappedCustomer }
     })
   })
@@ -120,8 +127,15 @@ const update = async (fileId, cv) => {
   // Sort employers from latest to oldest
   cv.workHistory.sort((a, b) => new Date(b.startDate) - new Date(a.startDate))
 
+  // Create/update project pages
   await createProjectRequests(slides, fileId, cv.workHistory, projectsPage, pageHeight)
     .catch((err) => { throw err })
+
+  // Create/update skill pages
+  await slides.presentations.batchUpdate({
+    resource: { requests: [createSkillTableRequests(cv.skills, skillsPage)] },
+    presentationId: fileId
+  }).catch((err) => { throw err })
 }
 
 const runExport = async (fileId) => {
