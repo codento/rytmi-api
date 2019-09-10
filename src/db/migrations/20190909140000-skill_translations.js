@@ -25,12 +25,18 @@ module.exports = {
              'en', (SELECT "oldDescription" FROM "skill" c WHERE c."id" = s."id")
              )
         `, { transaction: transaction })
-
-      await queryInterface.sequelize.query(`ALTER TABLE "skill" ALTER COLUMN name SET NOT NULL`, { transaction: transaction })
       await queryInterface.sequelize.query(`CREATE UNIQUE INDEX skill_name_fi_idx ON "skill"( (name->>'fi') )`, { transaction: transaction })
       await queryInterface.sequelize.query(`CREATE UNIQUE INDEX skill_name_en_idx ON "skill"( (name->>'en') )`, { transaction: transaction })
       await queryInterface.removeColumn('skill', 'oldName', { transaction: transaction })
       await queryInterface.removeColumn('skill', 'oldDescription', { transaction: transaction })
+      await queryInterface.changeColumn('skill', 'name',
+        {
+          type: Sequelize.JSONB,
+          allowNull: false,
+          unique: false
+        },
+        { transaction: transaction }
+      )
     })
   },
 
