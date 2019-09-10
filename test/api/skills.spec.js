@@ -25,7 +25,7 @@ describe('API Skills endpoint', () => {
     request.set('Authorization', `Bearer ${jwtToken}`)
   })
   afterAll(async () => {
-    await skillModel.destroy({ where: { name: 'Java' } })
+    await skillModel.destroy({ where: { name: { en: 'Java' } } })
     const skillsInDb = await skillModel.findAll()
     expect(skillsInDb.length).toEqual(skills.length)
   })
@@ -106,12 +106,12 @@ describe('API Skills endpoint', () => {
 
     it('should not allow two skills with same name', async () => {
       const skill = {
-        name: { fi: 'React', en: 'React' },
+        name: { fi: 'Something new', en: 'React' },
         description: {fi: '', en: ''},
         skillCategoryId: 3
       }
       const response = await request.post(skillEndpoint).send(skill).expect(400)
-      expect(response.body.error.details[0]).toEqual('(name ->> \'fi\'::text) must be unique')
+      expect(response.body.error.details[0]).toEqual('(name ->> \'en\'::text) must be unique')
     })
 
     it('should not allow skill without category', async () => {
