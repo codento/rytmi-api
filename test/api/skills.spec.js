@@ -40,7 +40,7 @@ describe('API Skills endpoint', () => {
     })
 
     it('should allow authorized user to fetch specific skill by id', async () => {
-      const [react] = await skillModel.findAll({ where: { name: 'React' } })
+      const [react] = await skillModel.findAll({ where: { name: { en: 'React' } } })
       const response = await request.get(skillEndpoint + react.id).expect(200)
       expect(response.body.id).toEqual(react.id)
       expect(response.body.name).toEqual(react.name)
@@ -49,8 +49,8 @@ describe('API Skills endpoint', () => {
 
     it('should allow authorized user to create new skill', async () => {
       const skill = {
-        name: 'Java Spring Boot',
-        description: 'Good \'ol java spring boot',
+        name: { fi: 'Java Spring Boot', en: 'Java Spring Boot' },
+        description: { fi: 'Good \'ol java spring boot', en: 'Good \'ol java spring boot' },
         skillCategoryId: 3
       }
       const response = await request.post(skillEndpoint).send(skill).expect(201)
@@ -60,7 +60,7 @@ describe('API Skills endpoint', () => {
     })
 
     it('should allow authorized user to edit existing skill', async () => {
-      const [java] = await skillModel.findAll({ where: { name: 'Java Spring Boot' } })
+      const [java] = await skillModel.findAll({ where: { name: { fi: 'Java Spring Boot' } } })
       java.skillCategoryId = 1
       const attributes = { skillCategoryId: 1 }
       const response = await request.put(skillEndpoint + java.id).send(attributes).expect(200)
@@ -68,7 +68,7 @@ describe('API Skills endpoint', () => {
     })
 
     it('should allow authorized user to delete existing skill', async () => {
-      const [java] = await skillModel.findAll({ where: { name: 'Java Spring Boot' } })
+      const [java] = await skillModel.findAll({ where: { name: { fi: 'Java Spring Boot' } } })
       await request.delete(skillEndpoint + java.id).expect(204)
       const skillsInDb = await skillModel.findAll()
       skillsInDb.forEach(skill => {
@@ -78,11 +78,11 @@ describe('API Skills endpoint', () => {
     })
 
     it('should recreate old soft deleted skill when created again', async () => {
-      const [java] = await skillModel.findAll({ where: { name: 'Java Spring Boot' }, paranoid: false })
+      const [java] = await skillModel.findAll({ where: { name: { fi: 'Java Spring Boot' } }, paranoid: false })
       expect(java.deletedAt).not.toEqual(null)
       const skill = {
-        name: 'Java Spring Boot',
-        description: 'Good \'ol java spring boot again',
+        name: { fi: 'Java Spring Boot', en: 'Java Spring Boot' },
+        description: { fi: 'Good \'ol java spring boot', en: 'Good \'ol java spring boot' },
         skillCategoryId: 3
       }
       const response = await request.post(skillEndpoint).send(skill).expect(201)
@@ -97,7 +97,7 @@ describe('API Skills endpoint', () => {
     it('should not allow skill without name', async () => {
       const skill = {
         name: null,
-        description: 'Good \'ol java',
+        description: { fi: 'Good \'ol java', en: 'Good \'ol java' },
         skillCategoryId: 3
       }
       const response = await request.post(skillEndpoint).send(skill).expect(400)
@@ -106,12 +106,12 @@ describe('API Skills endpoint', () => {
 
     it('should not allow two skills with same name', async () => {
       const skill = {
-        name: 'React',
-        description: 'Good \'ol java',
+        name: { fi: 'React', en: 'React' },
+        description: {fi: '', en: ''},
         skillCategoryId: 3
       }
       const response = await request.post(skillEndpoint).send(skill).expect(400)
-      expect(response.body.error.details[0]).toEqual('name must be unique')
+      expect(response.body.error.details[0]).toEqual('(name ->> \'fi\'::text) must be unique')
     })
 
     it('should not allow skill without category', async () => {
