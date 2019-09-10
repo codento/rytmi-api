@@ -22,13 +22,13 @@ const backEndDevelopment = {
 }
 
 const react = {
-  name: 'React',
-  description: 'Facebook made front end library'
+  name: { en: 'React', fi: 'React' },
+  description: { en: 'Facebook made front end library', fi: 'Facebookin fronttikirjasto' }
 }
 
 const nodeJs = {
-  name: 'NodeJS',
-  description: 'So backend js'
+  name: { en: 'NodeJS', fi: 'NodeJS' },
+  description: { en: 'So backend js', fi: 'Bäkkärikirjasto' }
 }
 
 module.exports = {
