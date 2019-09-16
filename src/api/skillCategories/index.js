@@ -10,20 +10,20 @@ export default () => {
    * @swagger
    * /skillcategories:
    *   get:
-   *     description: List of skillcategories
+   *     description: Retrieve a list of skill categories
    *     tags:
-   *       - skillcategories
+   *       - skills
    *     produces:
    *       - application/json
    *     responses:
    *       200:
+   *         description: An array of JSON objects containing skill categories
    *         content:
    *           application/json:
    *             schema:
    *               type: array
    *               items:
    *                 $ref: "#/components/schemas/skillCategory"
-   *         description: An array of JSON objects containing skillcategories
    *       401:
    *         description: Unauthorized
    */
@@ -33,14 +33,14 @@ export default () => {
    * @swagger
    * /skillcategories/:
    *   post:
-   *     description: Update skillcategory
+   *     description: Create skill category
    *     tags:
-   *       - skillcategories
+   *       - skills
    *     produces:
    *       - application/json
    *     responses:
    *       201:
-   *         description: A JSON object containing the updated skillcategory
+   *         description: A JSON object containing the new skill category
    *         content:
    *           application/json:
    *             schema:
@@ -57,16 +57,16 @@ export default () => {
 
   /**
    * @swagger
-   * /skillCategories/{id}:
+   * /skillcategories/{id}:
    *   get:
-   *     description: Show a single skillcategory
+   *     description: Show a single skill category
    *     tags:
-   *       - skillcategories
+   *       - skills
    *     produces:
    *       - application/json
    *     responses:
    *       200:
-   *         description: A JSON object containing a skillcategory
+   *         description: A JSON object containing a skill category
    *         content:
    *           application/json:
    *             schema:
@@ -86,22 +86,24 @@ export default () => {
 
   /**
    * @swagger
-   * /skillCategories/{id}:
+   * /skillcategories/{id}:
    *   put:
-   *     description: Update a skillcategory
+   *     description: Update a skill category
    *     tags:
-   *       - skillcategories
+   *       - skills
    *     produces:
    *       - application/json
    *     responses:
    *       200:
-   *         description: A JSON object containing the updated skillcategory
+   *         description: A JSON object containing the updated skill category
    *         content:
    *           application/json:
    *             schema:
    *               $ref: "#/components/schemas/skillCategory"
    *       401:
    *         description: Unauthorized
+   *       404:
+   *         description: Not found
    *     parameters:
    *       - name: id
    *         in: path
@@ -118,16 +120,16 @@ export default () => {
 
   /**
    * @swagger
-   * /skillCategories/{id}:
+   * /skillcategories/{id}:
    *   delete:
-   *     description: Delete a skillcategory
+   *     description: Delete a skill category
    *     tags:
-   *       - skillcategories
+   *       - skills
    *     produces:
    *       - applicatios/json
    *     responses:
    *       204:
-   *         description: skillCategory deleted
+   *         description: The skill category was deleted successfully
    *       401:
    *         description: Unauthorized
    *       404:

@@ -13,14 +13,14 @@ export default () => {
   * @swagger
   * /profiles/{id}/skills:
   *   get:
-  *     description: A list of profile skills
+  *     description: Retrieve a list of skills for employee
   *     tags:
-  *       - profiles
+  *       - employee
   *     produces:
   *       - application/json
   *     responses:
   *       200:
-  *         description: An array of JSON objects containing skills
+  *         description: An array of JSON objects containing skills related to an employee profile
   *         content:
   *           application/json:
   *             schema:
@@ -44,14 +44,14 @@ export default () => {
   * @swagger
   * /profiles/{id}/skills:
   *   post:
-  *     description: Post new skill
+  *     description: Add a new skill for employee
   *     tags:
-  *       - profiles
+  *       - employee
   *     produces:
   *       - application/json
   *     responses:
-  *       204:
-  *         description: A JSON object containing the new profile skill
+  *       201:
+  *         description: A JSON object containing the relation between an employee profile and a skill
   *         content:
   *           application/json:
   *             schema:
@@ -79,14 +79,14 @@ export default () => {
   * @swagger
   * /profiles/{id}/skills/{profileSkillId}:
   *   get:
-  *     description: Retrieve skills of profile
+  *     description: Does nothing
   *     tags:
-  *       - profiles
+  *       - employee
   *     produces:
   *       - application/json
   *     responses:
   *       200:
-  *         description: A JSON object containing a profile skill
+  *         description: null
   *         content:
   *           application/json:
   *             schema:
@@ -115,14 +115,14 @@ export default () => {
   * @swagger
   * /profiles/{id}/skills/{profileSkillId}:
   *   put:
-  *     description: Update skill of profile
+  *     description: Update skill of an employee
   *     tags:
-  *       - profiles
+  *       - employee
   *     produces:
   *       - application/json
   *     responses:
   *       200:
-  *         description: A JSON object containing teh updated profile skill
+  *         description: A JSON object containing the updated relation between an employee profile and a skill
   *         content:
   *           application/json:
   *             schema:
@@ -154,12 +154,14 @@ export default () => {
   * @swagger
   * /profiles/{id}/skills/{profileSkillId}:
   *   delete:
-  *     description: Delete skill from profile
+  *     description: Delete skill from employee
   *     tags:
-  *       - profiles
+  *       - employee
   *     produces:
   *       - application/json
   *     responses:
+  *       204: 
+  *         description: The relation between a skill and an employee profile was deleted successfully.
   *       404:
   *         description: Not found
   *     parameters:

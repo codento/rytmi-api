@@ -11,14 +11,14 @@ export default () => {
   * @swagger
   * /profileprojects:
   *   get:
-  *     description: Returns a list of profile projects
+  *     description: Retrieve a list of relations between employee profiles and projects
   *     tags:
-  *       - profileprojects
+  *       - employee
   *     produces:
   *       - application/json
   *     responses:
   *       200:
-  *         description: An array of JSON objects containing profile projects
+  *         description: An array of JSON objects containing the relation between employee profiles and projects
   *         content:
   *           application/json:
   *             schema:
@@ -38,14 +38,14 @@ export default () => {
   * @swagger
   * /profileprojects/{id}:
   *   get:
-  *     description: Returns a project
+  *     description: Returns the relation between a project and an employee profile
   *     tags:
-  *       - profileprojects
+  *       - employee
   *     produces:
   *       - application/json
   *     responses:
   *       200:
-  *         description: A JSON object containing a profile project
+  *         description: A JSON object containing the relation between a project and an employee profile
   *         content:
   *           application/json:
   *             schema:
@@ -67,14 +67,14 @@ export default () => {
   * @swagger
   * /profileprojects/{id}:
   *   put:
-  *     description: Update project
+  *     description: Update the relation between a project and an employee profile
   *     tags:
-  *       - profileprojects
+  *       - employee
   *     produces:
   *       - application/json
   *     responses:
   *       200:
-  *         description: A JSON object containing the updated profile project
+  *         description: A JSON object containing the updated relation between a project and an employee profile.
   *         content:
   *           application/json:
   *             schema:
@@ -101,14 +101,14 @@ export default () => {
   * @swagger
   * /profileprojects/{id}:
   *   delete:
-  *     description: A project
+  *     description: Delete a relation between a project and an employee profile.
   *     tags:
-  *       - profileprojects
+  *       - employee
   *     produces:
   *       - application/json
   *     responses:
   *       204:
-  *         description: Success/No content
+  *         description: The relation between a project and an employee profile was deleted successfully.
   *       401:
   *         description: Unauthorized
   *       404:
