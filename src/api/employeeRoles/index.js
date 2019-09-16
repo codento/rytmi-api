@@ -10,14 +10,14 @@ export default () => {
   * @swagger
   * /employeeroles:
   *   get:
-  *     description: A list of all employeeRoles
+  *     description: Retrieve a list of all employee roles
   *     tags:
-  *       - employee roles
+  *       - employee
   *     produces:
   *       - application/json
   *     responses:
   *       200:
-  *         description: An array of JSON objects containing employeeRoles
+  *         description: An array of JSON objects containing employee roles
   *         content:
   *           application/json:
   *             schema:
@@ -33,14 +33,14 @@ export default () => {
   * @swagger
   * /employeeroles:
   *   post:
-  *     description: Add a employeeRole
+  *     description: Add an employee role
   *     tags:
-  *       - employee roles
+  *       - employee
   *     produces:
   *       - application/json
   *     responses:
   *       201:
-  *         description: A JSON object containing a new employeeRole
+  *         description: A JSON object containing a new employee role
   *         content:
   *           application/json:
   *             schema:
@@ -59,14 +59,14 @@ export default () => {
   * @swagger
   * /employeeroles/{id}:
   *   get:
-  *     description: Show a single employee role
+  *     description: Retrieve a single employee role
   *     tags:
-  *       - employee roles
+  *       - employee
   *     produces:
   *       - application/json
   *     responses:
   *       200:
-  *         description: A JSON object containing a employeeRole
+  *         description: A JSON object containing an employee role
   *         content:
   *           application/json:
   *             schema:
@@ -88,20 +88,22 @@ export default () => {
   * @swagger
   * /employeeroles/{id}:
   *   put:
-  *     description: Update a employeeRole
+  *     description: Update an employee role
   *     tags:
-  *       - employee roles
+  *       - employee
   *     produces:
   *       - application/json
   *     responses:
   *       200:
-  *         description: A JSON object containing the updated employeeRole
+  *         description: A JSON object containing the updated employee role
   *         content:
   *           application/json:
   *             schema:
   *               $ref: "#/components/schemas/employeeRole"
   *       401:
   *         description: Unauthorized
+  *       404:
+  *         description: Not found
   *     parameters:
   *       - name: id
   *         in: path
@@ -120,20 +122,18 @@ export default () => {
    * @swagger
    * /employeeroles/{id}:
    *   delete:
-   *     description: Delete a employeeRole
+   *     description: Delete an employee role
    *     tags:
-   *       - employee roles
+   *       - employee
    *     produces:
    *       - application/json
    *     responses:
-   *       200:
-   *         description: A JSON object containing the updated employeeRole
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: "#/components/schemas/employeeRole"
+   *       204:
+   *         description: The employee role was deleted successfully.
    *       401:
-   *         description: Unauthorized
+   *         description: Unauthorized  
+   *       404:
+   *         description: Not found
    *     parameters:
    *       - name: id
    *         in: path

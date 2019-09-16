@@ -14,14 +14,14 @@ export default () => {
   * @swagger
   * /projects/{id}/profiles:
   *   get:
-  *     description: A list of project profiles
+  *     description: Retrieve a list of profiles related to the project
   *     tags:
-  *       - projects
+  *       - project
   *     produces:
   *       - application/json
   *     responses:
   *       200:
-  *         description: An array of JSON objects containing project profiles
+  *         description: An array of JSON objects containing profiles related to the project
   *         content:
   *           application/json:
   *             schema:
@@ -46,14 +46,14 @@ export default () => {
   * @swagger
   * /projects/{id}/profiles/{profileId}:
   *   get:
-  *     description: A project profile
+  *     description: Retrieve the employee profile related to the project
   *     tags:
-  *       - projects
+  *       - project
   *     produces:
   *       - application/json
   *     responses:
   *       200:
-  *         description: A JSON object containing a project profile
+  *         description: A JSON object containing the employee profile related to the project
   *         content:
   *           application/json:
   *             schema:
@@ -81,14 +81,14 @@ export default () => {
   * @swagger
   * /projects/{id}/profiles/{profileId}:
   *   post:
-  *     description: Add profile to project
+  *     description: Add the profile to the project
   *     tags:
-  *       - projects
+  *       - project
   *     produces:
   *       - application/json
   *     responses:
   *       200:
-  *         description: A JSON object containing the new project profile
+  *         description: A JSON object containing the new relation between a project and a profile
   *         content:
   *           application/json:
   *             schema:
