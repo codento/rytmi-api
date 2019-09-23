@@ -13,7 +13,7 @@ employerController.update = wrapAsync(async (req, res) => {
 
 employerController.delete = wrapAsync(async (req, res) => {
   const action = await employerService.delete(req.params.id)
-  res.json(action)
+  res.status(204).send()
 })
 
 module.exports = {
