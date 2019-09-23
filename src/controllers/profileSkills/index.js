@@ -28,7 +28,7 @@ profileSkillController.update = wrapAsync(async (req, res) => {
 profileSkillController.delete = wrapAsync(async (req, res) => {
   const profile = req.profile
   const profileSkill = await profileSkillService.delete(profile.id, req.params.profileSkillId)
-  res.status(204).json(profileSkill)
+  res.status(204).send()
 })
 
 function findProfileSkillFromProfileOr404 (req, res, next, value) {
