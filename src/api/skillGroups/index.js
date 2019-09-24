@@ -122,7 +122,7 @@ export default () => {
    * @swagger
    * /skillgroups/{id}:
    *   delete:
-   *     description: Delete a skill group
+   *     description: Not implemented
    *     tags:
    *       - skills
    *     produces:
