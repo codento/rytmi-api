@@ -122,7 +122,7 @@ export default () => {
    * @swagger
    * /employers/{id}:
    *   delete:
-   *     description: Delete an employer
+   *     description: Not implemented
    *     tags:
    *       - employer
    *     produces:

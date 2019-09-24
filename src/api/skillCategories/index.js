@@ -122,7 +122,7 @@ export default () => {
    * @swagger
    * /skillcategories/{id}:
    *   delete:
-   *     description: Delete a skill category
+   *     description: Not implemented
    *     tags:
    *       - skills
    *     produces:

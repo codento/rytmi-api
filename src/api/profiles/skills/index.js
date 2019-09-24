@@ -79,7 +79,7 @@ export default () => {
   * @swagger
   * /profiles/{id}/skills/{profileSkillId}:
   *   get:
-  *     description: Does nothing
+  *     description: Does nothing or not implemented
   *     tags:
   *       - employee
   *     produces:

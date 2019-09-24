@@ -123,7 +123,7 @@ export default () => {
   * @swagger
   * /projects/{id}:
   *   delete:
-  *     description: Delete a project
+  *     description: Not implemented
   *     tags:
   *       - project
   *     produces:
