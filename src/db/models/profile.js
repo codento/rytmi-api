@@ -77,9 +77,11 @@ module.exports = (sequelize, DataTypes) => {
   })
 
   Profile.associate = (models) => {
-    models.profile.belongsTo(models.user, {foreignKey: 'userId'})
-    models.profile.hasMany(models.profileSkill, {foreignKey: 'profileId'})
-    models.profile.belongsToMany(models.project, {through: models.profileProject, foreignKey: 'profileId'})
+    models.profile.belongsTo(models.user, { foreignKey: 'userId' })
+    models.profile.hasMany(models.profileSkill, { foreignKey: 'id' })
+    models.profile.hasMany(models.absence)
+    models.profile.belongsToMany(models.leave, { through: models.absence, foreignKey: 'profileId' })
+    models.profile.belongsToMany(models.project, { through: models.profileProject, foreignKey: 'profileId' })
   }
 
   return Profile
