@@ -6,25 +6,24 @@ const router = Router()
 export default () => {
   router.param('id', findProjectSkillOr404)
 
-  // TODO: Update swagger
   /**
   * @swagger
-  * /employers:
+  * /projectskills:
   *   get:
-  *     description: A list of all employers
+  *     description: Retrieve a list of all relations between projects and skills
   *     tags:
-  *       - employee roles
+  *       - project
   *     produces:
   *       - application/json
   *     responses:
   *       200:
-  *         description: An array of JSON objects containing employeeRoles
+  *         description: A array of JSON objects containing relations between projects and skills
   *         content:
   *           application/json:
   *             schema:
   *               type: array
   *               items:
-  *                 $ref: "#/components/schemas/employeeRole"
+  *                 $ref: "#/components/schemas/projectSkill"
   *       401:
   *         description: Unauthorized
   */
@@ -32,46 +31,46 @@ export default () => {
 
   /**
   * @swagger
-  * /employeeroles:
+  * /projectskills:
   *   post:
-  *     description: Add a employeeRole
+  *     description: Add a relation between project and skill
   *     tags:
-  *       - employee roles
+  *       - project
   *     produces:
   *       - application/json
   *     responses:
   *       201:
-  *         description: A JSON object containing a new employeeRole
+  *         description: A JSON object containing a new relation between project and skill
   *         content:
   *           application/json:
   *             schema:
-  *               $ref: "#/components/schemas/employeeRole"
+  *               $ref: "#/components/schemas/projectSkill"
   *       401:
   *         description: Unauthorized
   *     requestBody:
   *       content:
   *         application/json:
   *           schema:
-  *             $ref: "#/components/schemas/employeeRole"
+  *             $ref: "#/components/schemas/projectSkill"
   */
   router.post('/', projectSkillController.create)
 
   /**
   * @swagger
-  * /employeeroles/{id}:
+  * /projectskills/{id}:
   *   get:
-  *     description: Show a single employee role
+  *     description: Retrieve a single relation between project and skill
   *     tags:
-  *       - employee roles
+  *       - project
   *     produces:
   *       - application/json
   *     responses:
   *       200:
-  *         description: A JSON object containing a employeeRole
+  *         description: A JSON object containing a relation between project and skill
   *         content:
   *           application/json:
   *             schema:
-  *               $ref: "#/components/schemas/employeeRole"
+  *               $ref: "#/components/schemas/projectSkill"
   *       401:
   *         description: Unauthorized
   *       404:
@@ -87,22 +86,24 @@ export default () => {
 
   /**
   * @swagger
-  * /employeeroles/{id}:
+  * /projectskills/{id}:
   *   put:
-  *     description: Update a employeeRole
+  *     description: Update a relation between project and skill
   *     tags:
-  *       - employee roles
+  *       - project
   *     produces:
   *       - application/json
   *     responses:
   *       200:
-  *         description: A JSON object containing the updated employeeRole
+  *         description: A JSON object containing the updated relation between project and skill
   *         content:
   *           application/json:
   *             schema:
-  *               $ref: "#/components/schemas/employeeRole"
+  *               $ref: "#/components/schemas/projectSkill"
   *       401:
   *         description: Unauthorized
+  *       404:
+  *         description: Not found
   *     parameters:
   *       - name: id
   *         in: path
@@ -113,39 +114,32 @@ export default () => {
   *       content:
   *         application/json:
   *           schema:
-  *             $ref: "#/components/schemas/employeeRole"
+  *             $ref: "#/components/schemas/projectSkill"
   */
   router.put('/:id', projectSkillController.update)
 
   /**
    * @swagger
-   * /employeeroles/{id}:
+   * /projectskills/{id}:
    *   delete:
-   *     description: Delete a employeeRole
+   *     description: Delete a relation between project and skill
    *     tags:
-   *       - employee roles
+   *       - project
    *     produces:
    *       - application/json
    *     responses:
-   *       200:
-   *         description: A JSON object containing the updated employeeRole
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: "#/components/schemas/employeeRole"
+   *       204:
+   *         description: The relation between project and skill was deleted successfully
    *       401:
    *         description: Unauthorized
+   *       404:
+   *         description: Not found
    *     parameters:
    *       - name: id
    *         in: path
    *         schema:
    *           type: integer
    *           format: int64
-   *     requestBody:
-   *       content:
-   *         application/json:
-   *           schema:
-   *             $ref: "#/components/schemas/employeeRole"
    */
   router.delete('/:id', projectSkillController.delete)
 

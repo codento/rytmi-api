@@ -20,7 +20,7 @@ export default () => {
   *       - application/json
   *     responses:
   *       200:
-  *         description: An array of JSON objects containing users
+  *         description: An array of JSON objects containing all users
   *         content:
   *           application/json:
   *             schema:
@@ -62,14 +62,14 @@ export default () => {
   * @swagger
   * /users/{id}:
   *   get:
-  *     description: A JSON object containing a single user
+  *     description: Retrieve a JSON object containing a single user
   *     tags:
   *       - users
   *     produces:
   *       - application/json
   *     responses:
   *       200:
-  *         description: A user
+  *         description: A JSON object containing single user
   *         content:
   *           application/json:
   *             schema:
@@ -137,11 +137,7 @@ export default () => {
   *       - application/json
   *     responses:
   *       204:
-  *         description: No content
-  *         content:
-  *           application/json:
-  *             schema:
-  *               $ref: "#/components/schemas/User"
+  *         description: The user was deleted successfully.
   *       401:
   *         description: Unauthorized
   *       404:

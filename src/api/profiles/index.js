@@ -15,24 +15,22 @@ export default () => {
   * @swagger
   * /profiles:
   *   get:
-  *     description: List of active profiles
+  *     description: Retrieve a list of employees
   *     tags:
-  *       - profiles
+  *       - employee
   *     produces:
   *       - application/json
   *     responses:
   *       200:
+  *         description: An array of JSON objects containing employee profiles
   *         content:
   *           application/json:
   *             schema:
   *               type: array
   *               items:
   *                 $ref: "#/components/schemas/profile"
-  *         description: An array of JSON objects containing profiles
   *       401:
   *         description: Unauthorized
-  *       404:
-  *         description: Not found
   */
   router.get('/', profileController.getList)
 
@@ -40,14 +38,14 @@ export default () => {
   * @swagger
   * /profiles:
   *   post:
-  *     description: Create user
+  *     description: Create an employee
   *     tags:
-  *       - profiles
+  *       - employee
   *     produces:
   *       - application/json
   *     responses:
   *       201:
-  *         description: A JSON object containing the created profile
+  *         description: A JSON object containing the created employee profile
   *         content:
   *           application/json:
   *             schema:
@@ -66,14 +64,14 @@ export default () => {
   * @swagger
   * /profiles/{id}/:
   *   get:
-  *     description: Show single profile
+  *     description: Retrieve a single employee profile
   *     tags:
-  *       - profiles
+  *       - employee
   *     produces:
   *       - application/json
   *     responses:
   *       200:
-  *         description: A JSON object containing a profile
+  *         description: A JSON object containing an employee profile
   *         content:
   *           application/json:
   *             schema:
@@ -95,14 +93,14 @@ export default () => {
   * @swagger
   * /profiles/{id}/:
   *   put:
-  *     description: Update profile
+  *     description: Update employee profile
   *     tags:
-  *       - profiles
+  *       - employee
   *     produces:
   *       - application/json
   *     responses:
   *       200:
-  *         description: A JSON object containing the updated profile
+  *         description: A JSON object containing the updated employee profile
   *         content:
   *           application/json:
   *             schema:
