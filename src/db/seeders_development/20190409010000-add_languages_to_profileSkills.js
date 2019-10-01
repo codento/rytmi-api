@@ -19,7 +19,7 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     try {
       const profileIds = await queryInterface.sequelize.query('SELECT "id" FROM "profile"', { type: Sequelize.QueryTypes.SELECT })
-      const skillIds = await queryInterface.sequelize.query('SELECT "id" FROM "skill" WHERE "name" in (\'Finnish\', \'English\', \'Swedish\')', { type: Sequelize.QueryTypes.SELECT })
+      const skillIds = await queryInterface.sequelize.query('SELECT "id" FROM "skill" WHERE "name"->>\'en\' in (\'Finnish\', \'English\', \'Swedish\')', { type: Sequelize.QueryTypes.SELECT })
       const profileSkills = []
       profileIds.forEach(profile => {
         const randomSkills = []
