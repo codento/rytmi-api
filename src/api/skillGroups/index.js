@@ -10,20 +10,20 @@ export default () => {
    * @swagger
    * /skillgroups:
    *   get:
-   *     description: List of skillgroups
+   *     description: Retrieve a list of skill groups
    *     tags:
-   *       - skillgroups
+   *       - skills
    *     produces:
    *       - application/json
    *     responses:
    *       200:
+   *         description: An array of JSON objects containing skill groups
    *         content:
    *           application/json:
    *             schema:
    *               type: array
    *               items:
    *                 $ref: "#/components/schemas/skillGroup"
-   *         description: An array of JSON objects containing skillgroups
    *       401:
    *         description: Unauthorized
    */
@@ -33,14 +33,14 @@ export default () => {
    * @swagger
    * /skillgroups/:
    *   post:
-   *     description: Update skillgroup
+   *     description: Create a skill group
    *     tags:
-   *       - skillgroups
+   *       - skills
    *     produces:
    *       - application/json
    *     responses:
    *       201:
-   *         description: A JSON object containing the updated skillgroup
+   *         description: A JSON object containing a new skill group
    *         content:
    *           application/json:
    *             schema:
@@ -59,14 +59,14 @@ export default () => {
    * @swagger
    * /skillgroups/{id}:
    *   get:
-   *     description: Show a single skillgroup
+   *     description: Retrieve a single skill group
    *     tags:
-   *       - skillgroups
+   *       - skills
    *     produces:
    *       - application/json
    *     responses:
    *       200:
-   *         description: A JSON object containing a skillgroup
+   *         description: A JSON object containing a skill group
    *         content:
    *           application/json:
    *             schema:
@@ -88,9 +88,9 @@ export default () => {
    * @swagger
    * /skillgroups/{id}:
    *   put:
-   *     description: Update a skillgroup
+   *     description: Update a skill group
    *     tags:
-   *       - skillgroups
+   *       - skills
    *     produces:
    *       - application/json
    *     responses:
@@ -102,6 +102,8 @@ export default () => {
    *               $ref: "#/components/schemas/skillGroup"
    *       401:
    *         description: Unauthorized
+   *       404:
+   *         description: Not found
    *     parameters:
    *       - name: id
    *         in: path
@@ -120,14 +122,14 @@ export default () => {
    * @swagger
    * /skillgroups/{id}:
    *   delete:
-   *     description: Delete a skillgroup
+   *     description: Not implemented
    *     tags:
-   *       - skillgroups
+   *       - skills
    *     produces:
    *       - applicatios/json
    *     responses:
    *       204:
-   *         description: Skillgroup deleted
+   *         description: The skill group was deleted successfully
    *       401:
    *         description: Unauthorized
    *       404:

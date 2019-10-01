@@ -10,14 +10,14 @@ export default () => {
   * @swagger
   * /profileskills:
   *   get:
-  *     description: A list of profileskills
+  *     description: Retrieve a list of relations between employee profiles and skills
   *     tags:
-  *       - profileskills
+  *       - employee
   *     produces:
   *       - application/json
   *     responses:
   *       200:
-  *         description: An array of JSON objects containing profile skills
+  *         description: An array of JSON objects containing relations between employee profiles and skills
   *         content:
   *           application/json:
   *             schema:
@@ -33,14 +33,14 @@ export default () => {
   * @swagger
   * /profileskills/{id}:
   *   get:
-  *     description: A profileskill
+  *     description: Retrieve a relation between employee profile and skill
   *     tags:
-  *       - profileskills
+  *       - employee
   *     produces:
   *       - application/json
   *     responses:
   *       200:
-  *         description: A JSON object containing a profile skill
+  *         description: A JSON object containing a relation between employee profile and skill
   *         content:
   *           application/json:
   *             schema:

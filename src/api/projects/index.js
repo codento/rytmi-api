@@ -13,7 +13,7 @@ export default () => {
   *   get:
   *     description: A list of projects
   *     tags:
-  *       - projects
+  *       - project
   *     produces:
   *       - application/json
   *     responses:
@@ -36,7 +36,7 @@ export default () => {
   *   post:
   *     description: Create a project
   *     tags:
-  *       - projects
+  *       - project
   *     produces:
   *       - application/json
   *     responses:
@@ -62,7 +62,7 @@ export default () => {
   *   get:
   *     description: Returns a project
   *     tags:
-  *       - projects
+  *       - project
   *     produces:
   *       - application/json
   *     responses:
@@ -91,7 +91,7 @@ export default () => {
   *   put:
   *     description: Update a project
   *     tags:
-  *       - projects
+  *       - project
   *     produces:
   *       - application/json
   *     responses:
@@ -123,12 +123,16 @@ export default () => {
   * @swagger
   * /projects/{id}:
   *   delete:
-  *     description: Delete a project
+  *     description: Not implemented
   *     tags:
-  *       - projects
+  *       - project
   *     produces:
   *       - application/json
   *     responses:
+  *       204:
+  *         description: The project was deleted successfully
+  *       401:
+  *         description: Unauthorized
   *       404:
   *         description: Not found
   *     parameters:
