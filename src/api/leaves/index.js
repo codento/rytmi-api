@@ -17,7 +17,7 @@ export default () => {
   *       - application/json
   *     responses:
   *       200:
-  *         description: An array of JSON objects containing skills
+  *         description: An array of JSON objects containing leaves
   *         content:
   *           application/json:
   *             schema:
@@ -40,7 +40,7 @@ export default () => {
   *       - application/json
   *     responses:
   *       201:
-  *         description: A JSON object containing a new skill
+  *         description: A JSON object containing a new leave
   *         content:
   *           application/json:
   *             schema:
@@ -87,8 +87,58 @@ export default () => {
   */
   router.put('/:id', leaveController.update)
 
+  /**
+   * @swagger
+   * /leaves/{id}/:
+   *   get:
+   *     description: Retrieve a single leave
+   *     tags:
+   *       - leaves
+   *     produces:
+   *       - application/json
+   *     responses:
+   *       200:
+   *         description: A JSON object containing a leave
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/leave"
+   *       401:
+   *         description: Unauthorized
+   *       404:
+   *         description: Not found
+   *     parameters:
+   *       - name: id
+   *         in: path
+   *         schema:
+   *           type: integer
+   *           format: int64
+   */
   router.get('/:id', leaveController.get)
 
+  /**
+   * @swagger
+   * /leaves/{id}:
+   *   delete:
+   *     description: Delete a leave
+   *     tags:
+   *       - leaves
+   *     produces:
+   *       - application/json
+   *     responses:
+   *       204:
+   *         description: The leave was deleted successfully.
+   *       401:
+   *         description: Unauthorized
+   *       404:
+   *         description: Not found
+   *     parameters:
+   *       - name: id
+   *         in: path
+   *         schema:
+   *           type: integer
+   *           format: int64
+   */
   router.delete('/:id', leaveController.delete)
 
   return router
