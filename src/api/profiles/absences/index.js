@@ -20,7 +20,7 @@ export default () => {
   *       - application/json
   *     responses:
   *       200:
-  *         description: An array of JSON objects containing absences
+  *         description: An array of JSON objects containing absences for profile
   *         content:
   *           application/json:
   *             schema:
@@ -44,7 +44,7 @@ export default () => {
   * @swagger
   * /profiles/{id}/absences:
   *   post:
-  *     description: Post new skill
+  *     description: Post new absence
   *     tags:
   *       - profiles
   *     produces:
