@@ -13,7 +13,7 @@ employeeRoleController.update = wrapAsync(async (req, res) => {
 
 employeeRoleController.delete = wrapAsync(async (req, res) => {
   const action = await employeeRoleService.delete(req.params.id)
-  res.json(action)
+  res.status(204).send()
 })
 
 module.exports = {

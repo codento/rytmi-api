@@ -11,7 +11,6 @@
 ## Development
 
 Install dependencies:
-
 ```
 npm install
 ```
@@ -54,7 +53,7 @@ Set the correct google service account credentials in the google credentials fil
 Use the Postgres Docker image:
 
 ```
-docker-compose up -d postgres
+sudo docker-compose up -d postgres
 ```
 Make sure you don't have a local postgresql db running on the default port (5432).
 
