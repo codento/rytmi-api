@@ -57,19 +57,25 @@ describe('API profile endpoint', () => {
     it('should allow authorized users to fetch profiles', async () => {
       const expectedProfiles = profiles
       const response = await request.get(profileEndpoint).expect(200)
-      expect(response.body.length).toEqual(expectedProfiles.length)
-      response.body.forEach((profile, idx) => {
-        expect(profile).toMatchObject(expectedProfiles[idx])
+      response.body = response.body.map(profile => {
+        delete profile.createdAt
+        delete profile.updatedAt
+        return profile
       })
+      expect(response.body.length).toEqual(expectedProfiles.length)
+      for (const profile of expectedProfiles) {
+        expect(response.body).toContainEqual(expect.objectContaining(profile))
+      }
     })
 
     it('should allow authorized users to filter active profiles', async () => {
       const expectedProfiles = profiles
       const response = await request.get(profileEndpoint).query({ active: true }).expect(200)
+
       expect(response.body.length).toEqual(expectedProfiles.length)
-      response.body.forEach((profile, idx) => {
-        expect(profile).toMatchObject(expectedProfiles[idx])
-      })
+      for (const profile of response.body) {
+        expect(response.body).toContainEqual(expect.objectContaining(profile))
+      }
     })
 
     it('should allow authorized users to filter inactive profiles', async () => {
@@ -317,6 +323,52 @@ describe('API profile endpoint', () => {
 
   it('should return 404 for missing project profile', async () => {
     await request.get(profileEndpoint + normalUserProfileId + '/projects/123123').expect(404)
+  })
+
+  describe('Absences for profile endpoint', () => {
+    it('allows authorized user to create absences for a profile', async () => {
+      const users = await userModel.findAll()
+      normalUser = users.filter((user) => user.admin === false).pop()
+      const profile = await profileModel.findOne({ where: { userId: normalUser.id } })
+      const absence = {
+        endDate: '2019-09-04T00:00:00.000Z',
+        leaveId: 1,
+        startDate: '2019-09-01T00:00:00.000Z'
+      }
+      await request.post(`${profileEndpoint + profile.id}/absences`).send(absence)
+      const response = await request.get(`${profileEndpoint + profile.id}/absences`)
+      expect(response.body).toContainEqual(expect.objectContaining(absence))
+    })
+    it('allows authorized user to fetch and change an absence of a profile', async () => {
+      const users = await userModel.findAll()
+      normalUser = users.filter((user) => user.admin === false).pop()
+      const profile = await profileModel.findOne({ where: { userId: normalUser.id } })
+      const absences = await request.get(`${profileEndpoint + profile.id}/absences`)
+      const oldAbsence = absences.body[0]
+      const absence = {
+        id: oldAbsence.id,
+        profileId: oldAbsence.profileId,
+        leaveId: 2
+      }
+      await request.put(`${profileEndpoint + profile.id}/absences/${oldAbsence.id}`).send(absence)
+      const response = await request.get(`${profileEndpoint + profile.id}/absences`)
+      expect(response.body).toContainEqual(expect.objectContaining(absence))
+    })
+    it('allows authorized user to delete an absence of a profile', async () => {
+      const users = await userModel.findAll()
+      normalUser = users.filter((user) => user.admin === false).pop()
+      const profile = await profileModel.findOne({ where: { userId: normalUser.id } })
+      const absences = await request.get(`${profileEndpoint + profile.id}/absences`)
+      const oldAbsence = absences.body[0]
+      const absence = {
+        id: oldAbsence.id,
+        profileId: oldAbsence.profileId,
+        leaveId: 2
+      }
+      await request.delete(`${profileEndpoint + profile.id}/absences/${oldAbsence.id}`).send(absence).expect(204)
+      const response = await request.get(`${profileEndpoint + profile.id}/absences/${oldAbsence.id}`).expect(404)
+      expect(response.body).not.toContainEqual(expect.objectContaining(absence))
+    })
   })
 
   describe('Endpoint authorization', () => {

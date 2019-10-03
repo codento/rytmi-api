@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import skills from './skills'
 import projects from './projects'
+import absences from './absences'
 import { profileController, findProfileOr404 } from '../../controllers/profiles'
 import { createPermissionHandler } from '../utils'
 
@@ -124,6 +125,7 @@ export default () => {
 
   router.use('/:id/projects', projects())
   router.use('/:id/skills', skills())
+  router.use('/:id/absences', absences())
 
   return router
 }
