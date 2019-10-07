@@ -12,20 +12,14 @@ export default () => {
   * @swagger
   * /profiles/{id}/projects:
   *   get:
-  *     description: Retrieve a list of projects for profile
+  *     description: Retrieve a list of projects for employee
   *     tags:
-  *       - profiles
+  *       - employee
   *     produces:
   *       - application/json
-  *     parameters:
-  *       - name: id
-  *         in: path
-  *         schema:
-  *           type: integer
-  *           format: int64
   *     responses:
   *       200:
-  *         description: An array of JSON objects containing profile projects
+  *         description: An array of JSON objects containing projects related to an employee profile
   *         content:
   *           application/json:
   *             schema:
@@ -36,6 +30,12 @@ export default () => {
   *         description: Unauthorized
   *       404:
   *         description: Not found
+  *     parameters:
+  *       - name: id
+  *         in: path
+  *         schema:
+  *           type: integer
+  *           format: int64
   */
   router.get('/', profileProjectController.getByProfile)
 
@@ -43,14 +43,14 @@ export default () => {
   * @swagger
   * /profiles/{id}/projects/{projectId}:
   *   get:
-  *     description: Retrieve a single profile project
+  *     description: Retrieve a single project of an employee
   *     tags:
-  *       - profiles
+  *       - employee
   *     produces:
   *       - application/json
   *     responses:
   *       200:
-  *         description: A JSON object containing a profile project
+  *         description: A JSON object containing a project related to an employee profile
   *         content:
   *           application/json:
   *             schema:
@@ -78,14 +78,14 @@ export default () => {
   * @swagger
   * /profiles/{id}/projects/{anyProjectId}:
   *   post:
-  *     description: Retrieve a single profile
+  *     description: Create a relation between employee profile and project
   *     tags:
-  *       - profiles
+  *       - employee
   *     produces:
   *       - application/json
   *     responses:
   *       201:
-  *         description: A JSON object containing a progile project
+  *         description: A JSON object containing a relation between employee profile and project
   *         content:
   *           application/json:
   *             schema:

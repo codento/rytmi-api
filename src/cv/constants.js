@@ -1,8 +1,8 @@
 export const MAX_SKILLS_PER_PAGE = 18
 
 export const STATIC_TEXTS = {
-  topProjectsTitle: { en: 'Top projects', fi: 'Top projektit' },
-  topSkillsTitle: { en: 'Top skills', fi: 'Top osaaminen' },
+  topProjectsTitle: { en: 'Latest projects', fi: 'Viimeisimmät projektit' },
+  topSkillsTitle: { en: 'Key competence', fi: 'Avainosaaminen' },
   languagesTitle: { en: 'Languages', fi: 'Kielitaito' },
   skillsTitle: { en: 'SKILLS', fi: 'OSAAMINEN' },
   categoryTitle: { en: 'Category', fi: 'Kategoria' },

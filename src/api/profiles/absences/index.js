@@ -1,32 +1,32 @@
 import { Router } from 'express'
-import {profileSkillController, findProfileSkillFromProfileOr404} from '../../../controllers/profileSkills'
+import { absenceController, findAbsenceOr404 } from '../../../controllers/absences'
 import { createPermissionHandler } from '../../utils'
 
 const router = Router()
 const permissionHandler = createPermissionHandler('profile', 'userId')
 
 export default () => {
-  router.param('profileSkillId', findProfileSkillFromProfileOr404)
+  router.param('absenceId', findAbsenceOr404)
   router.use(permissionHandler)
 
   /**
   * @swagger
-  * /profiles/{id}/skills:
+  * /profiles/{id}/absences:
   *   get:
-  *     description: Retrieve a list of skills for employee
+  *     description: A list of profile absences
   *     tags:
-  *       - employee
+  *       - profiles
   *     produces:
   *       - application/json
   *     responses:
   *       200:
-  *         description: An array of JSON objects containing skills related to an employee profile
+  *         description: An array of JSON objects containing absences for profile
   *         content:
   *           application/json:
   *             schema:
   *               type: array
   *               items:
-  *                 $ref: "#/components/schemas/profileSkill"
+  *                 $ref: "#/components/schemas/absence"
   *       401:
   *         description: Unauthorized
   *       404:
@@ -38,24 +38,24 @@ export default () => {
   *           type: integer
   *           format: int64
   */
-  router.get('/', profileSkillController.getByProfile)
+  router.get('/', absenceController.getByProfile)
 
   /**
   * @swagger
-  * /profiles/{id}/skills:
+  * /profiles/{id}/absences:
   *   post:
-  *     description: Add a new skill for employee
+  *     description: Post new absence
   *     tags:
-  *       - employee
+  *       - profiles
   *     produces:
   *       - application/json
   *     responses:
-  *       201:
-  *         description: A JSON object containing the relation between an employee profile and a skill
+  *       204:
+  *         description: A JSON object containing the new profile absences
   *         content:
   *           application/json:
   *             schema:
-  *               $ref: "#/components/schemas/profileSkill"
+  *               $ref: "#/components/schemas/absence"
   *       401:
   *         description: Unauthorized
   *       404:
@@ -71,26 +71,26 @@ export default () => {
   *       content:
   *         application/json:
   *           schema:
-  *             $ref: "#/components/schemas/profileSkill"
+  *             $ref: "#/components/schemas/absence"
   */
-  router.post('/', profileSkillController.create)
+  router.post('/', absenceController.create)
 
   /**
   * @swagger
-  * /profiles/{id}/skills/{profileSkillId}:
+  * /profiles/{id}/absence/{absenceId}:
   *   get:
-  *     description: Does nothing or not implemented
+  *     description: Retrieve an absence of profile
   *     tags:
-  *       - employee
+  *       - profiles
   *     produces:
   *       - application/json
   *     responses:
   *       200:
-  *         description: null
+  *         description: A JSON object containing an absence
   *         content:
   *           application/json:
   *             schema:
-  *               $ref: "#/components/schemas/profileSkill"
+  *               $ref: "#/components/schemas/absence"
   *       401:
   *         description: Unauthorized
   *       404:
@@ -102,31 +102,31 @@ export default () => {
   *         schema:
   *           type: integer
   *           format: int64
-  *       - name: profileSkillId
-  *         desription: Profile skill id
+  *       - name: absenceId
+  *         description: Absence id
   *         in: path
   *         schema:
   *           type: integer
   *           format: int64
   */
-  router.get('/:profileSkillId', profileSkillController.get)
+  router.get('/:absenceId', absenceController.get)
 
   /**
   * @swagger
-  * /profiles/{id}/skills/{profileSkillId}:
+  * /profiles/{id}/absences/{absenceId}:
   *   put:
-  *     description: Update skill of an employee
+  *     description: Update absence
   *     tags:
-  *       - employee
+  *       - profiles
   *     produces:
   *       - application/json
   *     responses:
   *       200:
-  *         description: A JSON object containing the updated relation between an employee profile and a skill
+  *         description: A JSON object containing the updated absence
   *         content:
   *           application/json:
   *             schema:
-  *               $ref: "#/components/schemas/*profileSkill"
+  *               $ref: "#/components/schemas/absence"
   *       401:
   *         description: Unauthorized
   *       404:
@@ -137,7 +137,7 @@ export default () => {
   *         schema:
   *           type: integer
   *           format: int64
-  *       - name: profileSkillId
+  *       - name: absenceId
   *         in: path
   *         schema:
   *           type: integer
@@ -146,22 +146,20 @@ export default () => {
   *       content:
   *         application/json:
   *           schema:
-  *             $ref: "#/components/schemas/profileSkill"
+  *             $ref: "#/components/schemas/absence"
   */
-  router.put('/:profileSkillId', profileSkillController.update)
+  router.put('/:absenceId', absenceController.update)
 
   /**
   * @swagger
-  * /profiles/{id}/skills/{profileSkillId}:
+  * /profiles/{id}/absences/{absenceId}:
   *   delete:
-  *     description: Delete skill from employee
+  *     description: Delete an absence from profile
   *     tags:
-  *       - employee
+  *       - profiles
   *     produces:
   *       - application/json
   *     responses:
-  *       204: 
-  *         description: The relation between a skill and an employee profile was deleted successfully.
   *       404:
   *         description: Not found
   *     parameters:
@@ -170,13 +168,13 @@ export default () => {
   *         schema:
   *           type: integer
   *           format: int64
-  *       - name: profileSkillId
+  *       - name: absenceId
   *         in: path
   *         schema:
   *           type: integer
   *           format: int64
   */
-  router.delete('/:profileSkillId', profileSkillController.delete)
+  router.delete('/:absenceId', absenceController.delete)
 
   return router
 }

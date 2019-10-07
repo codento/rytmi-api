@@ -7,6 +7,11 @@ const profileService = new ProfileService()
 
 let profileController = baseController('profile', profileService, profileValidator)
 
+profileController.get = wrapAsync(async (req, res) => {
+  const obj = await profileService.get(req.params.id)
+  res.json(obj)
+})
+
 profileController.getList = wrapAsync(async (req, res) => {
   const query = req.query
   const criteria = {}
@@ -15,12 +20,6 @@ profileController.getList = wrapAsync(async (req, res) => {
   }
   const profiles = await profileService.getFiltered(criteria)
   res.json(profiles)
-})
-
-profileController.update = wrapAsync(async (req, res) => {
-  profileValidator.validate(req.body)
-  const obj = await profileService.update(req['profile'].id, req.body)
-  res.json(obj)
 })
 
 module.exports = {

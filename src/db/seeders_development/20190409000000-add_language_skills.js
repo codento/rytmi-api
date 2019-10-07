@@ -24,10 +24,12 @@ module.exports = {
     return queryInterface.sequelize.transaction(async (transaction) => {
       let skillGroups = await [factory.build('skillGroup', { title: JSON.stringify({ en: 'Language', fi: 'Kieli' }) })]
       await queryInterface.bulkInsert('skillGroup', skillGroups)
+
       const languageSkillGroups = await queryInterface.sequelize.query('SELECT * FROM "skillGroup" WHERE "title"->>\'en\'=\'Language\'', {
         type: queryInterface.sequelize.QueryTypes.SELECT,
         transaction: transaction
       })
+
       let skillCategories = await [factory.build('skillCategory', {title: JSON.stringify({ en: 'Language', fi: 'Kieli' }), skillGroupId: languageSkillGroups[0].id})]
       await queryInterface.bulkInsert('skillCategory', skillCategories, { transaction: transaction })
 
@@ -35,10 +37,11 @@ module.exports = {
         type: queryInterface.sequelize.QueryTypes.SELECT,
         transaction: transaction
       })
+
       const skillCategoryId = languageSkillCategories[0].id
-      let languageSkills = await [factory.build('skill', {name: 'Finnish', description: 'Finnish language', skillCategoryId}),
-        factory.build('skill', {name: 'English', description: 'English language', skillCategoryId}),
-        factory.build('skill', {name: 'Swedish', description: 'Swedish language', skillCategoryId})]
+      let languageSkills = await [factory.build('skill', { name: JSON.stringify({fi: 'suomi', en: 'Finnish'}), description: JSON.stringify({fi: '', en: 'Finnish language'}), skillCategoryId }),
+        factory.build('skill', { name: JSON.stringify({fi: 'englanti', en: 'English'}), description: JSON.stringify({fi: '', en: 'English language'}), skillCategoryId }),
+        factory.build('skill', { name: JSON.stringify({fi: 'ruotsi', en: 'Swedish'}), description: JSON.stringify({fi: '', en: 'Swedish language'}), skillCategoryId })]
       await queryInterface.bulkInsert('skill', languageSkills, { transaction: transaction })
     })
   },

@@ -32,7 +32,10 @@ const adminUsersProfile = {
     en: ''
   },
   education: null,
-  employeeRoles: []
+  employeeRoles: [],
+  absences: [],
+  otherInfo: null,
+  certificatesAndOthers: null
 }
 
 // id (=> profileId) will be 2
@@ -51,7 +54,10 @@ const basicUsersProfile = {
     en: ''
   },
   education: null,
-  employeeRoles: []
+  employeeRoles: [],
+  absences: [],
+  otherInfo: null,
+  certificatesAndOthers: null
 }
 
 module.exports = {

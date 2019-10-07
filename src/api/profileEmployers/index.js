@@ -6,25 +6,24 @@ const router = Router()
 export default () => {
   router.param('id', findProfileEmployerOr404)
 
-  // TODO: Update swagger
   /**
   * @swagger
-  * /employers:
+  * /profileemployers:
   *   get:
-  *     description: A list of all employers
+  *     description: Retrieve a list of all relations between employee profiles and employers
   *     tags:
-  *       - employee roles
+  *       - employee
   *     produces:
   *       - application/json
   *     responses:
   *       200:
-  *         description: An array of JSON objects containing employeeRoles
+  *         description: An array of JSON objects, each object containing relation between employee profile with employer
   *         content:
   *           application/json:
   *             schema:
   *               type: array
   *               items:
-  *                 $ref: "#/components/schemas/employeeRole"
+  *                 $ref: "#/components/schemas/profileEmployers"
   *       401:
   *         description: Unauthorized
   */
@@ -32,46 +31,46 @@ export default () => {
 
   /**
   * @swagger
-  * /employeeroles:
+  * /profileemployers:
   *   post:
-  *     description: Add a employeeRole
+  *     description: Add a relation between employee profile and employer
   *     tags:
-  *       - employee roles
+  *       - employee
   *     produces:
   *       - application/json
   *     responses:
   *       201:
-  *         description: A JSON object containing a new employeeRole
+  *         description: A JSON object containing a new relation between employee profile and employer
   *         content:
   *           application/json:
   *             schema:
-  *               $ref: "#/components/schemas/employeeRole"
+  *               $ref: "#/components/schemas/profileEmployers"
   *       401:
   *         description: Unauthorized
   *     requestBody:
   *       content:
   *         application/json:
   *           schema:
-  *             $ref: "#/components/schemas/employeeRole"
+  *             $ref: "#/components/schemas/profileEmployers"
   */
   router.post('/', profileEmployerController.create)
 
   /**
   * @swagger
-  * /employeeroles/{id}:
+  * /profileemployers/{id}:
   *   get:
-  *     description: Show a single employee role
+  *     description: Retrieve a single relation between employee profile and employer
   *     tags:
-  *       - employee roles
+  *       - employee
   *     produces:
   *       - application/json
   *     responses:
   *       200:
-  *         description: A JSON object containing a employeeRole
+  *         description: A JSON object containing a relation between employee profile and employer
   *         content:
   *           application/json:
   *             schema:
-  *               $ref: "#/components/schemas/employeeRole"
+  *               $ref: "#/components/schemas/profileEmployers"
   *       401:
   *         description: Unauthorized
   *       404:
@@ -87,22 +86,24 @@ export default () => {
 
   /**
   * @swagger
-  * /employeeroles/{id}:
+  * /profileemployers/{id}:
   *   put:
-  *     description: Update a employeeRole
+  *     description: Update a relation between an employee profile and employer
   *     tags:
-  *       - employee roles
+  *       - employee
   *     produces:
   *       - application/json
   *     responses:
   *       200:
-  *         description: A JSON object containing the updated employeeRole
+  *         description: A JSON object containing the updated relation between employee profile and employer
   *         content:
   *           application/json:
   *             schema:
-  *               $ref: "#/components/schemas/employeeRole"
+  *               $ref: "#/components/schemas/profileEmployers"
   *       401:
   *         description: Unauthorized
+  *       404:
+  *         description: Not found
   *     parameters:
   *       - name: id
   *         in: path
@@ -113,39 +114,32 @@ export default () => {
   *       content:
   *         application/json:
   *           schema:
-  *             $ref: "#/components/schemas/employeeRole"
+  *             $ref: "#/components/schemas/profileEmployers"
   */
   router.put('/:id', profileEmployerController.update)
 
   /**
    * @swagger
-   * /employeeroles/{id}:
+   * /profileemployers/{id}:
    *   delete:
-   *     description: Delete a employeeRole
+   *     description: Delete a relation between employee profile and employer
    *     tags:
-   *       - employee roles
+   *       - employee
    *     produces:
    *       - application/json
    *     responses:
-   *       200:
-   *         description: A JSON object containing the updated employeeRole
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: "#/components/schemas/employeeRole"
+   *       204:
+   *         description: The relation between employee profile and employer was deleted successfully.
    *       401:
    *         description: Unauthorized
+   *       404:
+   *         description: Not found
    *     parameters:
    *       - name: id
    *         in: path
    *         schema:
    *           type: integer
    *           format: int64
-   *     requestBody:
-   *       content:
-   *         application/json:
-   *           schema:
-   *             $ref: "#/components/schemas/employeeRole"
    */
   router.delete('/:id', profileEmployerController.delete)
 

@@ -10,7 +10,7 @@ export default () => {
   * @swagger
   * /skills:
   *   get:
-  *     description: A list of all skills
+  *     description: Retrieve a list of all skills
   *     tags:
   *       - skills
   *     produces:
@@ -59,7 +59,7 @@ export default () => {
   * @swagger
   * /skills/{id}:
   *   get:
-  *     description: Show a single skill
+  *     description: Retrieve a single skill
   *     tags:
   *       - skills
   *     produces:
@@ -102,6 +102,8 @@ export default () => {
   *               $ref: "#/components/schemas/skill"
   *       401:
   *         description: Unauthorized
+  *       404:
+  *         description: Not found
   *     parameters:
   *       - name: id
   *         in: path

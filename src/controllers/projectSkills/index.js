@@ -13,7 +13,7 @@ projectSkillController.update = wrapAsync(async (req, res) => {
 
 projectSkillController.delete = wrapAsync(async (req, res) => {
   const action = await projectSkillService.delete(req.params.id)
-  res.json(action)
+  res.status(204).send()
 })
 
 projectSkillController.getAll = wrapAsync(async (req, res) => {

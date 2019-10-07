@@ -8,7 +8,6 @@ import {
   createProfileImageRequest,
   createTopProjectsReplacementRequests,
   createTopSkillsReplacementRequests,
-  createTopSkillsAndLanguagesLevelVisualizationRequest,
   createLanguagesReplacementRequest,
   createSkillTableRequests,
   createEducationRequests
@@ -73,9 +72,8 @@ const update = async (fileId, cv) => {
     requests: [
       createStaticTextReplacementRequests(cv),
       createProfileImageRequest(cv.employeePicture, titlePage),
-      createTopProjectsReplacementRequests(cv.topProjects, cv.currentLanguage),
-      createTopSkillsReplacementRequests(cv.topSkills),
-      createTopSkillsAndLanguagesLevelVisualizationRequest(cv.topSkills, cv.languages, titlePage),
+      createTopProjectsReplacementRequests(cv.recentProjects, cv.currentLanguage),
+      createTopSkillsReplacementRequests(cv.keySkills),
       createLanguagesReplacementRequest(cv.languages)
     ]
   }
