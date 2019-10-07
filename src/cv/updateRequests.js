@@ -1,5 +1,5 @@
 import format from 'date-fns/format'
-import { orderBy, cloneDeep } from 'lodash'
+import { orderBy } from 'lodash'
 import logger from '../api/logging'
 import jsdom from 'jsdom'
 
@@ -13,8 +13,7 @@ import {
   duplicateObjectRequest,
   modifyTableTextRequest,
   moveObjectRequest,
-  replaceAllTextRequest,
-  updateShapeFillColorRequest
+  replaceAllTextRequest
 } from './requestUtils'
 
 const { JSDOM } = jsdom
@@ -88,62 +87,6 @@ export const createTopSkillsReplacementRequests = (topSkills) => {
     requests.push(
       replaceAllTextRequest(`{{ topSkill${i + 1} }}`, skillText)
     )
-  }
-  return requests
-}
-
-export const createTopSkillsAndLanguagesLevelVisualizationRequest = (topSkills, languages, titlePage) => {
-  const circleElements = titlePage.pageElements.filter(element => 'shape' in element && element.shape.shapeType === 'ELLIPSE')
-
-  // Orders elements so that array's first element is the topleft most circle, second element is the top row's second from left element and so on.
-  const elementsOrderedByPosition = orderBy(circleElements, ['transform.translateY', 'transform.translateX'])
-  const requests = []
-  const filledColor = cloneDeep(elementsOrderedByPosition[0].shape.shapeProperties.shapeBackgroundFill.solidFill.color)
-
-  // Color circles for skills
-  topSkills.forEach((skill, index) => {
-    for (let i = 0; i < skill.skillLevel; i++) {
-      let element = elementsOrderedByPosition[index * 5 + i]
-      requests.push(updateShapeFillColorRequest(element.objectId, filledColor))
-    }
-  })
-
-  // Color circles for languages
-  languages.forEach((language, index) => {
-    for (let i = 0; i < language.languageLevel; i++) {
-      let element = elementsOrderedByPosition[(index + 5) * 5 + i]
-      requests.push(updateShapeFillColorRequest(element.objectId, filledColor))
-    }
-  })
-
-  // Delete circles if there are fewer than 5 skills
-  const numberOfSkillRowsToDelete = 5 - topSkills.length
-  for (let rowNumber = 0; rowNumber < numberOfSkillRowsToDelete; rowNumber++) {
-    for (let circleIndex = 0; circleIndex < 5; circleIndex++) {
-      let element = elementsOrderedByPosition[(topSkills.length + rowNumber) * 5 + circleIndex]
-      requests.push(
-        {
-          deleteObject: {
-            objectId: element.objectId
-          }
-        }
-      )
-    }
-  }
-
-  // Delete circles if there are fewer than 4 languages
-  const numberOfLanguageRowsToDelete = 4 - languages.length
-  for (let rowNumber = 0; rowNumber < numberOfLanguageRowsToDelete; rowNumber++) {
-    for (let circleIndex = 0; circleIndex < 5; circleIndex++) {
-      let element = elementsOrderedByPosition[(languages.length + rowNumber + 5) * 5 + circleIndex]
-      requests.push(
-        {
-          deleteObject: {
-            objectId: element.objectId
-          }
-        }
-      )
-    }
   }
   return requests
 }
