@@ -16,17 +16,21 @@ import { STATIC_TEXTS } from './constants'
 
 const templateId = '1If6AFJi8ip_yvyvTgzm5LgxiIXl3TUhvuEMFkcmQKQU'
 
-const create = async () => {
+const getDriveInstance = async () => {
   const auth = await google.auth.getClient({
     scopes: [
       'https://www.googleapis.com/auth/drive'
     ]
   }).catch((err) => { throw err })
 
-  const drive = google.drive({
+  return google.drive({
     version: 'v3',
     auth
   })
+}
+
+const create = async () => {
+  const drive = await getDriveInstance()
 
   const { data } = await drive.files.copy({
     fileId: templateId,
@@ -137,16 +141,7 @@ const update = async (fileId, cv) => {
 }
 
 const runExport = async (fileId) => {
-  const auth = await google.auth.getClient({
-    scopes: [
-      'https://www.googleapis.com/auth/drive'
-    ]
-  })
-
-  const drive = google.drive({
-    version: 'v3',
-    auth
-  })
+  const drive = await getDriveInstance()
 
   const path = `${os.tmpdir()}/${fileId}.pdf`
   const dest = fs.createWriteStream(path)
@@ -161,7 +156,9 @@ const runExport = async (fileId) => {
         reject(err)
       })
       .pipe(dest)
-    dest.on('finish', () => {
+    dest.on('finish', async () => {
+      const driveTest = await drive.files.get({fileId, fields: 'webViewLink'})
+      console.log(driveTest.data.webViewLink)
       drive.files.delete(
         { fileId }
       )
@@ -170,19 +167,18 @@ const runExport = async (fileId) => {
   })
 }
 
-const deleteFile = async (fileId) => {
-  const auth = await google.auth.getClient({
-    scopes: [
-      'https://www.googleapis.com/auth/drive'
-    ]
-  })
+const getFileViewUrl = async fileId => {
+  const drive = await getDriveInstance()
 
-  const drive = google.drive({
-    version: 'v3',
-    auth
-  })
+  const driveTest = await drive.files.get({fileId, fields: 'webViewLink'})
+  return driveTest.data.webViewLink
+}
+
+const deleteFile = async (fileId) => {
+  const drive = await getDriveInstance()
+
   await drive.files.delete(
     { fileId }
   )
 }
-export default { create, update, runExport, deleteFile }
+export default { create, update, runExport, getFileViewUrl, deleteFile }

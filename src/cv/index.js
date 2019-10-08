@@ -35,15 +35,28 @@ export default () => {
       return res.status(500).send({ error: 'GENERIC', description: 'There was an error updating cv template' })
     }
 
-    logger.debug('Exporting CV to PDF...')
-    try {
-      const filePath = await service.runExport(id)
-      logger.debug('PDF downloaded to', filePath)
-      res.download(filePath)
-    } catch (err) {
-      logger.debug('Error while exporting:', err)
-      await service.deleteFile(id)
-      return res.status(500).send({ error: 'GENERIC', description: 'Cv export failed' })
+    if (!req.query.url) {
+      logger.debug('Exporting CV to PDF...')
+      try {
+        const filePath = await service.runExport(id)
+        logger.debug('PDF downloaded to', filePath)
+        res.download(filePath)
+      } catch (err) {
+        logger.debug('Error while exporting:', err)
+        await service.deleteFile(id)
+        return res.status(500).send({ error: 'GENERIC', description: 'Cv export failed' })
+      }
+    } else {
+      logger.debug('Creating Cv url...')
+      try {
+        const url = await service.getFileViewUrl(id)
+        logger.debug('Google slide url: ', url)
+        res.send(url)
+      } catch (err) {
+        logger.debug('Error while getting url:', err)
+        await service.deleteFile(id)
+        return res.status(500).send({ error: 'GENERIC', description: 'Creating Cv url failed' })
+      }
     }
   })
 
