@@ -1,6 +1,7 @@
 import os from 'os'
 import fs from 'fs'
 import { google } from 'googleapis'
+import logger from '../api/logging'
 
 import {
   createProjectRequests,
@@ -157,8 +158,6 @@ const runExport = async (fileId) => {
       })
       .pipe(dest)
     dest.on('finish', async () => {
-      const driveTest = await drive.files.get({fileId, fields: 'webViewLink'})
-      console.log(driveTest.data.webViewLink)
       drive.files.delete(
         { fileId }
       )
@@ -185,9 +184,9 @@ const deleteFileOnGoogleDrive = async (fileId) => {
 const deleteFileOnLocalDrive = async (filePath) => {
   try {
     fs.unlinkSync(filePath)
-    console.log(`Removed temp file ${filePath}`)
+    logger.info(`Removed temp file ${filePath}`)
   } catch (error) {
-    console.error(error)
+    logger.error(error)
   }
 }
 export default { create, update, runExport, getFileViewUrl, deleteFileOnLocalDrive, deleteFileOnGoogleDrive }
