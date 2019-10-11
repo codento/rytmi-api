@@ -1,7 +1,7 @@
-import services from '../cv/tools/manageServiceAccountFiles'
 if (!global._babelPolyfill) {
   require('@babel/polyfill')
 }
+const services = require('../cv/tools/manageServiceAccountFiles')
 const cron = require('node-cron')
 const app = require('./app')
 

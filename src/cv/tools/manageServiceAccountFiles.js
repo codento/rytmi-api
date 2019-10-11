@@ -52,4 +52,4 @@ const deleteFiles = async () => {
   console.log('Number of files deleted: ', deleted)
 }
 
-export default { deleteFiles }
+export { deleteFiles }
