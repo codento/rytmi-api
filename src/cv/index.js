@@ -40,7 +40,13 @@ export default () => {
       try {
         const filePath = await service.runExport(id)
         logger.debug('PDF downloaded to', filePath)
-        res.download(filePath)
+        res.download(filePath, 'cv.pdf', (error) => {
+          if (error) {
+            console.error(error)
+          } else {
+            service.deleteFileOnLocalDrive(filePath)
+          }
+        })
       } catch (err) {
         logger.debug('Error while exporting:', err)
         await service.deleteFile(id)
@@ -54,7 +60,7 @@ export default () => {
         res.send(url)
       } catch (err) {
         logger.debug('Error while getting url:', err)
-        await service.deleteFile(id)
+        await service.deleteFileOnGoogleDrive(id)
         return res.status(500).send({ error: 'GENERIC', description: 'Creating Cv url failed' })
       }
     }

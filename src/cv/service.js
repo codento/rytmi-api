@@ -174,11 +174,20 @@ const getFileViewUrl = async fileId => {
   return driveTest.data.webViewLink
 }
 
-const deleteFile = async (fileId) => {
+const deleteFileOnGoogleDrive = async (fileId) => {
   const drive = await getDriveInstance()
 
   await drive.files.delete(
     { fileId }
   )
 }
-export default { create, update, runExport, getFileViewUrl, deleteFile }
+
+const deleteFileOnLocalDrive = async (filePath) => {
+  try {
+    fs.unlinkSync(filePath)
+    console.log(`Removed temp file ${filePath}`)
+  } catch (error) {
+    console.error(error)
+  }
+}
+export default { create, update, runExport, getFileViewUrl, deleteFileOnLocalDrive, deleteFileOnGoogleDrive }
