@@ -3,7 +3,7 @@ import expressWinston from 'express-winston'
 
 const env = process.env.NODE_ENV || 'development'
 
-const tsFormat = () => (new Date()).toLocaleTimeString()
+const tsFormat = () => (new Date()).toISOString()
 
 const logger = new (winston.Logger)({
   level: env === 'production' ? 'info' : 'debug',
