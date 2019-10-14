@@ -319,10 +319,23 @@ export const createProjectRequests = async (slides, presentationId, workHistory,
       })
     }
 
+    // Order projects by starting month
+    const orderedProjects = (projects) =>
+      orderBy(
+        projects.map(
+          project => ({
+            ...project,
+            startDate: new Date(
+              project.projectDuration.substring(3, 7),
+              project.projectDuration.substring(0, 2))
+          }),
+          ['startDate'],
+          ['desc']))
+
     // Loop through employer's projects
-    for (const [projectIndex, project] of employer.projects.entries()) {
+    for (const [projectIndex, project] of orderedProjects(employer.projects).entries()) {
       const projectRequests = []
-      // Column idexes for project table texts
+      // Column indexes for project table texts
       let columnIndexesWithText = [0, 0, 1, 1, 1]
       // If customer is the same as previously, don't display it the second time
       if (projectIndex > 0 && project.projectCustomer === employer.projects[projectIndex - 1].projectCustomer) {

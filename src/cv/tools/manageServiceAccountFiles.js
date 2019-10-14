@@ -1,4 +1,5 @@
 import { google } from 'googleapis'
+import logger from '../../api/logging'
 
 // Lists all files named 'Copied CV'
 const listItems = async (drive) => {
@@ -36,7 +37,6 @@ const deleteFiles = async () => {
   })
 
   const files = await listItems(drive)
-  console.log('Number of files to be deleted: ', files.length)
   let deleted = 0
   for (const item of files) {
     const response = await drive.files.delete({
@@ -46,10 +46,10 @@ const deleteFiles = async () => {
     if (response.status === 204) {
       deleted++
     } else {
-      console.log(response)
+      logger.error(response)
     }
   }
-  console.log('Number of files deleted: ', deleted)
+  logger.info('Number of files deleted: ', deleted)
 }
 
-export default { deleteFiles }
+export { deleteFiles }
