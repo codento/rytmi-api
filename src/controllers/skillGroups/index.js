@@ -7,8 +7,18 @@ const skillGroupService = new SkillGroupService()
 let skillGroupController = baseController('skillgroup', skillGroupService)
 
 skillGroupController.delete = wrapAsync(async (req, res) => {
-  await skillGroupService.delete(req.params.id)
-  res.status(204).send()
+  try {
+
+    await skillGroupService.delete(req.params.id)
+    res.status(204).send()
+  } catch (error) {
+    if (error.name === 'SequelizeForeignKeyConstraintError') {
+      const categories = await skillGroupService.getCategoriesForGroup(req.params.id)
+      error.details = { categories: categories.map(category => category.get()) }
+      error.message = error.name
+    }
+    throw error
+  }
 })
 
 module.exports = {
