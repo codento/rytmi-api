@@ -3,7 +3,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       googleId: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
       },
       firstName: {
         type: DataTypes.STRING,

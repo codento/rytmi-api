@@ -54,7 +54,7 @@ function errorHandler (err, req, res, next) {
     res
       .status(500)
       .json(
-        utils.errorTemplate(500, 'Server error', err.message)
+        utils.errorTemplate(500, err.message ? err.message : 'Server error', err.details)
       )
   }
 }
