@@ -58,7 +58,7 @@ const create = async () => {
 const update = async (fileId, cv) => {
   const auth = await google.auth.getClient({
     scopes: [
-      'https://www.googleapis.com/auth/slides'
+      'https://www.googleapis.com/auth/presentations'
     ]
   })
 
