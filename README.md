@@ -17,7 +17,8 @@ npm install
 
 ### Setting environment variables
 
-Copy the `.env-default` file in the project root directory and rename it to `.env`. Use the following values in your dev env (ask dev team about google client id):
+Copy the `.env-default` file in the project root directory and rename it to `.env`.
+Use the following values in your dev env (ask dev team about google client id):
 
 ```
 DB_HOST=localhost
@@ -33,7 +34,8 @@ JWT_VALID_TIME=3600
 
 PORT=8081
 ```
-Set the correct google service account credentials in the google credentials file `google_service_account_credentials.json`:
+Set the correct google service account credentials in the google credentials file
+`google_service_account_credentials.json`:
 ```
 {
   "type": "service_account",
@@ -60,7 +62,8 @@ Make sure you don't have a local postgresql db running on the default port (5432
 
 ### Setting up the database / migrating to the latest version
 
-For migrations you must use sequelize-cli. Run it from under node_modules, install it globally or use npx like `npx sequelize db:migrate`:
+For migrations you must use sequelize-cli. Run it from under node_modules, install it
+globally or use npx like `npx sequelize db:migrate`:
 
 ```
 npm install sequelize-cli -g
@@ -91,7 +94,9 @@ Create a migration script:
 sequelize migration:create --name migration_name_here
 ```
 
-This will create a new script under the `db/migrations` folder. Make your changes to the tables in the `up` function. The `down` function is used for rollbacks, it should undo the `up` function.
+This will create a new script under the `db/migrations` folder. Make your changes
+to the tables in the `up` function. The `down` function is used for rollbacks,
+it should undo the `up` function.
 
 Update the test data seeder under `db/seeders` if required.
 
@@ -101,11 +106,14 @@ If you are adding a new model, the command
 sequelize model:create --name ModelName --attributes "attr1:string, attr2:boolean"
 ```
 
-will add a new model under `db/models` and the migration file for that model. You will probably have to make changes to these (not null-constraints etc.) before running the migration.
+will add a new model under `db/models` and the migration file for that model. You
+will probably have to make changes to these (not null-constraints etc.) before
+running the migration.
 
 ### Doc generation
 
-API documentation is generated of commented in-code OpenAPI specification. The swagger generated documentation is served at:
+API documentation is generated of commented in-code OpenAPI specification. The
+swagger generated documentation is served at:
 
 ```
 /api/swagger/

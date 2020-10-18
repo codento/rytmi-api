@@ -76,7 +76,7 @@ async function getOrCreateProfile (userId, ticketPayload) {
         firstName: ticketPayload.given_name,
         lastName: ticketPayload.family_name,
         email: ticketPayload.email,
-        photoPath: convertPhotoUrl(ticketPayload.picture),
+        photoPath: ticketPayload.picture,
         active: true
       })
     } catch (err) {
@@ -85,9 +85,9 @@ async function getOrCreateProfile (userId, ticketPayload) {
     }
   } else {
     // check if profile photo has been updated
-    if (profile.photoPath !== convertPhotoUrl(ticketPayload.picture)) {
+    if (profile.photoPath !== ticketPayload.picture) {
       profile = await profileService.update(profile.id,
-        { photoPath: convertPhotoUrl(ticketPayload.picture) })
+        { photoPath: ticketPayload.picture })
     }
   }
   return profile
