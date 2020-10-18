@@ -61,7 +61,7 @@
     "date-fns": "^1.30.1",
     "dotenv": "^4.0.0",
     "express": "^4.17.1",
-    "express-jwt": "^5.3.3",
+    "express-jwt": "^6.0.0",
     "express-winston": "^2.6.0",
     "google-auth-library": "^6.1.1",
     "googleapis": "^61.0.0",
